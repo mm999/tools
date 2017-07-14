@@ -44,6 +44,10 @@ public class GenerateSourceParam {
     private String domainPackage;
 
     /**
+     * 习惯domain类名字后缀，比如PO，可以为空
+     */
+    private String domainSuffix;
+    /**
      * dao文件生成地址，留空代表不生成.
      */
     private String daoPath;
@@ -63,6 +67,13 @@ public class GenerateSourceParam {
      */
     private List<GenerateSourceParamItem> items;
 
+    public String getDomainSuffix() {
+        return domainSuffix;
+    }
+
+    public void setDomainSuffix(String domainSuffix) {
+        this.domainSuffix = domainSuffix;
+    }
 
     public String getDomainPath() {
         return domainPath;
@@ -139,15 +150,15 @@ public class GenerateSourceParam {
     @Override
     public String toString() {
         return "GenerateSourceParam{" +
-            "commentsUser='" + commentsUser + '\'' +
-            ", commentsSince='" + commentsSince + '\'' +
-            ", commentsVersion='" + commentsVersion + '\'' +
-            ", domainPath='" + domainPath + '\'' +
-            ", domainPackage='" + domainPackage + '\'' +
-            ", daoPath='" + daoPath + '\'' +
-            ", daoPackage='" + daoPackage + '\'' +
-            ", mapperPath='" + mapperPath + '\'' +
-            ", items=" + CollectionUtils.toString(items) +
-            '}';
+                "commentsUser='" + commentsUser + '\'' +
+                ", commentsSince='" + commentsSince + '\'' +
+                ", commentsVersion='" + commentsVersion + '\'' +
+                ", domainPath='" + domainPath + '\'' +
+                ", domainPackage='" + domainPackage + '\'' +
+                ", daoPath='" + daoPath + '\'' +
+                ", daoPackage='" + daoPackage + '\'' +
+                ", mapperPath='" + mapperPath + '\'' +
+                ", items=" + CollectionUtils.toString(items) +
+                '}';
     }
 }

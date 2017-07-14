@@ -3,7 +3,7 @@ package com.xiafei.tools.generatesource;
 import com.xiafei.tools.generatesource.enums.ColumnKeyEnum;
 
 /**
- * <P>Description: 字段信息. </P>
+ * <P>Description: 数据库字段信息. </P>
  * <P>CALLED BY:   齐霞飞 </P>
  * <P>UPDATE BY:   齐霞飞 </P>
  * <P>CREATE DATE: 2017/7/13</P>

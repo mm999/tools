@@ -18,7 +18,7 @@ import java.util.List;
 public enum MyBatisJdbcTypeEnum {
 
     ARRAY("ARRAY", Collections.EMPTY_LIST),
-    BIGINT("BIGINT ", new ArrayList<String>() {
+    BIGINT("BIGINT", new ArrayList<String>() {
         {
             add("BIGINT");
         }

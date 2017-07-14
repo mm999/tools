@@ -53,9 +53,12 @@ public final class SourceGenerator {
         param.setCommentsUser("齐霞飞");
         param.setCommentsSince("JDK 1.7.0");
         param.setCommentsVersion("1.0");
-        param.setDomainPath("C:/Users/qixiafei/Desktop/");
+        param.setDomainPath("C:/Users/Administrator/Desktop/");
         param.setDomainPackage("com.le.jr.qixiafei.domain");
-        param.setMapperPath("C:/Users/qixiafei/Desktop/");
+        param.setDomainSuffix("PO");
+        param.setMapperPath("C:/Users/Administrator/Desktop/");
+        param.setDaoPath("C:/Users/Administrator/Desktop/");
+        param.setDaoPackage("com.le.jr.qixiafei.dao");
         exec(param);
     }
 
@@ -65,7 +68,7 @@ public final class SourceGenerator {
      * @param param 生成参数
      */
     public static void exec(final GenerateSourceParam param) {
-
+        // 校验参数合法，必要校验都放在这里
         if (!validParam(param)) {
             return;
         }
@@ -172,7 +175,8 @@ public final class SourceGenerator {
         // 增加类注释
         DomainTemplate.addClassComments(param, item, fileContent);
         // 增加类声明
-        DomainTemplate.addClassDeclara(item.getClassName(), fileContent);
+        DomainTemplate.addClassDeclara(item.getClassName() + (param.getDomainSuffix() == null ? "" :
+            param.getDomainSuffix()), fileContent);
         // 增加字段声明
         DomainTemplate.addPropertiesDeclara(columnInfoList, fileContent);
         // 增加get、set方法
@@ -182,7 +186,7 @@ public final class SourceGenerator {
         if (!filePath.endsWith("/")) {
             filePath += "/";
         }
-        filePath += item.getClassName() + "PO.java";
+        filePath += item.getClassName() + (param.getDomainSuffix() == null ? "" : param.getDomainSuffix()) + ".java";
         FileUtils.outPutToFileByLine(filePath, fileContent);
         LOGGER.info("成功生成domain文件：{}", filePath);
 
@@ -199,7 +203,7 @@ public final class SourceGenerator {
     private static void generateMapper(final GenerateSourceParam param, final GenerateSourceParamItem item, final List<ColumnInfo> columnInfoList) {
         // 输出文件内容
         final List<String> fileContent = new ArrayList<>(500);
-        // 从末班加载文件内容
+        // 从模板加载文件内容
         MapperTemplate.addContent(param, item, columnInfoList, fileContent);
         String filePath = param.getMapperPath();
         if (!filePath.endsWith("/")) {

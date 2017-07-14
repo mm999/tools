@@ -91,7 +91,7 @@ public final class DomainTemplate extends SourceTemplate {
      */
     public static void addClassComments(final GenerateSourceParam param, final GenerateSourceParamItem item, final List<String> fileContent) {
         fileContent.add("/**");
-        fileContent.add(" * <P>Description: " + item.getClassName() + "PO. </P>");
+        fileContent.add(" * <P>Description: " + item.getTableName() + "表持久化PO对象. </P>");
         fileContent.add(" * <P>CALLED BY:   " + param.getCommentsUser() + " </P>");
         fileContent.add(" * <P>UPDATE BY:   " + param.getCommentsUser() + " </P>");
         final String dateComment = DateUtils.toString(new Date(), DateUtils.YMD_SEPARATE_WITH_SLASH);
@@ -107,12 +107,12 @@ public final class DomainTemplate extends SourceTemplate {
     /**
      * 增加类声明.
      *
-     * @param className   Java类名字
+     * @param className   Domain类名字
      * @param fileContent 输出文件内容列表.
      */
     public static void addClassDeclara(final String className, final List<String> fileContent) {
         fileContent.add("@SuppressWarnings(\"unused\")");
-        fileContent.add("public class " + className + "PO implements Serializable {");
+        fileContent.add("public class " + className + " implements Serializable {");
     }
 
     /**
@@ -130,7 +130,7 @@ public final class DomainTemplate extends SourceTemplate {
             fileContent.add(getIndent(1) + " */");
             // 字段声明
             fileContent.add(getIndent(1) + "private " + JdbcTypeJavaTypeEnum.instance(columnInfo.getType()).javaType
-                + " " + StringUtils.underLineToHump(columnInfo.getName(), false) + ";");
+                    + " " + StringUtils.underLineToHump(columnInfo.getName(), false) + ";");
         }
     }
 
