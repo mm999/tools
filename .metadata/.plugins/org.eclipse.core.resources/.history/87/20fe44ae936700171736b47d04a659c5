@@ -1,5 +1,0 @@
-package com.xiafei.tools.tools.generatesource;
-
-public interface SourceGenerator {
-
-}
