@@ -311,8 +311,8 @@ public final class MapperTemplate extends SourceTemplate {
      */
     private static void addBatchInsert(final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content) {
         content.add("");
-        content.add(getIndent(1) + "<!-- 统计数量 -->");
-        String headInfo = "<insert id=\"insert\" parameterType=\"java.util.List\" ";
+        content.add(getIndent(1) + "<!-- 批量插入 -->");
+        String headInfo = "<insert id=\"batchInsert\" parameterType=\"java.util.List\" ";
         if (primaryColumn != null) {
             headInfo += "useGeneratedKeys=\"true\" keyProperty=\"" + StringUtils.underLineToHump(primaryColumn.getName(), false) + "\" ";
         }
