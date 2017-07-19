@@ -57,9 +57,10 @@ public final class MapperTemplate extends SourceTemplate {
                 primaryColumn = info;
             }
         }
+        List<ColumnInfo> columnInfosNoPrimaryColumn = new ArrayList<>(columnInfos);
         if (primaryColumn != null) {
             // ===============若主键不为空，columnInfos里面已经不包含主键信息了===========================
-            columnInfos.remove(primaryColumn);
+            columnInfosNoPrimaryColumn.remove(primaryColumn);
         }
         // resultMap的id.
         final String resultId = StringUtils.firstCharToLower(item.getClassName()) + "Result";
@@ -67,24 +68,24 @@ public final class MapperTemplate extends SourceTemplate {
         final String domainJavaPath = param.getDomainPackage() + "." + item.getClassName() + (
             param.getDomainSuffix() == null ? "" : param.getDomainSuffix());
         // 增加resultMap信息.
-        addResultMap(resultId, domainJavaPath, primaryColumn, columnInfos, content);
+        addResultMap(resultId, domainJavaPath, primaryColumn, columnInfosNoPrimaryColumn, content);
         // 增加字段<sql>模板
-        addSqlTemplate(primaryColumn, columnInfos, content);
+        addSqlTemplate(primaryColumn, columnInfosNoPrimaryColumn, content);
 
         if (primaryColumn != null) {
             // 增加get
             addGet(resultId, primaryColumn, item.getTableName(), content);
             // 增加update
-            addUpdate(domainJavaPath, primaryColumn, columnInfos, item.getTableName(), content);
+            addUpdate(domainJavaPath, primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content);
         }
         // 增加query
-        addQuery(domainJavaPath, resultId, primaryColumn, columnInfos, item.getTableName(), content);
+        addQuery(domainJavaPath, resultId, primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content);
         // 增加count
-        addCount(domainJavaPath, primaryColumn, columnInfos, item.getTableName(), content);
+        addCount(domainJavaPath, primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content);
         // 增加insert
-        addInsert(domainJavaPath, primaryColumn, columnInfos, item.getTableName(), content);
+        addInsert(domainJavaPath, primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content);
         // 增加batchInsert
-        addBatchInsert(primaryColumn, columnInfos, item.getTableName(), content);
+        addBatchInsert(primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content);
 
 
         content.add("</mapper>");
