@@ -34,9 +34,9 @@ public class GenerateSourceParam {
     private String commentsVersion;
 
     /**
-     * domain文件生成地址，留空代表不生成.
+     * domain文件生成目录地址，留空代表不生成.
      */
-    private String domainPath;
+    private String domainDirectory;
 
     /**
      * domain包地址.
@@ -47,10 +47,11 @@ public class GenerateSourceParam {
      * 习惯domain类名字后缀，比如PO，可以为空
      */
     private String domainSuffix;
+
     /**
-     * dao文件生成地址，留空代表不生成.
+     * dao文件生成目录地址，留空代表不生成.
      */
-    private String daoPath;
+    private String daoDirectory;
 
     /**
      * dao文件报地址.
@@ -58,9 +59,14 @@ public class GenerateSourceParam {
     private String daoPackage;
 
     /**
-     * mapper文件生成地址，留空代表不生成.
+     * mapper文件生成目录地址，留空代表不生成.
      */
-    private String mapperPath;
+    private String mapperDirectory;
+
+    /**
+     * 是否替换原文件，若为false则在原文件内容上追加
+     */
+    private boolean coverFile = false;
 
     /**
      * 生成文件的明细信息.
@@ -75,12 +81,12 @@ public class GenerateSourceParam {
         this.domainSuffix = domainSuffix;
     }
 
-    public String getDomainPath() {
-        return domainPath;
+    public String getDomainDirectory() {
+        return domainDirectory;
     }
 
-    public void setDomainPath(final String pDomainPath) {
-        domainPath = pDomainPath;
+    public void setDomainDirectory(final String pDomainPath) {
+        domainDirectory = pDomainPath;
     }
 
     public String getCommentsUser() {
@@ -107,20 +113,20 @@ public class GenerateSourceParam {
         commentsVersion = pCommentsVersion;
     }
 
-    public String getDaoPath() {
-        return daoPath;
+    public String getDaoDirectory() {
+        return daoDirectory;
     }
 
-    public void setDaoPath(final String pDaoPath) {
-        daoPath = pDaoPath;
+    public void setDaoDirectory(final String pDaoPath) {
+        daoDirectory = pDaoPath;
     }
 
-    public String getMapperPath() {
-        return mapperPath;
+    public String getMapperDirectory() {
+        return mapperDirectory;
     }
 
-    public void setMapperPath(final String pMapperPath) {
-        mapperPath = pMapperPath;
+    public void setMapperDirectory(final String pMapperPath) {
+        mapperDirectory = pMapperPath;
     }
 
     public List<GenerateSourceParamItem> getItems() {
@@ -147,18 +153,27 @@ public class GenerateSourceParam {
         daoPackage = pDaoPackage;
     }
 
+    public boolean isCoverFile() {
+        return coverFile;
+    }
+
+    public void setCoverFile(final boolean coverFile) {
+        this.coverFile = coverFile;
+    }
+
     @Override
     public String toString() {
         return "GenerateSourceParam{" +
-                "commentsUser='" + commentsUser + '\'' +
-                ", commentsSince='" + commentsSince + '\'' +
-                ", commentsVersion='" + commentsVersion + '\'' +
-                ", domainPath='" + domainPath + '\'' +
-                ", domainPackage='" + domainPackage + '\'' +
-                ", daoPath='" + daoPath + '\'' +
-                ", daoPackage='" + daoPackage + '\'' +
-                ", mapperPath='" + mapperPath + '\'' +
-                ", items=" + CollectionUtils.toString(items) +
-                '}';
+            "commentsUser='" + commentsUser + '\'' +
+            ", commentsSince='" + commentsSince + '\'' +
+            ", commentsVersion='" + commentsVersion + '\'' +
+            ", domainDirectory='" + domainDirectory + '\'' +
+            ", domainPackage='" + domainPackage + '\'' +
+            ", daoDirectory='" + daoDirectory + '\'' +
+            ", daoPackage='" + daoPackage + '\'' +
+            ", mapperDirectory='" + mapperDirectory + '\'' +
+            ", coverFile='" + coverFile + '\'' +
+            ", items=" + CollectionUtils.toString(items) +
+            '}';
     }
 }

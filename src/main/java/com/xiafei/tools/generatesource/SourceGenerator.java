@@ -1,6 +1,7 @@
 package com.xiafei.tools.generatesource;
 
 import com.xiafei.tools.generatesource.enums.DataBaseTypeEnum;
+import com.xiafei.tools.generatesource.template.DaoTemplate;
 import com.xiafei.tools.generatesource.template.DomainTemplate;
 import com.xiafei.tools.generatesource.template.MapperTemplate;
 import com.xiafei.tools.utils.DBUtils;
@@ -14,7 +15,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,7 +35,11 @@ public final class SourceGenerator {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceGenerator.class);
 
+    /**
+     * mysql search table structrue sql.
+     */
     private static final String MYSQL_SQL_TEMPLATE = "SELECT lower(t.COLUMN_NAME),upper(t.DATA_TYPE),t.COLUMN_COMMENT,upper(t.COLUMN_KEY) FROM information_schema.COLUMNS t WHERE t.TABLE_NAME = '$tableName' AND t.TABLE_SCHEMA = '$tableSchema' ORDER BY t.ORDINAL_POSITION";
+
 
     /**
      * 工具类不允许实例化.
@@ -44,21 +48,74 @@ public final class SourceGenerator {
 
     }
 
+    /**
+     * 示例程序.
+     *
+     * @param args system boot argument
+     */
     public static void main(String[] args) {
         GenerateSourceParam param = new GenerateSourceParam();
-        GenerateSourceParamItem item = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL, "jdbc:mysql://10.11.147.81:3306",
-            "order_t_w", "NTk3NjIyYmJmNDY", "trade_product_feepay", "trade_feepay",
-            "ProductFeepay");
-        param.setItems(Collections.singletonList(item));
         param.setCommentsUser("齐霞飞");
         param.setCommentsSince("JDK 1.7.0");
         param.setCommentsVersion("1.0");
-        param.setDomainPath("C:/Users/Administrator/Desktop/");
-        param.setDomainPackage("com.le.jr.qixiafei.domain");
+        // domian files dirctory
+//        param.setDomainDirectory("C:\\newWork\\metal-quotation\\metal-quotation-domain\\src\\main\\java\\com\\le\\jr\\metal\\quotation\\domain\\po\\gold");
+        // domain classes package
+        param.setDomainPackage("com.le.jr.metal.quotation.domain.po.gold");
+        // domain classname will be item.className+param.domainSuffix
         param.setDomainSuffix("PO");
-        param.setMapperPath("C:/Users/Administrator/Desktop/");
-        param.setDaoPath("C:/Users/Administrator/Desktop/");
-        param.setDaoPackage("com.le.jr.qixiafei.dao");
+        // mybatis mapper.xmls dirctory
+        param.setMapperDirectory("C:\\newWork\\metal-quotation\\metal-quotation-web\\src\\main\\resources\\mapper");
+//        param.setDaoDirectory("C:\\newWork\\metal-quotation\\metal-quotation-dao\\src\\main\\java\\com\\le\\jr\\metal\\quotation\\dao");
+        param.setDaoPackage("com.le.jr.metal.quotation.dao");
+        // is cover ori file's content
+        param.setCoverFile(true);
+
+        List<GenerateSourceParamItem> itemList = new ArrayList<>();
+        GenerateSourceParamItem table1 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+            "xxx",
+            "order_t_w", "xxx", "metal_gold_defer_delivery_quotation", "metal_quotation",
+            "GoldDeferDeliveryQuotation", "黄金交易二级系统延期交割行情");
+        itemList.add(table1);
+
+        GenerateSourceParamItem table2 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+            "xxx",
+            "order_t_w", "xxx", "metal_gold_spot_inst_state", "metal_quotation",
+            "GoldSpotInstState", "黄金交易二级系统现货合约状态");
+        itemList.add(table2);
+
+        GenerateSourceParamItem table3 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+            "xxx",
+            "order_t_w", "xxx", "metal_gold_forward_inst_state", "metal_quotation",
+            "GoldForwardInstState", "黄金交易二级系统远期合约状态");
+        itemList.add(table3);
+
+        GenerateSourceParamItem table4 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+            "xxx",
+            "order_t_w", "xxx", "metal_gold_defert_inst_state", "metal_quotation",
+            "GoldDeferInstState", "黄金交易二级系统延期合约状态");
+        itemList.add(table4);
+
+        GenerateSourceParamItem table5 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+            "xxx",
+            "order_t_w", "xxx", "metal_gold_spot_quotation_00", "metal_quotation",
+            "GoldSpotQuotation", "黄金交易二级系统现货行情");
+        itemList.add(table5);
+
+        GenerateSourceParamItem table6 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+            "xxx",
+            "order_t_w", "xxx", "metal_gold_forward_quotation_00", "metal_quotation",
+            "GoldForwardQuotation", "黄金交易二级系统远期行情");
+        itemList.add(table6);
+
+        GenerateSourceParamItem table7 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+            "xxx",
+            "order_t_w", "xxx", "metal_gold_defer_quotation_00", "metal_quotation",
+            "GoldDeferQuotation", "黄金交易二级系统延期行情");
+        itemList.add(table7);
+
+        param.setItems(itemList);
+
         exec(param);
     }
 
@@ -115,17 +172,17 @@ public final class SourceGenerator {
             }
 
             // 生成domain文件
-            if (StringUtils.isNotBlank(param.getDomainPath())) {
+            if (StringUtils.isNotBlank(param.getDomainDirectory())) {
                 generateDomain(param, item, columnInfoList);
             }
 
             // 生成mapper文件
-            if (StringUtils.isNotBlank(param.getMapperPath())) {
+            if (StringUtils.isNotBlank(param.getMapperDirectory())) {
                 generateMapper(param, item, columnInfoList);
             }
 
             // 生成dao文件
-            if (StringUtils.isNotBlank(param.getDaoPath())) {
+            if (StringUtils.isNotBlank(param.getDaoDirectory())) {
                 generateDao(param, item, columnInfoList);
             }
 
@@ -145,7 +202,7 @@ public final class SourceGenerator {
             return false;
         }
 
-        if (StringUtils.isBlank(param.getDomainPath()) && StringUtils.isBlank(param.getDaoPath()) && StringUtils.isBlank(param.getMapperPath())) {
+        if (StringUtils.isBlank(param.getDomainDirectory()) && StringUtils.isBlank(param.getDaoDirectory()) && StringUtils.isBlank(param.getMapperDirectory())) {
             LOGGER.error("参数中domian路径、dao路径、mapper路径都为空，退出方法");
             return false;
         }
@@ -168,28 +225,16 @@ public final class SourceGenerator {
     private static void generateDomain(final GenerateSourceParam param, final GenerateSourceParamItem item, final List<ColumnInfo> columnInfoList) {
         // 输出文件内容
         final List<String> fileContent = new ArrayList<>(500);
-        // 第一行固定package信息
-        DomainTemplate.addPackage(param.getDomainPackage(), fileContent);
-        // 输出内容中增加可能出现的import信息
-        DomainTemplate.addDomainImportInfo(columnInfoList, fileContent);
-        // 增加类注释
-        DomainTemplate.addClassComments(param, item, fileContent);
-        // 增加类声明
-        DomainTemplate.addClassDeclara(item.getClassName() + (param.getDomainSuffix() == null ? "" :
-            param.getDomainSuffix()), fileContent);
-        // 增加字段声明
-        DomainTemplate.addPropertiesDeclara(columnInfoList, fileContent);
-        // 增加get、set方法
-        DomainTemplate.addSetterAndGetter(columnInfoList, fileContent);
-        fileContent.add("}");
-        String filePath = param.getDomainPath();
+        // 填充文件内容
+        DomainTemplate.addContent(param, item, columnInfoList, fileContent);
+        // 输出到文件
+        String filePath = param.getDomainDirectory().replace("\\", "/");
         if (!filePath.endsWith("/")) {
             filePath += "/";
         }
         filePath += item.getClassName() + (param.getDomainSuffix() == null ? "" : param.getDomainSuffix()) + ".java";
-        FileUtils.outPutToFileByLine(filePath, fileContent);
+        FileUtils.outPutToFileByLine(filePath, fileContent, param.isCoverFile());
         LOGGER.info("成功生成domain文件：{}", filePath);
-
     }
 
 
@@ -205,12 +250,14 @@ public final class SourceGenerator {
         final List<String> fileContent = new ArrayList<>(500);
         // 从模板加载文件内容
         MapperTemplate.addContent(param, item, columnInfoList, fileContent);
-        String filePath = param.getMapperPath();
+        // 输出到文件
+        String filePath = param.getMapperDirectory().replace("\\", "/");
+        ;
         if (!filePath.endsWith("/")) {
             filePath += "/";
         }
         filePath += item.getClassName() + "Mapper.xml";
-        FileUtils.outPutToFileByLine(filePath, fileContent);
+        FileUtils.outPutToFileByLine(filePath, fileContent, param.isCoverFile());
         LOGGER.info("成功生成mapper文件：{}", filePath);
     }
 
@@ -222,6 +269,19 @@ public final class SourceGenerator {
      * @param columnInfoList 数据库字段信息列表
      */
     private static void generateDao(final GenerateSourceParam param, final GenerateSourceParamItem item, final List<ColumnInfo> columnInfoList) {
+        // 输出文件内容
+        final List<String> fileContent = new ArrayList<>(500);
+        // 从模板加载文件内容
+        DaoTemplate.addContent(param, item, columnInfoList, fileContent);
+        // 输出到文件
+        String filePath = param.getDaoDirectory().replace("\\", "/");
+        ;
+        if (!filePath.endsWith("/")) {
+            filePath += "/";
+        }
+        filePath += item.getClassName() + "Dao.java";
+        FileUtils.outPutToFileByLine(filePath, fileContent, param.isCoverFile());
+        LOGGER.info("成功生成dao文件：{}", filePath);
     }
 
 }

@@ -23,7 +23,7 @@ public class GenerateSourceParamItem {
     private final DataBaseTypeEnum dataBaseType;
 
     /**
-     * 数据库地址.
+     * 数据库jdbc连接地址.
      */
     private final String url;
 
@@ -52,20 +52,27 @@ public class GenerateSourceParamItem {
      */
     private final String className;
 
+    /**
+     * 类描述.
+     */
+    private final String classDescription;
+
     public GenerateSourceParamItem(final DataBaseTypeEnum dataBaseType,
-                                   final String url,
+                                   final String jdbcUrl,
                                    final String user,
                                    final String password,
                                    final String tableName,
                                    final String tableSchema,
-                                   final String className) {
+                                   final String className,
+                                   final String classDescription) {
         this.dataBaseType = dataBaseType;
-        this.url = url;
+        this.url = jdbcUrl;
         this.user = user;
         this.password = password;
         this.tableName = tableName;
         this.tableSchema = tableSchema;
         this.className = className;
+        this.classDescription = classDescription;
     }
 
 
@@ -103,6 +110,10 @@ public class GenerateSourceParamItem {
         return className;
     }
 
+    public String getClassDescription() {
+        return classDescription;
+    }
+
 
     @Override
     public String toString() {
@@ -114,6 +125,7 @@ public class GenerateSourceParamItem {
             ", tableName='" + tableName + '\'' +
             ", tableSchema='" + tableSchema + '\'' +
             ", className='" + className + '\'' +
+            ", classDescription='" + classDescription + '\'' +
             '}';
     }
 }

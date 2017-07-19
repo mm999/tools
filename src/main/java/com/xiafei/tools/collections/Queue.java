@@ -124,10 +124,26 @@ public class Queue<T> implements Iterable<T> {
             throw new IllegalArgumentException("队列不允许插入null元素");
         }
 
-        if (n == content.length || n >= (int) (content.length * increaseFactor)) {
-            final int resizeTo = Math.min(n * 2, Integer.MAX_VALUE);
-            resize(resizeTo);
+        if ((n + front) == content.length) {
+            // 如果队列满了
+
+            if (n >= (int) (content.length * increaseFactor)) {
+                // 如果数量n达到扩容条件
+                final int resizeTo = Math.min(n * 2, Integer.MAX_VALUE);
+                resize(resizeTo);
+            } else {
+
+                if (front > 0) {
+                    // 若头指针不指向0，先不扩容，将头指针指向起始位置.
+                    tidy();
+                } else {
+                    // 若头指针指向0还是满了，扩容
+                    final int resizeTo = Math.min(n * 2, Integer.MAX_VALUE);
+                    resize(resizeTo);
+                }
+            }
         }
+
         content[front + n++] = item;
     }
 
@@ -141,8 +157,14 @@ public class Queue<T> implements Iterable<T> {
             return null;
         }
         final T result = content[front];
+        // 防止对象游离
         content[front++] = null;
         n--;
+        // 当头指针移动到队列的一半时，将内容整体左移顶头，不改变队列长度
+        if (front >= n) {
+            tidy();
+        }
+
         if (n > initCap && n < (int) (content.length * reduceFactor)) {
             resize(content.length / 2);
         }
@@ -191,6 +213,16 @@ public class Queue<T> implements Iterable<T> {
         front = 0;
     }
 
+
+    /**
+     * 整理队列，将内容左移顶头.
+     */
+    private void tidy() {
+        T[] newContent = (T[]) new Object[content.length];
+        System.arraycopy(content, front, newContent, 0, n);
+        content = newContent;
+        front = 0;
+    }
 
     /**
      * 队列迭代器.

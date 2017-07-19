@@ -8,9 +8,8 @@ import com.xiafei.tools.generatesource.enums.DataBaseTypeEnum;
 import com.xiafei.tools.generatesource.enums.JdbcTypeJavaTypeEnum;
 import com.xiafei.tools.generatesource.enums.MyBatisJdbcTypeEnum;
 import com.xiafei.tools.utils.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,8 +24,6 @@ import java.util.List;
  * @since java 1.7.0
  */
 public final class MapperTemplate extends SourceTemplate {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MapperTemplate.class);
 
     /**
      * 行最大长度，超过就换行.
@@ -67,28 +64,27 @@ public final class MapperTemplate extends SourceTemplate {
         // resultMap的id.
         final String resultId = StringUtils.firstCharToLower(item.getClassName()) + "Result";
         // domain的包+类路径
-        final String domainJavaPath = param.getDomainPackage() + item.getClassName() + (
+        final String domainJavaPath = param.getDomainPackage() + "." + item.getClassName() + (
             param.getDomainSuffix() == null ? "" : param.getDomainSuffix());
         // 增加resultMap信息.
         addResultMap(resultId, domainJavaPath, primaryColumn, columnInfos, content);
         // 增加字段<sql>模板
         addSqlTemplate(primaryColumn, columnInfos, content);
+
         if (primaryColumn != null) {
             // 增加get
             addGet(resultId, primaryColumn, item.getTableName(), content);
-            // 增加updateById
-            addUpdateById();
+            // 增加update
+            addUpdate(domainJavaPath, primaryColumn, columnInfos, item.getTableName(), content);
         }
         // 增加query
-
+        addQuery(domainJavaPath, resultId, primaryColumn, columnInfos, item.getTableName(), content);
         // 增加count
-
-
-        // 增加update
-
+        addCount(domainJavaPath, primaryColumn, columnInfos, item.getTableName(), content);
         // 增加insert
-
+        addInsert(domainJavaPath, primaryColumn, columnInfos, item.getTableName(), content);
         // 增加batchInsert
+        addBatchInsert(primaryColumn, columnInfos, item.getTableName(), content);
 
 
         content.add("</mapper>");
@@ -171,31 +167,6 @@ public final class MapperTemplate extends SourceTemplate {
     }
 
     /**
-     * 循环增加字段信息
-     *
-     * @param indent      缩进
-     * @param columnInfos 数据库字段信息列表
-     * @param content     输出文件内容
-     */
-    private static void cycleAddColumnName(final String indent, final List<ColumnInfo> columnInfos, final List<String> content) {
-        // 拼接逗号分隔字段信息
-        final StringBuilder sb = new StringBuilder();
-        for (ColumnInfo columnInfo : columnInfos) {
-            final String columnName = columnInfo.getName();
-            if ((sb.length() + columnName.length()) / (LINE_LENGTH - indent.length())
-                > sb.length() / (LINE_LENGTH - indent.length())) {
-                // 如果新增该列描述后超长了，那么这行存好，接下来另起一行
-                content.add(getIndent(2) + sb.toString());
-                sb.delete(0, sb.length());
-            }
-            sb.append(columnInfo.getName()).append(",");
-        }
-        // 删掉最后一个逗号
-        sb.deleteCharAt(sb.length() - 1);
-        content.add(getIndent(2) + sb.toString());
-    }
-
-    /**
      * 增加get方法.
      *
      * @param resultId      resultMap的id
@@ -219,5 +190,226 @@ public final class MapperTemplate extends SourceTemplate {
         content.add(getIndent(1) + "</select>");
     }
 
+    /**
+     * 增加根据主键更新方法sql.
+     */
+    private static void addUpdate(final String domainJavaPath, final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content) {
+        content.add("");
+        content.add(getIndent(1) + "<!-- 根据主键更新非空字段 -->");
+        content.add(getIndent(1) + "<update id=\"update\" parameterType=\"" + domainJavaPath + "\">");
+        content.add(getIndent(2) + "<if test=\" "
+            + StringUtils.underLineToHump(primaryColumn.getName(), false) + " != null \" >");
+        content.add(getIndent(3) + "UPDATE " + tableName);
+        content.add(getIndent(3) + "<set>");
+        cycleAddIfTest(getIndent(4), columnInfos, ",", content);
+        content.add(getIndent(3) + "</set>");
+        content.add(getIndent(3) + "WHERE " + primaryColumn.getName() + "=#{"
+            + StringUtils.underLineToHump(primaryColumn.getName(), false)
+            + ",jdbcType=" + MyBatisJdbcTypeEnum.instance(primaryColumn.getType()).mybatisType + "}");
+        content.add(getIndent(2) + "</if>");
+        content.add(getIndent(1) + "</update>");
+    }
+
+    /**
+     * 增加根据条件查询列表sql.
+     *
+     * @param domainJavaPath 包+PO类名字符串
+     * @param resultId       resultMap的id
+     * @param primaryColumn  主键列
+     * @param columnInfos    数据库字段信息（不包含主键）
+     * @param tableName      数据库表名
+     * @param content        输出文件内容
+     */
+    private static void addQuery(final String domainJavaPath, final String resultId, final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content) {
+        content.add("");
+        content.add(getIndent(1) + "<!-- 根据条件查询列表 -->");
+        content.add(getIndent(1) + "<select id=\"query\" parameterType=\"" + domainJavaPath + "\" resultMap=\"" + resultId + "\">");
+        content.add(getIndent(2) + "SELECT");
+        content.add(getIndent(2) + "<include refid=\"Base_Columns\" />");
+        content.add(getIndent(2) + "FROM " + tableName);
+        content.add(getIndent(2) + "<where>");
+
+        List<ColumnInfo> tempColumnInfos = new ArrayList<>(columnInfos);
+        if (primaryColumn != null) {
+            tempColumnInfos.add(primaryColumn);
+        }
+        cycleAddIfTest(getIndent(3), tempColumnInfos, "AND", content);
+
+        content.add(getIndent(2) + "</where>");
+        content.add(getIndent(1) + "</select>");
+
+    }
+
+    /**
+     * 增加统计数量sql.
+     *
+     * @param domainJavaPath 包+PO类名字符串
+     * @param primaryColumn  主键列
+     * @param columnInfos    数据库字段信息（不包含主键）
+     * @param tableName      数据库表名
+     * @param content        输出文件内容
+     */
+    private static void addCount(final String domainJavaPath, final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content) {
+        content.add("");
+        content.add(getIndent(1) + "<!-- 统计数量 -->");
+        content.add(getIndent(1) + "<select id=\"count\" parameterType=\"" + domainJavaPath + "\" resultType=\"int\" >");
+        content.add(getIndent(2) + "SELECT count(*)");
+        content.add(getIndent(2) + "FROM " + tableName);
+        content.add(getIndent(2) + "<where>");
+
+        List<ColumnInfo> tempColumnInfos = new ArrayList<>(columnInfos);
+        if (primaryColumn != null) {
+            tempColumnInfos.add(primaryColumn);
+        }
+        cycleAddIfTest(getIndent(3), tempColumnInfos, "AND", content);
+
+        content.add(getIndent(2) + "</where>");
+        content.add(getIndent(1) + "</select>");
+
+    }
+
+    /**
+     * 增加插入sql.
+     *
+     * @param domainJavaPath 包+PO类名字符串
+     * @param primaryColumn  主键列
+     * @param columnInfos    数据库字段信息（不包含主键）
+     * @param tableName      数据库表名
+     * @param content        输出文件内容
+     */
+    private static void addInsert(final String domainJavaPath, final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content) {
+        content.add("");
+        content.add(getIndent(1) + "<!-- 插入数据 -->");
+
+        String headInfo = "<insert id=\"insert\" parameterType=\"" + domainJavaPath + "\" ";
+        if (primaryColumn != null) {
+            headInfo += "useGeneratedKeys=\"true\" keyProperty=\"" + StringUtils.underLineToHump(primaryColumn.getName(), false) + "\"";
+        }
+        headInfo += ">";
+        content.add(getIndent(1) + headInfo);
+
+        content.add(getIndent(2) + "INSERT INTO");
+        content.add(getIndent(2) + tableName);
+        content.add(getIndent(2) + "(");
+        content.add(getIndent(3) + "<include refid=\"Columns_For_Insert\"/>");
+        content.add(getIndent(2) + ")");
+        content.add(getIndent(2) + "VALUES");
+        content.add(getIndent(2) + "(");
+        cycleAddPropertyValue(getIndent(3), "", columnInfos, content);
+        content.add(getIndent(2) + ")");
+        content.add(getIndent(1) + "</insert>");
+    }
+
+    /**
+     * 增加批量插入sql.
+     *
+     * @param primaryColumn 主键列
+     * @param columnInfos   数据库字段信息（不包含主键）
+     * @param tableName     数据库表名
+     * @param content       输出文件内容
+     */
+    private static void addBatchInsert(final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content) {
+        content.add("");
+        content.add(getIndent(1) + "<!-- 统计数量 -->");
+        String headInfo = "<insert id=\"insert\" parameterType=\"java.util.List\" ";
+        if (primaryColumn != null) {
+            headInfo += "useGeneratedKeys=\"true\" keyProperty=\"" + StringUtils.underLineToHump(primaryColumn.getName(), false) + "\" ";
+        }
+        headInfo += ">";
+        content.add(getIndent(1) + headInfo);
+        content.add(getIndent(2) + "INSERT INTO");
+        content.add(getIndent(2) + tableName);
+        content.add(getIndent(2) + "(");
+        content.add(getIndent(3) + "<include refid=\"Columns_For_Insert\"/>");
+        content.add(getIndent(2) + ")");
+        content.add(getIndent(2) + "VALUES");
+        content.add(getIndent(2) + "<foreach collection=\"list\" item=\"item\" separator=\",\" >");
+        content.add(getIndent(3) + "(");
+        cycleAddPropertyValue(getIndent(4), "item.", columnInfos, content);
+        content.add(getIndent(3) + ")");
+        content.add(getIndent(2) + "</foreach>");
+
+        content.add(getIndent(1) + "</insert>");
+    }
+
+    /**
+     * 循环增加字段信息
+     *
+     * @param indent      缩进
+     * @param columnInfos 数据库字段信息列表
+     * @param content     输出文件内容
+     */
+    private static void cycleAddColumnName(final String indent, final List<ColumnInfo> columnInfos, final List<String> content) {
+        // 拼接逗号分隔字段信息
+        final StringBuilder sb = new StringBuilder();
+        final int contentLength = LINE_LENGTH - indent.length();
+        for (ColumnInfo columnInfo : columnInfos) {
+            final String columnName = columnInfo.getName();
+            if ((sb.length() + columnName.length()) / contentLength > 0) {
+                // 如果新增该列描述后超长了，那么将新增前的内容算作一行，接下来另起一行
+                content.add(indent + sb.toString());
+
+                sb.delete(0, sb.length());
+            }
+            sb.append(columnName).append(",");
+        }
+        // 删掉最后一个逗号
+        sb.deleteCharAt(sb.length() - 1);
+        content.add(indent + sb.toString());
+    }
+
+    /**
+     * 循环增加<if test=""></>.
+     *
+     * @param indent      缩进
+     * @param columnInfos 数据库字段信息列表
+     * @param s           分隔符
+     * @param content     输出文件内容
+     */
+    private static void cycleAddIfTest(final String indent, final List<ColumnInfo> columnInfos, final String s, final List<String> content) {
+        for (ColumnInfo columnInfo : columnInfos) {
+            final String propertyName = StringUtils.underLineToHump(columnInfo.getName(), false);
+            final JdbcTypeJavaTypeEnum javaType = JdbcTypeJavaTypeEnum.instance(columnInfo.getType());
+            final String mybatisType = MyBatisJdbcTypeEnum.instance(columnInfo.getType()).mybatisType;
+            if (JdbcTypeJavaTypeEnum.STRING == javaType) {
+                content.add(indent + "<if test=\" " + propertyName + " != null and " + propertyName + " != '' \" >");
+            } else {
+                content.add(indent + "<if test=\" " + propertyName + " != null \" >");
+            }
+            content.add(indent + getIndent(1) + s + " " + columnInfo.getName() + "=#{" + propertyName + ",jdbcType=" + mybatisType + "}");
+            content.add(indent + "</if>");
+        }
+    }
+
+    /**
+     * 循环增加java字段值.
+     *
+     * @param indent      缩进
+     * @param prefix      字段值的前缀
+     * @param columnInfos 数据库字段信息列表
+     * @param content     输出文件内容
+     */
+    private static void cycleAddPropertyValue(final String indent, final String prefix, final List<ColumnInfo> columnInfos, final List<String> content) {
+        // 拼接逗号分隔java字段值
+        final StringBuilder sb = new StringBuilder();
+        // 实际内容长度限制.
+        final int contentLength = LINE_LENGTH - indent.length();
+        for (ColumnInfo columnInfo : columnInfos) {
+            final String propertyName = StringUtils.underLineToHump(columnInfo.getName(), false);
+            final String propertyValue = "#{" + prefix + propertyName + ",jdbcType=" + MyBatisJdbcTypeEnum.instance(columnInfo.getType()) + "}";
+
+            if ((sb.length() + propertyValue.length()) / contentLength > 0) {
+                // 如果新增该列后超长了，那么将新增前的内容算作一行，接下来另起一行
+                content.add(indent + sb.toString());
+
+                sb.delete(0, sb.length());
+            }
+
+            sb.append(propertyValue).append(",");
+        }
+        // 删掉最后一个逗号
+        sb.deleteCharAt(sb.length() - 1);
+        content.add(indent + sb.toString());
+    }
 
 }

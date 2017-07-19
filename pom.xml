@@ -4,7 +4,7 @@
 
     <groupId>com.xiafei.tools</groupId>
     <artifactId>tools</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>tools</name>
@@ -97,19 +97,6 @@
         </dependency>
 
     </dependencies>
-    <!-- 发布到仓库配置 -->
-    <distributionManagement>
-        <repository>
-            <id>letv-finance</id>
-            <name>libs-releases</name>
-            <url>http://10.11.145.88:8081/nexus/content/repositories/lejr-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>letv-finance</id>
-            <name>libs-snapshots</name>
-            <url>http://10.11.145.88:8081/nexus/content/repositories/lejr-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <!-- 插件管理 -->
     <build>

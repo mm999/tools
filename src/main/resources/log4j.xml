@@ -27,9 +27,6 @@
     <!--没有包含在指定appender之内的日志-->
     <appender name="OTHER" class="org.apache.log4j.DailyRollingFileAppender">
         <param name="Encoding" value="UTF-8"/>
-        <!-- 配置每日一个日志 -->
-        <param name="MaxFileSize" value="512M"/>
-        <param name="MaxBackupIndex" value="5"/>
         <param name="File" value="/xiafei/Logs/tools/tools-other.log"/> <!-- 日志路径，根据实际情况修改 -->
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%-d %t %-5p [%c{1}:%L] %m%n"/>

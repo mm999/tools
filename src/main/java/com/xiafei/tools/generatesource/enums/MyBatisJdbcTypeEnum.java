@@ -52,13 +52,7 @@ public enum MyBatisJdbcTypeEnum {
         }
     }),
 
-    DATALINK("DATALINK", new ArrayList<String>() {
-        {
-            add("INTEGER");
-            add("INT");
-            add("SMALLINT");
-        }
-    }),
+    DATALINK("DATALINK",Collections.EMPTY_LIST),
     DATE("DATE", new ArrayList<String>() {
         {
             add("DATE");
@@ -85,6 +79,7 @@ public enum MyBatisJdbcTypeEnum {
     INTEGER("INTEGER", new ArrayList<String>() {
         {
             add("INTEGER");
+            add("INT");
         }
     }),
     JAVA_OBJECT("JAVA_OBJECT", Collections.EMPTY_LIST),
