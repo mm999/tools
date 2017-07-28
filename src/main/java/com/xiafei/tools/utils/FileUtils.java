@@ -39,7 +39,8 @@ public final class FileUtils {
         final String regex = "^.*\\.[a-z]+$";
         if (filePath.matches(regex)) {
             final File file = new File(filePath);
-            if (isNewFile && file.exists()) {
+            boolean flag = file.exists();
+            if (isNewFile && flag) {
                 file.delete();
             }
             try (FileOutputStream outputStream = new FileOutputStream(file, true);
@@ -47,7 +48,8 @@ public final class FileUtils {
                  BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter)
             ) {
 
-                if (!file.createNewFile() && !isNewFile) {
+                file.createNewFile();
+                if (flag && !isNewFile) {
                     bufferedWriter.write("#########################################################");
                     bufferedWriter.newLine();
                     bufferedWriter.write("################" + DateUtils.toString(new Date()) + "追加#################");
