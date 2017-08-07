@@ -65,54 +65,53 @@ public final class SourceGenerator {
         // domain classname will be item.className+param.domainSuffix
         param.setDomainSuffix("PO");
         // mybatis mapper.xmls dirctory
-//        param.setMapperDirectory("C:\\newWork\\metal-quotation\\metal-quotation-web\\src\\main\\resources\\mapper");
-        param.setDaoDirectory("C:\\newWork\\metal-quotation\\metal-quotation-dao\\src\\main\\java\\com\\le\\jr\\metal\\quotation\\dao");
+        param.setMapperDirectory("C:\\newWork\\metal-quotation\\metal-quotation-web\\src\\main\\resources\\mapper");
+//        param.setDaoDirectory("C:\\newWork\\metal-quotation\\metal-quotation-dao\\src\\main\\java\\com\\le\\jr\\metal\\quotation\\dao");
         param.setDaoPackage("com.le.jr.metal.quotation.dao");
         // is cover ori file's content
         param.setCoverFile(false);
 
         List<GenerateSourceParamItem> itemList = new ArrayList<>();
-        GenerateSourceParamItem table1 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_defer_delivery_quotation", "metal_quotation",
-            "GoldDeferDeliveryQuotation", "黄金交易二级系统延期交割行情");
-        itemList.add(table1);
+//        GenerateSourceParamItem table1 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+//            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
+//            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_defer_delivery_quotation", "metal_quotation",
+//            "GoldDeferDeliveryQuotation", "黄金交易二级系统延期交割行情实时信息，数据保留一日后删除");
+//        itemList.add(table1);
+//
+//        GenerateSourceParamItem table2 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+//            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
+//            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_state", "metal_quotation",
+//            "GoldState", "黄金交易二级系统合约状态");
+//        itemList.add(table2);
+//
+//        GenerateSourceParamItem table5 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+//            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
+//            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_spot_quotation", "metal_quotation",
+//            "GoldSpotQuotation", "黄金交易二级系统现货行情，数据保留一日后删除");
+//        itemList.add(table5);
+//
+//        GenerateSourceParamItem table6 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+//            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
+//            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_forward_quotation", "metal_quotation",
+//            "GoldForwardQuotation", "黄金交易二级系统远期行情，数据保留一日后删除");
+//        itemList.add(table6);
 
-        GenerateSourceParamItem table2 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_spot_inst_state", "metal_quotation",
-            "GoldSpotInstState", "黄金交易二级系统现货合约状态");
-        itemList.add(table2);
+//        GenerateSourceParamItem table7 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+//            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
+//            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_defer_quotation", "metal_quotation",
+//            "GoldDeferQuotation", "黄金交易二级系统延期行情，数据保留一日后删除");
+//        itemList.add(table7);
 
-        GenerateSourceParamItem table3 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_forward_inst_state", "metal_quotation",
-            "GoldForwardInstState", "黄金交易二级系统远期合约状态");
-        itemList.add(table3);
-
-        GenerateSourceParamItem table4 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_defert_inst_state", "metal_quotation",
-            "GoldDeferInstState", "黄金交易二级系统延期合约状态");
-        itemList.add(table4);
-
-        GenerateSourceParamItem table5 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_spot_quotation_00", "metal_quotation",
-            "GoldSpotQuotation", "黄金交易二级系统现货行情");
-        itemList.add(table5);
-
-        GenerateSourceParamItem table6 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_forward_quotation_00", "metal_quotation",
-            "GoldForwardQuotation", "黄金交易二级系统远期行情");
-        itemList.add(table6);
-
-        GenerateSourceParamItem table7 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_defer_quotation_00", "metal_quotation",
-            "GoldDeferQuotation", "黄金交易二级系统延期行情");
-        itemList.add(table7);
+        GenerateSourceParamItem table8 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+                "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
+                "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_k", "metal_quotation",
+                "GoldK", "黄金交易相关K线数据");
+        itemList.add(table8);
+//        GenerateSourceParamItem table9 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
+//            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
+//            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_time", "metal_quotation",
+//            "GoldTime", "黄金交易相关分时数据");
+//        itemList.add(table9);
 
         param.setItems(itemList);
 

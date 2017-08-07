@@ -70,22 +70,22 @@ public final class MapperTemplate extends SourceTemplate {
         // 增加resultMap信息.
         addResultMap(resultId, domainJavaPath, primaryColumn, columnInfosNoPrimaryColumn, content);
         // 增加字段<sql>模板
-        addSqlTemplate(primaryColumn, columnInfosNoPrimaryColumn, content);
+        addSqlTemplate(primaryColumn, columnInfosNoPrimaryColumn, content, item.getDataBaseType());
 
         if (primaryColumn != null) {
             // 增加get
-            addGet(resultId, primaryColumn, item.getTableName(), content);
+            addGet(resultId, primaryColumn, item.getTableName(), content, item.getDataBaseType());
             // 增加update
-            addUpdate(domainJavaPath, primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content);
+            addUpdate(domainJavaPath, primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content, item.getDataBaseType());
         }
         // 增加query
-        addQuery(domainJavaPath, resultId, primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content);
+        addQuery(domainJavaPath, resultId, primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content, item.getDataBaseType());
         // 增加count
-        addCount(domainJavaPath, primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content);
+        addCount(domainJavaPath, primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content, item.getDataBaseType());
         // 增加insert
-        addInsert(domainJavaPath, primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content);
+        addInsert(domainJavaPath, primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content, item.getDataBaseType());
         // 增加batchInsert
-        addBatchInsert(primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content);
+        addBatchInsert(primaryColumn, columnInfosNoPrimaryColumn, item.getTableName(), content, item.getDataBaseType());
 
 
         content.add("</mapper>");
@@ -148,8 +148,9 @@ public final class MapperTemplate extends SourceTemplate {
      * @param primaryColumn 主键字段信息
      * @param columnInfos   数据库字段信息
      * @param content       输出文件内容列表
+     * @param dataBaseType  数据库类型
      */
-    private static void addSqlTemplate(ColumnInfo primaryColumn, List<ColumnInfo> columnInfos, List<String> content) {
+    private static void addSqlTemplate(ColumnInfo primaryColumn, List<ColumnInfo> columnInfos, List<String> content, final DataBaseTypeEnum dataBaseType) {
         // 先增加全字段模板
         content.add("");
         content.add(getIndent(1) + "<!-- 基础字段 -->");
@@ -163,7 +164,7 @@ public final class MapperTemplate extends SourceTemplate {
         content.add(getIndent(1) + "<!-- Insert使用字段 -->");
         content.add(getIndent(1) + "<sql id=\"Columns_For_Insert\">");
         // 增加字段信息，不包含主键
-        cycleAddColumnName(getIndent(2), columnInfos, content);
+        cycleAddColumnName(getIndent(2), columnInfos, content, dataBaseType);
         content.add(getIndent(1) + "</sql>");
     }
 
@@ -174,9 +175,10 @@ public final class MapperTemplate extends SourceTemplate {
      * @param primaryColumn 主键字段信息
      * @param tableName     数据库表名
      * @param content       输出文件内容
+     * @param dataBaseType  数据库类型
      */
     private static void addGet(final String resultId, final ColumnInfo primaryColumn, final String tableName,
-                               final List<String> content) {
+                               final List<String> content, final DataBaseTypeEnum dataBaseType) {
         content.add("");
         content.add(getIndent(1) + "<!-- 根据主键查询一行数据 -->");
         content.add(getIndent(1) + "<select id=\"get\" parameterType=\""
@@ -185,16 +187,24 @@ public final class MapperTemplate extends SourceTemplate {
         content.add(getIndent(2) + "SELECT");
         content.add(getIndent(2) + "<include refid=\"Base_Columns\"/>");
         content.add(getIndent(2) + "FROM " + tableName);
-        content.add(getIndent(2) + "WHERE " + primaryColumn.getName() + " = #{"
-                + StringUtils.underLineToHump(primaryColumn.getName(), false)
-                + ",jdbcType=" + MyBatisJdbcTypeEnum.instance(primaryColumn.getType()).mybatisType + "}");
+        if (DataBaseTypeEnum.MYSQL == dataBaseType) {
+            content.add(getIndent(2) + "WHERE `" + primaryColumn.getName() + "` = #{"
+                    + StringUtils.underLineToHump(primaryColumn.getName(), false)
+                    + ",jdbcType=" + MyBatisJdbcTypeEnum.instance(primaryColumn.getType()).mybatisType + "}");
+        } else if (DataBaseTypeEnum.ORACLE == dataBaseType) {
+            content.add(getIndent(2) + "WHERE \"" + primaryColumn.getName() + "\" = #{"
+                    + StringUtils.underLineToHump(primaryColumn.getName(), false)
+                    + ",jdbcType=" + MyBatisJdbcTypeEnum.instance(primaryColumn.getType()).mybatisType + "}");
+        } else {
+            throw new IllegalArgumentException("DataBaseTypeEnum枚举值改变了这里没修改");
+        }
         content.add(getIndent(1) + "</select>");
     }
 
     /**
      * 增加根据主键更新方法sql.
      */
-    private static void addUpdate(final String domainJavaPath, final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content) {
+    private static void addUpdate(final String domainJavaPath, final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content, final DataBaseTypeEnum dataBaseType) {
         content.add("");
         content.add(getIndent(1) + "<!-- 根据主键更新非空字段 -->");
         content.add(getIndent(1) + "<update id=\"update\" parameterType=\"" + domainJavaPath + "\">");
@@ -202,11 +212,19 @@ public final class MapperTemplate extends SourceTemplate {
                 + StringUtils.underLineToHump(primaryColumn.getName(), false) + " != null \" >");
         content.add(getIndent(3) + "UPDATE " + tableName);
         content.add(getIndent(3) + "<set>");
-        cycleAddIfTest(getIndent(4), columnInfos, ",", content);
+        cycleAddIfTest(getIndent(4), columnInfos, ",", content, dataBaseType);
         content.add(getIndent(3) + "</set>");
-        content.add(getIndent(3) + "WHERE " + primaryColumn.getName() + "=#{"
-                + StringUtils.underLineToHump(primaryColumn.getName(), false)
-                + ",jdbcType=" + MyBatisJdbcTypeEnum.instance(primaryColumn.getType()).mybatisType + "}");
+        if (DataBaseTypeEnum.MYSQL == dataBaseType) {
+            content.add(getIndent(3) + "WHERE `" + primaryColumn.getName() + "` = #{"
+                    + StringUtils.underLineToHump(primaryColumn.getName(), false)
+                    + ",jdbcType=" + MyBatisJdbcTypeEnum.instance(primaryColumn.getType()).mybatisType + "}");
+        } else if (DataBaseTypeEnum.ORACLE == dataBaseType) {
+            content.add(getIndent(3) + "WHERE \"" + primaryColumn.getName() + "\" = #{"
+                    + StringUtils.underLineToHump(primaryColumn.getName(), false)
+                    + ",jdbcType=" + MyBatisJdbcTypeEnum.instance(primaryColumn.getType()).mybatisType + "}");
+        } else {
+            throw new IllegalArgumentException("DataBaseTypeEnum枚举值改变了这里没修改");
+        }
         content.add(getIndent(2) + "</if>");
         content.add(getIndent(1) + "</update>");
     }
@@ -220,8 +238,9 @@ public final class MapperTemplate extends SourceTemplate {
      * @param columnInfos    数据库字段信息（不包含主键）
      * @param tableName      数据库表名
      * @param content        输出文件内容
+     * @param dataBaseType   数据库类型
      */
-    private static void addQuery(final String domainJavaPath, final String resultId, final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content) {
+    private static void addQuery(final String domainJavaPath, final String resultId, final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content, final DataBaseTypeEnum dataBaseType) {
         content.add("");
         content.add(getIndent(1) + "<!-- 根据条件查询列表 -->");
         content.add(getIndent(1) + "<select id=\"query\" parameterType=\"" + domainJavaPath + "\" resultMap=\"" + resultId + "\">");
@@ -234,7 +253,7 @@ public final class MapperTemplate extends SourceTemplate {
         if (primaryColumn != null) {
             tempColumnInfos.add(primaryColumn);
         }
-        cycleAddIfTest(getIndent(3), tempColumnInfos, "AND", content);
+        cycleAddIfTest(getIndent(3), tempColumnInfos, "AND", content, dataBaseType);
 
         content.add(getIndent(2) + "</where>");
         content.add(getIndent(1) + "</select>");
@@ -249,8 +268,9 @@ public final class MapperTemplate extends SourceTemplate {
      * @param columnInfos    数据库字段信息（不包含主键）
      * @param tableName      数据库表名
      * @param content        输出文件内容
+     * @param dataBaseType
      */
-    private static void addCount(final String domainJavaPath, final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content) {
+    private static void addCount(final String domainJavaPath, final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content, final DataBaseTypeEnum dataBaseType) {
         content.add("");
         content.add(getIndent(1) + "<!-- 统计数量 -->");
         content.add(getIndent(1) + "<select id=\"count\" parameterType=\"" + domainJavaPath + "\" resultType=\"int\" >");
@@ -262,7 +282,7 @@ public final class MapperTemplate extends SourceTemplate {
         if (primaryColumn != null) {
             tempColumnInfos.add(primaryColumn);
         }
-        cycleAddIfTest(getIndent(3), tempColumnInfos, "AND", content);
+        cycleAddIfTest(getIndent(3), tempColumnInfos, "AND", content, dataBaseType);
 
         content.add(getIndent(2) + "</where>");
         content.add(getIndent(1) + "</select>");
@@ -277,8 +297,9 @@ public final class MapperTemplate extends SourceTemplate {
      * @param columnInfos    数据库字段信息（不包含主键）
      * @param tableName      数据库表名
      * @param content        输出文件内容
+     * @param dataBaseType
      */
-    private static void addInsert(final String domainJavaPath, final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content) {
+    private static void addInsert(final String domainJavaPath, final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content, final DataBaseTypeEnum dataBaseType) {
         content.add("");
         content.add(getIndent(1) + "<!-- 插入数据 -->");
 
@@ -308,8 +329,9 @@ public final class MapperTemplate extends SourceTemplate {
      * @param columnInfos   数据库字段信息（不包含主键）
      * @param tableName     数据库表名
      * @param content       输出文件内容
+     * @param dataBaseType
      */
-    private static void addBatchInsert(final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content) {
+    private static void addBatchInsert(final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content, final DataBaseTypeEnum dataBaseType) {
         content.add("");
         content.add(getIndent(1) + "<!-- 批量插入 -->");
         String headInfo = "<insert id=\"batchInsert\" parameterType=\"java.util.List\" ";
@@ -336,11 +358,12 @@ public final class MapperTemplate extends SourceTemplate {
     /**
      * 循环增加字段信息
      *
-     * @param indent      缩进
-     * @param columnInfos 数据库字段信息列表
-     * @param content     输出文件内容
+     * @param indent       缩进
+     * @param columnInfos  数据库字段信息列表
+     * @param content      输出文件内容
+     * @param dataBaseType 数据库类型
      */
-    private static void cycleAddColumnName(final String indent, final List<ColumnInfo> columnInfos, final List<String> content) {
+    private static void cycleAddColumnName(final String indent, final List<ColumnInfo> columnInfos, final List<String> content, final DataBaseTypeEnum dataBaseType) {
         // 拼接逗号分隔字段信息
         final StringBuilder sb = new StringBuilder();
         final int contentLength = LINE_LENGTH - indent.length();
@@ -352,22 +375,29 @@ public final class MapperTemplate extends SourceTemplate {
 
                 sb.delete(0, sb.length());
             }
-            sb.append(columnName).append(",");
+            if (DataBaseTypeEnum.MYSQL == dataBaseType) {
+                sb.append("`").append(columnName).append("`, ");
+            } else if (DataBaseTypeEnum.ORACLE == dataBaseType) {
+                sb.append("\"").append(columnName).append("\", ");
+            } else {
+                throw new IllegalArgumentException("DataBaseTypeEnum新增枚举值这里没修改");
+            }
         }
-        // 删掉最后一个逗号
-        sb.deleteCharAt(sb.length() - 1);
+        // 删掉最后一个逗号和空格
+        sb.deleteCharAt(sb.length() - 1).deleteCharAt(sb.length() - 1);
         content.add(indent + sb.toString());
     }
 
     /**
      * 循环增加<if test=""></>.
      *
-     * @param indent      缩进
-     * @param columnInfos 数据库字段信息列表
-     * @param s           分隔符
-     * @param content     输出文件内容
+     * @param indent       缩进
+     * @param columnInfos  数据库字段信息列表
+     * @param s            分隔符
+     * @param content      输出文件内容
+     * @param dataBaseType 数据库类型
      */
-    private static void cycleAddIfTest(final String indent, final List<ColumnInfo> columnInfos, final String s, final List<String> content) {
+    private static void cycleAddIfTest(final String indent, final List<ColumnInfo> columnInfos, final String s, final List<String> content, final DataBaseTypeEnum dataBaseType) {
         for (ColumnInfo columnInfo : columnInfos) {
             final String propertyName = StringUtils.underLineToHump(columnInfo.getName(), false);
             final JdbcTypeJavaTypeEnum javaType = JdbcTypeJavaTypeEnum.instance(columnInfo.getType());
@@ -378,8 +408,23 @@ public final class MapperTemplate extends SourceTemplate {
                 content.add(indent + "<if test=\" " + propertyName + " != null \" >");
             }
             if ("AND".equalsIgnoreCase(s)) {
-                content.add(indent + getIndent(1) + "AND " + columnInfo.getName() + "=#{" + propertyName + ",jdbcType=" + mybatisType + "}");
+                if (DataBaseTypeEnum.MYSQL == dataBaseType) {
+                    content.add(indent + getIndent(1) + "AND `" + columnInfo.getName() + "` = #{" + propertyName + ",jdbcType=" + mybatisType + "}");
+
+                } else if (DataBaseTypeEnum.ORACLE == dataBaseType) {
+                    content.add(indent + getIndent(1) + "AND \"" + columnInfo.getName() + "\" = #{" + propertyName + ",jdbcType=" + mybatisType + "}");
+                } else {
+                    throw new IllegalArgumentException("DataBaseTypeEnum枚举值改变了这里没修改");
+                }
             } else if (",".equalsIgnoreCase(s)) {
+                if (DataBaseTypeEnum.MYSQL == dataBaseType) {
+                    content.add(indent + getIndent(1) + "`" + columnInfo.getName() + "` = #{" + propertyName + ",jdbcType=" + mybatisType + "},");
+
+                } else if (DataBaseTypeEnum.ORACLE == dataBaseType) {
+                    content.add(indent + getIndent(1) + "\"" + columnInfo.getName() + "\" = #{" + propertyName + ",jdbcType=" + mybatisType + "},");
+                } else {
+                    throw new IllegalArgumentException("DataBaseTypeEnum枚举值改变了这里没修改");
+                }
                 content.add(indent + getIndent(1) + columnInfo.getName() + "=#{" + propertyName + ",jdbcType=" + mybatisType + "},");
             }
             content.add(indent + "</if>");
