@@ -1,10 +1,6 @@
 package com.xiafei.tools.utils;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.util.Date;
 import java.util.List;
 
@@ -52,7 +48,7 @@ public final class FileUtils {
                 if (flag && !isNewFile) {
                     bufferedWriter.write("#########################################################");
                     bufferedWriter.newLine();
-                    bufferedWriter.write("################" + DateUtils.toString(new Date()) + "追加#################");
+                    bufferedWriter.write("################" + DateUtils.getYMDHMSWithSeparate().format(new Date()) + "追加#################");
                     bufferedWriter.newLine();
                     bufferedWriter.write("#########################################################");
                     bufferedWriter.newLine();
@@ -61,6 +57,32 @@ public final class FileUtils {
                     bufferedWriter.write(line);
                     bufferedWriter.newLine();
                 }
+                bufferedWriter.flush();
+            } catch (IOException e) {
+                throw new RuntimeException("创建文件失败，请检查文件夹是否已经建好" + filePath);
+
+            }
+
+        } else {
+            throw new RuntimeException("文件路径必须包含文件名和文件类型" + filePath);
+        }
+    }
+
+    public static void out(final String filePath, final String content) {
+        if (filePath == null || content == null || content.isEmpty()) {
+            return;
+        }
+        // 校验是否包含文件名
+        final String regex = "^.*\\.[a-z]+$";
+        if (filePath.matches(regex)) {
+            final File file = new File(filePath);
+            try (FileOutputStream outputStream = new FileOutputStream(file, true);
+                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, "utf-8");
+                 BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter)
+            ) {
+
+                file.createNewFile();
+                bufferedWriter.write(content);
                 bufferedWriter.flush();
             } catch (IOException e) {
                 throw new RuntimeException("创建文件失败，请检查文件夹是否已经建好" + filePath);

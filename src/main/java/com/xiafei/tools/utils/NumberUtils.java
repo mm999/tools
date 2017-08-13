@@ -52,16 +52,20 @@ public final class NumberUtils {
             throw new IllegalArgumentException("Illegal load factor: "
                     + loadFactor);
         }
-        int mapInitSize = Integer.highestOneBit(dataSize); //按照传入dataSize初始化的话Map的实际size
-        if (Integer.bitCount(dataSize) > 1) { //如果size不是2的幂数，那么Map的实际size是最近接并大于dataSize的2的幂数
+        //按照传入dataSize初始化的话Map的实际size
+        int mapInitSize = Integer.highestOneBit(dataSize);
+        //如果size不是2的幂数，那么Map的实际size是最近接并大于dataSize的2的幂数
+        if (Integer.bitCount(dataSize) > 1) {
             mapInitSize <<= 1;
         }
         //按照传入dataSize初始化的话Map当元素的数量大于等于resizeMax后将扩容，我们要避免这种情况
-        int resizeMax = (int) (mapInitSize * loadFactor);
-        if (dataSize < resizeMax) { //如果键值对数量小于扩若界限，直接返回map初始化size就可以
+        final int resizeMax = (int) (mapInitSize * loadFactor);
+        if (dataSize < resizeMax) {
+            //如果键值对数量小于扩若界限，直接返回map初始化size就可以
             return mapInitSize;
         } else {
-            return mapInitSize << 1; //否则扩大map的初始化大小
+            //否则扩大map的初始化大小
+            return mapInitSize << 1;
         }
     }
 }

@@ -56,7 +56,7 @@ public class SourceTemplate {
         fileContent.add(" * <P>Description: " + item.getClassDescription() + descripSuffix + ". </P>");
         fileContent.add(" * <P>CALLED BY:   " + param.getCommentsUser() + " </P>");
         fileContent.add(" * <P>UPDATE BY:   " + param.getCommentsUser() + " </P>");
-        final String dateComment = DateUtils.toString(new Date(), DateUtils.YMD_SEPARATE_WITH_SLASH);
+        final String dateComment = DateUtils.getYMDWithSeparate().format(new Date());
         fileContent.add(" * <P>CREATE DATE: " + dateComment + "</P>");
         fileContent.add(" * <P>UPDATE DATE: " + dateComment + "</P>");
         fileContent.add(" *");

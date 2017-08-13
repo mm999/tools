@@ -217,8 +217,9 @@ public class Queue<T> implements Iterable<T> {
     /**
      * 整理队列，将内容左移顶头.
      */
+    @SuppressWarnings("unchecked")
     private void tidy() {
-        T[] newContent = (T[]) new Object[content.length];
+        final T[] newContent = (T[]) new Object[content.length];
         System.arraycopy(content, front, newContent, 0, n);
         content = newContent;
         front = 0;

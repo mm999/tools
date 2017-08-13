@@ -23,32 +23,37 @@ public final class DateUtils {
     /**
      * 年月日无分隔符.
      */
-    public static final SimpleDateFormat YMD = new SimpleDateFormat("yyyyMMdd");
+    private static final ThreadLocal<SimpleDateFormat> YMD = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyyMMdd");
+        }
+    };
 
     /**
-     * 年月日用横岗分隔.
+     * 年月日用横杠分隔.
      */
-    public static final SimpleDateFormat YMD_SEPARATE_WITH_BAR = new SimpleDateFormat("yyyy-MM-dd");
-    /**
-     * 年月日用斜杠分隔.
-     */
-    public static final SimpleDateFormat YMD_SEPARATE_WITH_SLASH = new SimpleDateFormat("yyyy/MM/dd");
+    private static final ThreadLocal<SimpleDateFormat> YMD_SEPARATE = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd");
+        }
+    };
 
     /**
      * 年月日时分秒用横杠和冒号分隔.
      */
-    public static final SimpleDateFormat YMDHMS_SEPARATE_WITH_BAR_COLON = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    /**
-     * 年月日时分秒用斜杠和冒号分隔.
-     */
-    public static final SimpleDateFormat YMDHMS_SEPARATE_WITH_SLASH_COLON = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private static final ThreadLocal<SimpleDateFormat> YMDHMS_SEPARATE = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        }
+    };
 
     /**
      * 日志.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DateUtils.class);
-
 
     /**
      * 不允许实例化.
@@ -58,13 +63,40 @@ public final class DateUtils {
     }
 
     /**
+     * 获取年月日无分隔符的日期格式化对象.
+     *
+     * @return 年月日无分隔符的日期格式化对象
+     */
+    public static SimpleDateFormat getYMD() {
+        return YMD.get();
+    }
+
+    /**
+     * 获取年月日用横杠分隔的日期格式化对象.
+     *
+     * @return 年月日用横杠分隔的日期格式化对象
+     */
+    public static SimpleDateFormat getYMDWithSeparate() {
+        return YMD_SEPARATE.get();
+    }
+
+    /**
+     * 获取年月日时分秒用横杠和冒号分隔的日期格式化对象.
+     *
+     * @return 年月日时分秒用横杠和冒号分隔的日期格式化对象
+     */
+    public static SimpleDateFormat getYMDHMSWithSeparate() {
+        return YMDHMS_SEPARATE.get();
+    }
+
+    /**
      * 字符串转换成日期对象，使用默认的年月日时分秒横杠冒号格式化.
      *
      * @param source 字符串对象
      * @return 由字符串转换的日期对象
      */
     public static Date parse(final String source) {
-        return parse(source, YMDHMS_SEPARATE_WITH_BAR_COLON);
+        return parse(source, YMDHMS_SEPARATE.get());
     }
 
     /**
@@ -86,28 +118,14 @@ public final class DateUtils {
         return result;
     }
 
-
     /**
-     * 将日期按年月日时分秒格式化成字符串.
+     * 整数转换成日期对象，使用默认的年月日时分秒横杠冒号格式化.
      *
-     * @param date 日期对象
-     * @return 字符串
+     * @param source 整数日期对象
+     * @param sdf    日期格式化对象
+     * @return 由字符串转换的日期对象
      */
-    public static String toString(final Date date) {
-        return toString(date, YMDHMS_SEPARATE_WITH_BAR_COLON);
-    }
-
-    /**
-     * 将日期按给定的格式格式化成字符串.
-     *
-     * @param date 日期对象
-     * @param sdf  日期格式化对象
-     * @return 字符串
-     */
-    public static String toString(final Date date, final SimpleDateFormat sdf) {
-        if (date == null) {
-            return "";
-        }
-        return sdf.format(date);
+    public static Date parse(final Integer source, final SimpleDateFormat sdf) {
+        return parse(source.toString(), sdf);
     }
 }
