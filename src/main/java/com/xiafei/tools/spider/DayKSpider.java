@@ -29,6 +29,16 @@ import java.util.Map;
 public class DayKSpider {
 
 
+    /**
+     * 一个空格.
+     */
+    private static final String BLANK = "";
+
+    /**
+     * 逗号.
+     */
+    private static final String COMMA = ",";
+
     public static void main(String[] args) {
         generalDayKSQL();
 
@@ -43,7 +53,7 @@ public class DayKSpider {
         final List<DayK> dayKData = new ArrayList<>();
         String url = null;
 
-        try (FileInputStream in = new FileInputStream("C:\\work\\tools\\src\\main\\java\\com\\xiafei\\tools\\spider\\effectIndex.txt");
+        try (FileInputStream in = new FileInputStream("E:\\self-study\\tools\\src\\main\\java\\com\\xiafei\\tools\\spider\\effectIndex.txt");
              InputStreamReader ir = new InputStreamReader(in, "utf-8");
              BufferedReader br = new BufferedReader(ir)) {
             // 从文件中读取有效页面编号
@@ -56,6 +66,7 @@ public class DayKSpider {
                 Document document = getter.getPageJsoup(url);
 
                 final Map<String, Boolean> statusParam = MapUtils.newHashMap(1);
+                // 分析文档对象生成日K对象列表
                 List<DayK> pageDayK = analysisDocument(document, statusParam, url);
                 if (statusParam.get("continue") != null && statusParam.get("continue")) {
                     continue;
@@ -81,8 +92,68 @@ public class DayKSpider {
             contentList.add(k.toString());
             System.out.println(k);
         }
-        FileUtils.outPutToFileByLine("C:\\work\\tools\\src\\main\\java\\com\\xiafei\\tools\\spider\\dayk.txt", contentList, true);
+        FileUtils.outPutToFileByLine("E:\\self-study\\tools\\src\\main\\java\\com\\xiafei\\tools\\spider\\dayk.txt", contentList, true);
+        // 日K对象转成sql
+        final List<String> insertSqlList = new ArrayList<>(dayKData.size());
+        for (DayK k : dayKData) {
+            insertSqlList.add(convertToDayKSql(k));
+        }
+        final List<String> weekKSqlList = convertToWeekKSql(dayKData);
+        final List<String> montKSqlList = convertToMonthKSql(dayKData);
 
+        FileUtils.outPutToFileByLine("E:\\self-study\\tools\\src\\main\\java\\com\\xiafei\\tools\\spider\\dayKInsertSql.sql", insertSqlList, true);
+
+
+    }
+
+    private static List<String> convertToMonthKSql(final List<DayK> dayKData) {
+        return null;
+    }
+
+    private static List<String> convertToWeekKSql(final List<DayK> dayKData) {
+        return null;
+    }
+
+    /**
+     * 将日K对象转化成插入数据库的日Ksql.
+     *
+     * @param k 日k对象
+     * @return 插入数据库的sql
+     */
+    private static String convertToDayKSql(final DayK k) {
+        final StringBuilder sb = new StringBuilder("INSERT INTO metal_gold_k_");
+        if (k.getInstId() == null) {
+            System.out.println("合约代码为空" + k);
+            return null;
+        }
+        final InstIdEnum suffixEnum = InstIdEnum.instance(k.getInstId());
+        if (suffixEnum == null) {
+            throw new IllegalArgumentException("找不到合约代码和表名对应关系" + k);
+        }
+        sb.append(suffixEnum.suffix).append(BLANK);
+        sb.append("(`inst_id`,`type`,`open`,`high`,`low`,`close`,`volume`,`up_down`,`up_down_rate`,`average`,`turn_over`" +
+                ",`sequence_no`,`time_day`,`time_minute`,`week_year`,`index`,`create_time`)");
+        sb.append("VALUES(");
+        sb.append("'").append(suffixEnum.code).append("'").append(COMMA);
+        sb.append("0").append(COMMA);
+        sb.append(k.getOpen()).append(COMMA);
+        sb.append(k.getHigh()).append(COMMA);
+        sb.append(k.getLow()).append(COMMA);
+        sb.append(k.getClose()).append(COMMA);
+        sb.append(k.getVolume()).append(COMMA);
+        sb.append(k.getUpDown()).append(COMMA);
+        sb.append(k.getUpDownRate()).append(COMMA);
+        sb.append(k.getAverage()).append(COMMA);
+        sb.append(k.getTurnOver()).append(COMMA);
+        sb.append("0").append(COMMA);
+        sb.append(k.getTimeDay()).append(COMMA);
+        sb.append("000000").append(COMMA);
+        sb.append("null").append(COMMA);
+        sb.append("null").append(COMMA);
+        sb.append("sysdate()");
+
+        sb.append(");");
+        return null;
     }
 
     /**
@@ -102,8 +173,8 @@ public class DayKSpider {
         // 页面标题信息，拿到交易日期
         final Element pageTitle = document.select("div.jzk_newsCenter_meeting").get(0).child(0);
         final Integer timeDay = Integer.parseInt(pageTitle.select("span").get(1).html().
-            replace("<i>时间:</i>", "").replace("\"", "").
-            replace("-", ""));
+                replace("<i>时间:</i>", "").replace("\"", "").
+                replace("-", ""));
 
         final Elements tables = document.select("table");
         // 表格的行
@@ -129,8 +200,8 @@ public class DayKSpider {
         final Element titleTr = trs.get(0);
         final List<ColumnTypeEnum> cTypeList = new ArrayList<>(15);
         final Elements titleTds = titleTr.select("th").size() == 0
-            ? titleTr.select("td")
-            : titleTr.select("th");
+                ? titleTr.select("td")
+                : titleTr.select("th");
         cTypeList.add(ColumnTypeEnum.INST_ID);// 第一列不校验了，就当成合约代码
         titleTds.remove(0);
         for (Element td : titleTds) {
@@ -141,7 +212,7 @@ public class DayKSpider {
             }
         }
 
-        // 载入表格数据
+        // 读取页面表格数据封装成日K对象
         for (int j = 1, len = trs.size(); j < len; j++) {
             // 循环每一行时对应一个日K
             final DayK item = newDayK();
@@ -190,10 +261,15 @@ public class DayKSpider {
                     setProperty(value, cTypeList.get(z), item);
                 } catch (Exception e) {
                     System.out.println("value[" + value + "]，td[" + td.html() + "]，标题：[" + cTypeList.get(z) +
-                        "]，标题列表[" + cTypeList + "]，第一个tr[" + titleTr + "]");
+                            "]，标题列表[" + cTypeList + "]，第一个tr[" + titleTr + "]");
                     throw e;
                 }
 
+            }
+            // 有的页面没有涨跌幅
+            if (item.getUpDownRate() == null && item.getUpDown() != null && item.getClose() != null) {
+                final BigDecimal lastClose = item.getClose().subtract(item.getUpDown());
+                item.setUpDownRate(item.getClose().subtract(lastClose).divide(lastClose, 6, BigDecimal.ROUND_DOWN));
             }
             currentPageDayKList.add(item);
         }
@@ -209,40 +285,40 @@ public class DayKSpider {
      */
     private static ColumnTypeEnum judgeColumnType(final String headerTdStr) {
         if (headerTdStr.contains("开盘")
-            || headerTdStr.contains("开盘价")
-            || (headerTdStr.contains("Open") && !headerTdStr.contains("Interest"))) {
+                || headerTdStr.contains("开盘价")
+                || (headerTdStr.contains("Open") && !headerTdStr.contains("Interest"))) {
             return ColumnTypeEnum.OPEN;
         } else if ((headerTdStr.contains("收") && headerTdStr.contains("盘"))
-            || headerTdStr.contains("Close")) {
+                || headerTdStr.contains("Close")) {
             return ColumnTypeEnum.CLOSE;
         } else if ((headerTdStr.contains("最") && headerTdStr.contains("高"))
-            || headerTdStr.contains("High")) {
+                || headerTdStr.contains("High")) {
             return ColumnTypeEnum.HIGH;
         } else if ((headerTdStr.contains("最") && headerTdStr.contains("低"))
-            || headerTdStr.contains("Low")) {
+                || headerTdStr.contains("Low")) {
             return ColumnTypeEnum.LOW;
         } else if ((headerTdStr.contains("涨") && headerTdStr.contains("跌") && !headerTdStr.contains("幅"))
-            || headerTdStr.contains("Up/Down(yuan)")) {
+                || headerTdStr.contains("Up/Down(yuan)")) {
             return ColumnTypeEnum.UP_DOWN;
         } else if (headerTdStr.contains("涨") && headerTdStr.contains("跌") && headerTdStr.contains("幅")) {
             return ColumnTypeEnum.UP_DOWN_RATE;
         } else if ((headerTdStr.contains("均") && headerTdStr.contains("价"))
-            || headerTdStr.contains("平均")
-            || headerTdStr.contains("Weighted &nbsp; Average Price")) {
+                || headerTdStr.contains("平均")
+                || headerTdStr.contains("Weighted &nbsp; Average Price")) {
             return ColumnTypeEnum.AVERAGE;
         } else if (headerTdStr.contains("交易量")
-            || (headerTdStr.contains("成") && headerTdStr.contains("交") && headerTdStr.contains("量"))
-            || headerTdStr.contains("Volume(Kg)")) {
+                || (headerTdStr.contains("成") && headerTdStr.contains("交") && headerTdStr.contains("量"))
+                || headerTdStr.contains("Volume(Kg)")) {
             return ColumnTypeEnum.VOLUME;
         } else if (headerTdStr.contains("交易金额")
-            || (headerTdStr.contains("成") && headerTdStr.contains("交") && headerTdStr.contains("额"))
-            || headerTdStr.contains("Amount(yuan)")) {
+                || (headerTdStr.contains("成") && headerTdStr.contains("交") && headerTdStr.contains("额"))
+                || headerTdStr.contains("Amount(yuan)")) {
             return ColumnTypeEnum.TRUN_OVER;
         } else if (headerTdStr.contains("持仓量")
-            || headerTdStr.contains("交收")
-            || headerTdStr.contains("Open Interest")
-            || headerTdStr.contains("Direction")
-            || headerTdStr.contains("Delivery &nbsp; Volume")) {
+                || headerTdStr.contains("交收")
+                || headerTdStr.contains("Open Interest")
+                || headerTdStr.contains("Direction")
+                || headerTdStr.contains("Delivery &nbsp; Volume")) {
             return null;
         } else {
             throw new IllegalArgumentException("未识别标题 --》" + headerTdStr);
@@ -297,7 +373,7 @@ public class DayKSpider {
             case UP_DOWN_RATE:
                 if (value.contains("%")) {
                     dayK.setUpDownRate(new BigDecimal(digitOnly).divide(new BigDecimal(100),
-                        6, BigDecimal.ROUND_DOWN));
+                            6, BigDecimal.ROUND_DOWN));
                 } else {
                     dayK.setUpDownRate(new BigDecimal(digitOnly));
                 }
@@ -344,6 +420,7 @@ public class DayKSpider {
      */
     private static class DayK {
 
+        //fixme 分析用，和生成sql无关
         private String url;
         /**
          * 所有黄金交易二级系统表都包含的合约代码字段.
@@ -412,19 +489,19 @@ public class DayKSpider {
         @Override
         public String toString() {
             return "DayK{" +
-                "url='" + url + '\'' +
-                ", instId='" + instId + '\'' +
-                ", open=" + open +
-                ", high=" + high +
-                ", low=" + low +
-                ", close=" + close +
-                ", volume=" + volume +
-                ", upDown=" + upDown +
-                ", upDownRate=" + upDownRate +
-                ", average=" + average +
-                ", turnOver=" + turnOver +
-                ", timeDay=" + timeDay +
-                '}';
+                    "url='" + url + '\'' +
+                    ", instId='" + instId + '\'' +
+                    ", open=" + open +
+                    ", high=" + high +
+                    ", low=" + low +
+                    ", close=" + close +
+                    ", volume=" + volume +
+                    ", upDown=" + upDown +
+                    ", upDownRate=" + upDownRate +
+                    ", average=" + average +
+                    ", turnOver=" + turnOver +
+                    ", timeDay=" + timeDay +
+                    '}';
         }
 
         public String getInstId() {
@@ -518,34 +595,36 @@ public class DayKSpider {
 
 
     /**
-     * 已知合约代码枚举.
+     * 已知合约代码和分表表格名后缀对应关系枚举.
      */
     private enum InstIdEnum {
-        AG_DEFER(0, "Ag(T+D)", "白银延期"),
-        AU_DEFER(1, "Au(T+D)", "黄金延期"),
-        M_AU_DEFER(2, "mAu(T+D)", "迷你黄金延期"),
-        AU_DEFER_N1(3, "Au(T+N1)", "黄金单月延期"),
-        AU_DEFER_N2(4, "Au(T+N2)", "黄金双月延期"),
+        AG_DEFER("00", "Ag(T+D)", "Ag(T+D)", "白银延期"),
+        AU_DEFER("01", "Au(T+D)", "Au(T+D)", "黄金延期"),
+        M_AU_DEFER("02", "mAu(T+D)", "mAu(T+D)", "迷你黄金延期"),
+        AU_DEFER_N1("03", "Au(T+N1)", "Au(T+N1)", "黄金单月延期"),
+        AU_DEFER_N2("04", "Au(T+N2)", "Au(T+N2)", "黄金双月延期"),
 
-        AG_FORWARD1(5, "Ag99.9", "白银远期999"),
-        AG_FORWARD2(6, "Ag99.99", "白银远期99.99"),
+        AG_FORWARD1("05", "Ag999", "Ag99.9", "白银远期999"),
+        AG_FORWARD2("06", "Ag9999", "Ag99.99", "白银远期99.99"),
 
-        AU_SPOT1(7, "Au99.5", "黄金现货995"),
-        AU_SPOT2(8, "Au99.95", "黄金现货9995"),
-        AU_SPOT3(9, "Au99.99", "黄金现货9999"),
-        AU_SPOT4(10, "Au50g", "50g小金条"),
-        AU_SPOT5(11, "Au100g", "100g金条"),
-        IAU_SPOT1(12, "iAu99.5", "伦敦金现货995"),
-        IAU_SPOT2(13, "iAu99.99", "伦敦金现货9999"),
-        IU_SPOT3(14, "iAu100g", "伦敦100g金条"),
-        PT_SPOT(15, "Pt99.95", "铂金现货9995");
+        AU_SPOT1("07", "Au995", "Au99.5", "黄金现货995"),
+        AU_SPOT2("08", "Au9995", "Au99.95", "黄金现货9995"),
+        AU_SPOT3("09", "Au9999", "Au99.99", "黄金现货9999"),
+        AU_SPOT4("10", "Au50g", "Au50g", "50g小金条"),
+        AU_SPOT5("11", "Au100g", "Au100g", "100g金条"),
+        IAU_SPOT1("12", "iAu995", "iAu99.5", "伦敦金现货995"),
+        IAU_SPOT2("13", "iAu9999", "iAu99.99", "伦敦金现货9999"),
+        IU_SPOT3("14", "iAu100g", "iAu100g", "伦敦100g金条"),
+        PT_SPOT("15", "Pt9995", "Pt99.95", "铂金现货9995");
 
-        private final Integer order;
+        private final String suffix;
+        private final String pageCode;
         private final String code;
         private final String desc;
 
-        InstIdEnum(final Integer order, final String code, final String desc) {
-            this.order = order;
+        InstIdEnum(final String suffix, final String pageCode, final String code, final String desc) {
+            this.suffix = suffix;
+            this.pageCode = pageCode;
             this.code = code;
             this.desc = desc;
         }
@@ -553,7 +632,7 @@ public class DayKSpider {
         private static InstIdEnum instance(final String code) {
             if (code == null) return null;
             for (InstIdEnum e : values()) {
-                if (e.code.replace(".", "").equals(code)) return e;
+                if (e.pageCode.equals(code)) return e;
             }
             return null;
         }

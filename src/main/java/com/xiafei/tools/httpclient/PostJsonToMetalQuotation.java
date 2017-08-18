@@ -32,7 +32,7 @@ public class PostJsonToMetalQuotation extends AbstractPost {
 //        url = "http://pre-jr1.le.com/metal-quotation/goldK/getK";
 //        url = "http://pre-jr1.le.com/metal-quotation/goldTime/getTime";
 //        url = "http://pre-jr1.le.com/metal-quotation/goldTime/getTwoDay";
-        url = "https://pre-jr1.le.com/metal-quotation/goldInfo/qList/v1/appkey";
+        url = "http://127.0.0.1:8091/goldInfo/qList/v1/appkey";
         return url ;
     }
 
@@ -56,24 +56,24 @@ public class PostJsonToMetalQuotation extends AbstractPost {
 
     @Override
     protected void addForm(final HttpPost post) {
-        post.addHeader("Content-Type", "application/json;charset=UTF-8");
+//        post.addHeader("Content-Type", "application/json;charset=UTF-8");
         List<BasicNameValuePair> pairList = new ArrayList<>(4);
-        BasicNameValuePair pair1 = new BasicNameValuePair("productId", "Au(T+D)");
-        pairList.add(pair1);
+//        BasicNameValuePair pair1 = new BasicNameValuePair("productId", "Au(T+D)");
+//        pairList.add(pair1);
 
-        BasicNameValuePair pair2 = new BasicNameValuePair("kType", "0");
-        pairList.add(pair2);
+//        BasicNameValuePair pair2 = new BasicNameValuePair("kType", "0");
+//        pairList.add(pair2);
+//
+//        BasicNameValuePair pair3 = new BasicNameValuePair("fromDay", "20170811");
+//        pairList.add(pair3);
+//
+//        BasicNameValuePair pair4 = new BasicNameValuePair("toDay", "20170811");
+//        pairList.add(pair4);
 
-        BasicNameValuePair pair3 = new BasicNameValuePair("fromDay", "20170811");
-        pairList.add(pair3);
-
-        BasicNameValuePair pair4 = new BasicNameValuePair("toDay", "20170811");
-        pairList.add(pair4);
-
-        BasicNameValuePair pair5 = new BasicNameValuePair("version", "v1");
-        pairList.add(pair5);
-
-        pairList.add(new BasicNameValuePair("appKey", "rsa"));
+//        BasicNameValuePair pair5 = new BasicNameValuePair("version", "v1");
+//        pairList.add(pair5);
+//
+//        pairList.add(new BasicNameValuePair("appKey", "rsa"));
         pairList.add(new BasicNameValuePair("clientType", "1"));
         try {
             post.setEntity(new UrlEncodedFormEntity(pairList, "utf-8"));

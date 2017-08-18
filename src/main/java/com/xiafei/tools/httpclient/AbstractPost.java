@@ -29,9 +29,9 @@ public abstract class AbstractPost {
 
     public static void main(String[] args) {
         AbstractPost post = new PostJsonToMetalQuotation();
-        System.out.println(post.httpPostJson());
-//        System.out.println(post.httpPostForm());
-
+//        System.out.println(post.httpPostJson());
+        System.out.println(post.httpPostForm());
+//
     }
 
     public String httpPostForm() {

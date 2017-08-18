@@ -123,7 +123,7 @@ public final class DomainTemplate extends SourceTemplate {
             fileContent.add(getIndent(1) + " */");
             // 字段声明
             fileContent.add(getIndent(1) + "private " + JdbcTypeJavaTypeEnum.instance(columnInfo.getType()).javaType
-                + " " + StringUtils.underLineToHump(columnInfo.getName(), false) + ";");
+                + " " + StringUtils.underLineToHump(columnInfo.getName().toLowerCase(), false) + ";");
         }
     }
 
@@ -136,7 +136,7 @@ public final class DomainTemplate extends SourceTemplate {
     private static void addSetterAndGetter(final List<ColumnInfo> columnInfoList, final List<String> fileContent) {
         for (ColumnInfo columnInfo : columnInfoList) {
             // 字段名称
-            String pName = StringUtils.underLineToHump(columnInfo.getName(), false);
+            String pName = StringUtils.underLineToHump(columnInfo.getName().toLowerCase(), false);
             // 首字母大写的字段名称
             String pNameFirstUpper = StringUtils.firstCharToUpper(pName);
             // 字段java类型

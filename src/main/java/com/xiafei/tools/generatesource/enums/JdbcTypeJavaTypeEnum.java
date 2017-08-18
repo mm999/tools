@@ -22,6 +22,7 @@ public enum JdbcTypeJavaTypeEnum {
         add("CLOB");
         add("LONGVARCHAR");
         add("NVARCHAR");
+        add("TEXT");
     }}),
     LONG("Long", new ArrayList<String>() {{
         add("BIGINT");
