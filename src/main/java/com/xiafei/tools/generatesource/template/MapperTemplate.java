@@ -305,7 +305,7 @@ public final class MapperTemplate extends SourceTemplate {
 
         String headInfo = "<insert id=\"insert\" parameterType=\"" + domainJavaPath + "\" ";
         if (primaryColumn != null) {
-            headInfo += "useGeneratedKeys=\"true\" keyProperty=\"" + StringUtils.underLineToHump(primaryColumn.getName(), false) + "\"";
+            headInfo += "useGeneratedKeys=\"true\" keyProperty=\"" + StringUtils.underLineToHump(primaryColumn.getName().toLowerCase(), false) + "\"";
         }
         headInfo += ">";
         content.add(getIndent(1) + headInfo);
@@ -336,7 +336,7 @@ public final class MapperTemplate extends SourceTemplate {
         content.add(getIndent(1) + "<!-- 批量插入 -->");
         String headInfo = "<insert id=\"batchInsert\" parameterType=\"java.util.List\" ";
         if (primaryColumn != null) {
-            headInfo += "useGeneratedKeys=\"true\" keyProperty=\"" + StringUtils.underLineToHump(primaryColumn.getName(), false) + "\" ";
+            headInfo += "useGeneratedKeys=\"true\" keyProperty=\"" + StringUtils.underLineToHump(primaryColumn.getName().toLowerCase(), false) + "\" ";
         }
         headInfo += ">";
         content.add(getIndent(1) + headInfo);
