@@ -126,7 +126,7 @@ public final class MapperTemplate extends SourceTemplate {
                 throw new RuntimeException("无法将jdbc类型转换成mybatis的jdbcType");
             }
             content.add(getIndent(2) + "<id column=\"" + primaryColumn.getName() + "\" property=\""
-                    + StringUtils.underLineToHump(primaryColumn.getName(), false) + "\" jdbcType=\""
+                    + StringUtils.underLineToHump(primaryColumn.getName().toLowerCase(), false) + "\" jdbcType=\""
                     + myBatisJdbcTypeEnum.mybatisType + "\"/>");
         }
 
@@ -136,7 +136,7 @@ public final class MapperTemplate extends SourceTemplate {
                 throw new RuntimeException("无法将jdbc类型转换成mybatis的jdbcType");
             }
             content.add(getIndent(2) + "<result column=\"" + columnInfo.getName() + "\" property=\""
-                    + StringUtils.underLineToHump(columnInfo.getName(), false) + "\" jdbcType=\""
+                    + StringUtils.underLineToHump(columnInfo.getName().toLowerCase(), false) + "\" jdbcType=\""
                     + myBatisJdbcTypeEnum.mybatisType + "\"/>");
         }
         content.add(getIndent(1) + "</resultMap>");
@@ -189,11 +189,11 @@ public final class MapperTemplate extends SourceTemplate {
         content.add(getIndent(2) + "FROM " + tableName);
         if (DataBaseTypeEnum.MYSQL == dataBaseType) {
             content.add(getIndent(2) + "WHERE `" + primaryColumn.getName() + "` = #{"
-                    + StringUtils.underLineToHump(primaryColumn.getName(), false)
+                    + StringUtils.underLineToHump(primaryColumn.getName().toLowerCase(), false)
                     + ",jdbcType=" + MyBatisJdbcTypeEnum.instance(primaryColumn.getType()).mybatisType + "}");
         } else if (DataBaseTypeEnum.ORACLE == dataBaseType) {
             content.add(getIndent(2) + "WHERE \"" + primaryColumn.getName() + "\" = #{"
-                    + StringUtils.underLineToHump(primaryColumn.getName(), false)
+                    + StringUtils.underLineToHump(primaryColumn.getName().toLowerCase(), false)
                     + ",jdbcType=" + MyBatisJdbcTypeEnum.instance(primaryColumn.getType()).mybatisType + "}");
         } else {
             throw new IllegalArgumentException("DataBaseTypeEnum枚举值改变了这里没修改");
@@ -209,18 +209,18 @@ public final class MapperTemplate extends SourceTemplate {
         content.add(getIndent(1) + "<!-- 根据主键更新非空字段 -->");
         content.add(getIndent(1) + "<update id=\"update\" parameterType=\"" + domainJavaPath + "\">");
         content.add(getIndent(2) + "<if test=\" "
-                + StringUtils.underLineToHump(primaryColumn.getName(), false) + " != null \" >");
+                + StringUtils.underLineToHump(primaryColumn.getName().toLowerCase(), false) + " != null \" >");
         content.add(getIndent(3) + "UPDATE " + tableName);
         content.add(getIndent(3) + "<set>");
         cycleAddIfTest(getIndent(4), columnInfos, ",", content, dataBaseType);
         content.add(getIndent(3) + "</set>");
         if (DataBaseTypeEnum.MYSQL == dataBaseType) {
             content.add(getIndent(3) + "WHERE `" + primaryColumn.getName() + "` = #{"
-                    + StringUtils.underLineToHump(primaryColumn.getName(), false)
+                    + StringUtils.underLineToHump(primaryColumn.getName().toLowerCase(), false)
                     + ",jdbcType=" + MyBatisJdbcTypeEnum.instance(primaryColumn.getType()).mybatisType + "}");
         } else if (DataBaseTypeEnum.ORACLE == dataBaseType) {
             content.add(getIndent(3) + "WHERE \"" + primaryColumn.getName() + "\" = #{"
-                    + StringUtils.underLineToHump(primaryColumn.getName(), false)
+                    + StringUtils.underLineToHump(primaryColumn.getName().toLowerCase(), false)
                     + ",jdbcType=" + MyBatisJdbcTypeEnum.instance(primaryColumn.getType()).mybatisType + "}");
         } else {
             throw new IllegalArgumentException("DataBaseTypeEnum枚举值改变了这里没修改");
@@ -305,7 +305,7 @@ public final class MapperTemplate extends SourceTemplate {
 
         String headInfo = "<insert id=\"insert\" parameterType=\"" + domainJavaPath + "\" ";
         if (primaryColumn != null) {
-            headInfo += "useGeneratedKeys=\"true\" keyProperty=\"" + StringUtils.underLineToHump(primaryColumn.getName(), false) + "\"";
+            headInfo += "useGeneratedKeys=\"true\" keyProperty=\"" + StringUtils.underLineToHump(primaryColumn.getName().toLowerCase(), false) + "\"";
         }
         headInfo += ">";
         content.add(getIndent(1) + headInfo);
@@ -336,7 +336,7 @@ public final class MapperTemplate extends SourceTemplate {
         content.add(getIndent(1) + "<!-- 批量插入 -->");
         String headInfo = "<insert id=\"batchInsert\" parameterType=\"java.util.List\" ";
         if (primaryColumn != null) {
-            headInfo += "useGeneratedKeys=\"true\" keyProperty=\"" + StringUtils.underLineToHump(primaryColumn.getName(), false) + "\" ";
+            headInfo += "useGeneratedKeys=\"true\" keyProperty=\"" + StringUtils.underLineToHump(primaryColumn.getName().toLowerCase(), false) + "\" ";
         }
         headInfo += ">";
         content.add(getIndent(1) + headInfo);
@@ -399,7 +399,7 @@ public final class MapperTemplate extends SourceTemplate {
      */
     private static void cycleAddIfTest(final String indent, final List<ColumnInfo> columnInfos, final String s, final List<String> content, final DataBaseTypeEnum dataBaseType) {
         for (ColumnInfo columnInfo : columnInfos) {
-            final String propertyName = StringUtils.underLineToHump(columnInfo.getName(), false);
+            final String propertyName = StringUtils.underLineToHump(columnInfo.getName().toLowerCase(), false);
             final JdbcTypeJavaTypeEnum javaType = JdbcTypeJavaTypeEnum.instance(columnInfo.getType());
             final String mybatisType = MyBatisJdbcTypeEnum.instance(columnInfo.getType()).mybatisType;
             if (JdbcTypeJavaTypeEnum.STRING == javaType) {
@@ -425,7 +425,6 @@ public final class MapperTemplate extends SourceTemplate {
                 } else {
                     throw new IllegalArgumentException("DataBaseTypeEnum枚举值改变了这里没修改");
                 }
-                content.add(indent + getIndent(1) + columnInfo.getName() + "=#{" + propertyName + ",jdbcType=" + mybatisType + "},");
             }
             content.add(indent + "</if>");
         }
@@ -445,7 +444,7 @@ public final class MapperTemplate extends SourceTemplate {
         // 实际内容长度限制.
         final int contentLength = LINE_LENGTH - indent.length();
         for (ColumnInfo columnInfo : columnInfos) {
-            final String propertyName = StringUtils.underLineToHump(columnInfo.getName(), false);
+            final String propertyName = StringUtils.underLineToHump(columnInfo.getName().toLowerCase(), false);
             final String propertyValue = "#{" + prefix + propertyName + ",jdbcType=" + MyBatisJdbcTypeEnum.instance(columnInfo.getType()) + "}";
 
             if ((sb.length() + propertyValue.length()) / contentLength > 0) {

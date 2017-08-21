@@ -38,7 +38,7 @@ public final class SourceGenerator {
     /**
      * mysql search table structrue sql.
      */
-    private static final String MYSQL_SQL_TEMPLATE = "SELECT lower(t.COLUMN_NAME),upper(t.DATA_TYPE),t.COLUMN_COMMENT,upper(t.COLUMN_KEY) FROM information_schema.COLUMNS t WHERE t.TABLE_NAME = '$tableName' AND t.TABLE_SCHEMA = '$tableSchema' ORDER BY t.ORDINAL_POSITION";
+    private static final String MYSQL_SQL_TEMPLATE = "SELECT t.COLUMN_NAME,upper(t.DATA_TYPE),t.COLUMN_COMMENT,upper(t.COLUMN_KEY) FROM information_schema.COLUMNS t WHERE t.TABLE_NAME = '$tableName' AND t.TABLE_SCHEMA = '$tableSchema' ORDER BY t.ORDINAL_POSITION";
 
 
     /**
@@ -59,15 +59,15 @@ public final class SourceGenerator {
         param.setCommentsSince("JDK 1.7.0");
         param.setCommentsVersion("1.0");
         // domian files dirctory
-//        param.setDomainDirectory("C:\\newWork\\metal-quotation\\metal-quotation-domain\\src\\main\\java\\com\\le\\jr\\metal\\quotation\\domain\\po\\gold");
+//        param.setDomainDirectory("C:\\fumin\\fm-biz\\biz-dao\\src\\main\\java\\com\\fm\\creditLoan\\biz\\domain");
         // domain classes package
-        param.setDomainPackage("com.le.jr.metal.quotation.domain.po.gold");
+        param.setDomainPackage("com.fm.creditLoan.biz.domain");
         // domain classname will be item.className+param.domainSuffix
         param.setDomainSuffix("PO");
         // mybatis mapper.xmls dirctory
-        param.setMapperDirectory("C:\\newWork\\metal-quotation\\metal-quotation-web\\src\\main\\resources\\mapper");
-//        param.setDaoDirectory("C:\\newWork\\metal-quotation\\metal-quotation-dao\\src\\main\\java\\com\\le\\jr\\metal\\quotation\\dao");
-        param.setDaoPackage("com.le.jr.metal.quotation.dao");
+        param.setMapperDirectory("C:\\fumin\\fm-biz\\biz-dao\\src\\main\\resources\\mybatis\\biz");
+//        param.setDaoDirectory("C:\\fumin\\fm-biz\\biz-dao\\src\\main\\java\\com\\fm\\creditLoan\\biz\\dao");
+        param.setDaoPackage("com.fm.creditLoan.biz.dao");
         // is cover ori file's content
         param.setCoverFile(false);
 
@@ -103,9 +103,9 @@ public final class SourceGenerator {
 //        itemList.add(table7);
 
         GenerateSourceParamItem table8 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-                "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-                "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_k", "metal_quotation",
-                "GoldK", "黄金交易相关K线数据");
+                "jdbc:mysql://106.14.7.190:3306/",
+                "root", "Fmyh123!@#", "ACCT_BIZ_PAY_ORDER", "fm_lefinance_creditLoan_dev",
+                "PayOrder", "支付单表");
         itemList.add(table8);
 //        GenerateSourceParamItem table9 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
 //            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
@@ -116,6 +116,8 @@ public final class SourceGenerator {
         param.setItems(itemList);
 
         exec(param);
+
+
     }
 
     /**
