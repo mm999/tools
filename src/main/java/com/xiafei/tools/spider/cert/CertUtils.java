@@ -8,7 +8,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 /**
- * <P>Description: 证书安装工具， unable to find valid certification path to requested target异常解决. </P>
+ * <P>Description: 证书安装工具， unable to find valid certification path to requested target异常解决.
+ *  运行main方法，出现等待提示按回车，后在项目根目录下找到文件jssecacerts，复制到jdk根目录/jre/lib/security文件夹下即可</P>
  * <P>CALLED BY:   齐霞飞 </P>
  * <P>UPDATE BY:   齐霞飞 </P>
  * <P>CREATE DATE: 2017/8/13</P>
@@ -21,6 +22,7 @@ import java.security.cert.X509Certificate;
 public final class CertUtils {
 
     public static void main(String[] args) throws Exception {
+
         installCert("www.sge.com.cn", null, null);
     }
 

@@ -222,7 +222,7 @@ public final class BeanUtils {
             if (kV.length != 2 || StringUtils.isBlank(kV[0]) || StringUtils.isBlank(kV[1])) {
                 continue;
             }
-            final String key = lowerKey ? kV[0].toLowerCase() : kV[0];
+            final String key = lowerKey ? kV[0].trim().toLowerCase() : kV[0].trim();
             map.put(key, kV[1]);
         }
         return map;

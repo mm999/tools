@@ -44,8 +44,8 @@ public class KGenerator {
         final List<String> dataList = getKDataList();
         final List<DayK> dayKList = convertStrKToObjK(dataList);
         // 生成日K
-        generalDayK(dayKList);
-        // 生成周K
+//        generalDayK(dayKList);
+        // 生成周K和月K
         generalWeekMonthK(dayKList);
     }
 
