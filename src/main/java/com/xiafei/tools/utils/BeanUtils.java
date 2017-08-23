@@ -41,9 +41,9 @@ public final class BeanUtils {
      * @throws ReflectiveOperationException Java反射类异常
      * @throws IntrospectionException       Java内省类异常
      */
-    public static <T> T parseKeyValueToBean(final String keyValueStr, final String separator,
-                                            final boolean strictMatch, final Class<T> beanClass,
-                                            final String... specialNames)
+    public static <T> T parseKeyValueStrToBean(final String keyValueStr, final String separator,
+                                               final boolean strictMatch, final Class<T> beanClass,
+                                               final String... specialNames)
             throws ReflectiveOperationException, IntrospectionException {
 
         if (StringUtils.isBlank(keyValueStr) || StringUtils.isBlank(separator) || beanClass == null) {
@@ -65,7 +65,7 @@ public final class BeanUtils {
      *
      * @param map          key代表字段名，value代表字段值的map
      * @param beanClass    要转换成的对象class
-     * @param strictMatch  是否字段名严格匹配
+     * @param strictMatch  是否字段名严格匹配（大小写）
      * @param <T>          对象泛型
      * @param specialNames 特殊的属性名，不符合内省机制默认的首字母小写
      * @return 封装好的对象
@@ -165,32 +165,38 @@ public final class BeanUtils {
      */
     public static Object parseStringToType(final String source, final Class<?> clazz) {
         final Object result;
-        if (clazz == null || source == null) {
-            result = null;
-        } else if (clazz == Date.class) {
-            result = DateUtils.parse(source);
-        } else if (clazz == BigDecimal.class) {
-            result = new BigDecimal(source);
-        } else if (clazz == Character.class) {
-            result = source.charAt(0);
-        } else if (clazz == Byte.class) {
-            result = Byte.parseByte(source);
-        } else if (clazz == Short.class) {
-            result = Short.parseShort(source);
-        } else if (clazz == Integer.class) {
-            result = Integer.parseInt(source);
-        } else if (clazz == Long.class) {
-            result = Long.parseLong(source);
-        } else if (clazz == Float.class) {
-            result = Float.parseFloat(source);
-        } else if (clazz == Double.class) {
-            result = Double.parseDouble(source);
-        } else if (clazz == Boolean.class) {
-            result = Boolean.parseBoolean(source);
-        } else {
+        try{
+            if (clazz == null || source == null || source.equals("null")) {
+                result = null;
+            } else if (clazz == Date.class) {
+                result = DateUtils.parse(source);
+            } else if (clazz == BigDecimal.class) {
+                result = new BigDecimal(source);
+            } else if (clazz == Character.class) {
+                result = source.charAt(0);
+            } else if (clazz == Byte.class) {
+                result = Byte.parseByte(source);
+            } else if (clazz == Short.class) {
+                result = Short.parseShort(source);
+            } else if (clazz == Integer.class) {
+                result = Integer.parseInt(source);
+            } else if (clazz == Long.class) {
+                result = Long.parseLong(source);
+            } else if (clazz == Float.class) {
+                result = Float.parseFloat(source);
+            } else if (clazz == Double.class) {
+                result = Double.parseDouble(source);
+            } else if (clazz == Boolean.class) {
+                result = Boolean.parseBoolean(source);
+            } else {
 
-            result = source;
+                result = source;
+            }
+        }catch (NumberFormatException e){
+            System.out.println("格式化异常，字符="+source);
+            throw e;
         }
+
         return result;
     }
 

@@ -27,13 +27,6 @@ public abstract class AbstractPost {
     private static final int FORM = 0;
     private static final int JSON = 1;
 
-    public static void main(String[] args) {
-        AbstractPost post = new PostJsonToMetalQuotation();
-//        System.out.println(post.httpPostJson());
-        System.out.println(post.httpPostForm());
-//
-    }
-
     public String httpPostForm() {
         return httpPost(FORM);
     }

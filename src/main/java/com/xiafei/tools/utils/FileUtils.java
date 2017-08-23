@@ -1,6 +1,10 @@
 package com.xiafei.tools.utils;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Date;
 import java.util.List;
 
@@ -27,7 +31,7 @@ public final class FileUtils {
      * @param content   要输出的内容列表，列表每一个字符串代表文件一行
      * @param isNewFile 是否替换原文件，若为否，则在源文件上追加（若存在）
      */
-    public static void outPutToFileByLine(final String filePath, final List<String> content, final boolean isNewFile) {
+    public static void outPutToFileByLine(final String filePath, final List<?> content, final boolean isNewFile) {
         if (filePath == null || content == null || content.isEmpty()) {
             return;
         }
@@ -53,8 +57,8 @@ public final class FileUtils {
                     bufferedWriter.write("#########################################################");
                     bufferedWriter.newLine();
                 }
-                for (String line : content) {
-                    bufferedWriter.write(line);
+                for (Object line : content) {
+                    bufferedWriter.write(line == null ? "" : line.toString());
                     bufferedWriter.newLine();
                 }
                 bufferedWriter.flush();
