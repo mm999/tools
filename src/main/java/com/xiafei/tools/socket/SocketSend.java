@@ -1,6 +1,5 @@
 package com.xiafei.tools.socket;
 
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -14,7 +13,7 @@ import java.net.Socket;
  * <P>UPDATE DATE: 2017/8/18</P>
  *
  * @author qixiafei
- * @version 0.0.3-SNAPSHOT
+ * @version 1.0
  * @since java 1.7.0
  */
 public class SocketSend {

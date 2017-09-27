@@ -1,7 +1,19 @@
 package com.xiafei.tools.spider.cert;
 
-import javax.net.ssl.*;
-import java.io.*;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.cert.CertificateException;
@@ -9,21 +21,26 @@ import java.security.cert.X509Certificate;
 
 /**
  * <P>Description: 证书安装工具， unable to find valid certification path to requested target异常解决.
- *  运行main方法，出现等待提示按回车，后在项目根目录下找到文件jssecacerts，复制到jdk根目录/jre/lib/security文件夹下即可</P>
+ * 运行main方法，出现等待提示按回车，后在项目根目录下找到文件jssecacerts，复制到jdk根目录/jre/lib/security文件夹下即可</P>
  * <P>CALLED BY:   齐霞飞 </P>
  * <P>UPDATE BY:   齐霞飞 </P>
  * <P>CREATE DATE: 2017/8/13</P>
  * <P>UPDATE DATE: 2017/8/13</P>
  *
  * @author qixiafei
- * @version 0.0.1-SNAPSHOT
+ * @version 1.0
  * @since java 1.7.0
  */
 public final class CertUtils {
 
+    /**
+     * 要安装ssl证书的网址域名或ip，不需要包含http或https和后缀.
+     */
+    private static final String DOMAIN_OR_IP = "www.sge.com.cn";
+
     public static void main(String[] args) throws Exception {
 
-        installCert("www.sge.com.cn", null, null);
+        installCert(DOMAIN_OR_IP, null, null);
     }
 
     /**
@@ -46,7 +63,7 @@ public final class CertUtils {
         File file = new File("jssecacerts");
         if (!file.isFile()) {
             File dir = new File(System.getProperty("java.home") + SEPARATOR + "lib"
-                + SEPARATOR + "security");
+                    + SEPARATOR + "security");
             file = new File(dir, "jssecacerts");
             if (!file.isFile()) {
                 file = new File(dir, "cacerts");
@@ -61,18 +78,18 @@ public final class CertUtils {
 
         SSLContext context = SSLContext.getInstance("TLS");
         TrustManagerFactory tmf = TrustManagerFactory
-            .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                .getInstance(TrustManagerFactory.getDefaultAlgorithm());
         tmf.init(ks);
 
         X509TrustManager defaultTrustManager = (X509TrustManager) tmf
-            .getTrustManagers()[0];
+                .getTrustManagers()[0];
         SavingTrustManager tm = new SavingTrustManager(defaultTrustManager);
         context.init(null, new TrustManager[]{tm}, null);
 
         SSLSocketFactory factory = context.getSocketFactory();
 
         System.out
-            .println("Opening connection to " + host + ":" + port + "...");
+                .println("Opening connection to " + host + ":" + port + "...");
         SSLSocket socket = (SSLSocket) factory.createSocket(host, port);
         socket.setSoTimeout(10000);
 
@@ -94,7 +111,7 @@ public final class CertUtils {
         }
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(
-            System.in));
+                System.in));
 
         System.out.println();
         System.out.println("Server sent " + chain.length + " certificate(s):");
@@ -104,7 +121,7 @@ public final class CertUtils {
         for (int i = 0; i < chain.length; i++) {
             X509Certificate cert = chain[i];
             System.out.println(" " + (i + 1) + " Subject "
-                + cert.getSubjectDN());
+                    + cert.getSubjectDN());
             System.out.println("   Issuer  " + cert.getIssuerDN());
             sha1.update(cert.getEncoded());
             System.out.println("   sha1    " + toHexString(sha1.digest()));
@@ -114,7 +131,7 @@ public final class CertUtils {
         }
 
         System.out
-            .println("Enter certificate to add to trusted keystore or 'q' to quit: [1]");
+                .println("Enter certificate to add to trusted keystore or 'q' to quit: [1]");
         String line = reader.readLine().trim();
         int k;
         try {
@@ -136,8 +153,8 @@ public final class CertUtils {
         System.out.println(cert);
         System.out.println();
         System.out
-            .println("Added certificate to keystore 'jssecacerts' using alias '"
-                + alias + "'");
+                .println("Added certificate to keystore 'jssecacerts' using alias '"
+                        + alias + "'");
     }
 
     private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();
@@ -167,12 +184,12 @@ public final class CertUtils {
         }
 
         public void checkClientTrusted(X509Certificate[] chain, String authType)
-            throws CertificateException {
+                throws CertificateException {
             throw new UnsupportedOperationException();
         }
 
         public void checkServerTrusted(X509Certificate[] chain, String authType)
-            throws CertificateException {
+                throws CertificateException {
             this.chain = chain;
             tm.checkServerTrusted(chain, authType);
         }

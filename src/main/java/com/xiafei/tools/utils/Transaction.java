@@ -16,7 +16,7 @@ import javax.annotation.Resource;
  * <P>UPDATE DATE: 2017/6/28</P>
  *
  * @author qixiafei
- * @version 0.0.3-SNAPSHOT
+ * @version 1.0
  * @since java 1.7.0
  */
 @Component
@@ -52,7 +52,7 @@ public class Transaction {
      * <P>UPDATE DATE: 2017/6/28</P>
      *
      * @author qixiafei
-     * @version 0.0.3-SNAPSHOT
+     * @version 1.0
      * @since java 1.7.0
      */
     public interface TransTask {

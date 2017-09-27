@@ -12,10 +12,10 @@ import java.util.List;
  * <P>UPDATE DATE: 2017/7/14</P>
  *
  * @author qixiafei
- * @version 0.0.3-SNAPSHOT
+ * @version 1.0
  * @since java 1.7.0
  */
-public enum MyBatisJdbcTypeEnum {
+public enum JdbcTypeMyBatisEnum {
 
     ARRAY("ARRAY", Collections.EMPTY_LIST),
     BIGINT("BIGINT", new ArrayList<String>() {
@@ -152,16 +152,16 @@ public enum MyBatisJdbcTypeEnum {
      */
     public final List<String> jdbcTypeList;
 
-    MyBatisJdbcTypeEnum(final String mybatisType, final List<String> jdbcTypeList) {
+    JdbcTypeMyBatisEnum(final String mybatisType, final List<String> jdbcTypeList) {
         this.mybatisType = mybatisType;
         this.jdbcTypeList = jdbcTypeList;
     }
 
-    public static MyBatisJdbcTypeEnum instance(final String jdbcType) {
+    public static JdbcTypeMyBatisEnum instance(final String jdbcType) {
         if (jdbcType == null) {
             return null;
         }
-        for (MyBatisJdbcTypeEnum e : values()) {
+        for (JdbcTypeMyBatisEnum e : values()) {
             if (e.jdbcTypeList.contains(jdbcType)) {
                 return e;
             }

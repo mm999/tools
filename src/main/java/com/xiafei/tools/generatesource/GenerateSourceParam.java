@@ -12,7 +12,7 @@ import java.util.List;
  * <P>UPDATE DATE: 2017年7月13日</P>
  *
  * @author qixiafei
- * @version 0.0.1-SNAPSHOT
+ * @version 1.0
  * @since java 1.7.0
  */
 public class GenerateSourceParam {

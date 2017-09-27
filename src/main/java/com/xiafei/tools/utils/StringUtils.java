@@ -10,7 +10,7 @@ import com.xiafei.tools.collections.Queue;
  * <P>UPDATE DATE: ${date}</P>
  *
  * @author 齐霞飞
- * @version 0.0.1-SNAPSHOT
+ * @version 1.0
  * @since java 1.7.0
  */
 public final class StringUtils extends org.apache.commons.lang.StringUtils {

@@ -8,7 +8,7 @@ package com.xiafei.tools.utils;
  * <P>UPDATE DATE: 2017/6/29</P>
  *
  * @author qixiafei
- * @version 0.0.1-SNAPSHOT
+ * @version 1.0
  * @since java 1.7.0
  */
 public final class NumberUtils {

@@ -25,7 +25,7 @@ import java.util.List;
  * <P>UPDATE DATE: 2017年7月13日</P>
  *
  * @author qixiafei
- * @version 0.0.1-SNAPSHOT
+ * @version 1.0
  * @since java 1.7.0
  */
 public final class SourceGenerator {
@@ -59,15 +59,15 @@ public final class SourceGenerator {
         param.setCommentsSince("JDK 1.7.0");
         param.setCommentsVersion("1.0");
         // domian files dirctory
-//        param.setDomainDirectory("C:\\fumin\\fm-biz\\biz-dao\\src\\main\\java\\com\\fm\\creditLoan\\biz\\domain");
+        param.setDomainDirectory("C:\\fumin\\fm-mercury\\mercury-dao\\src\\main\\java\\com\\leFinance\\creditLoan\\mercury\\domain");
         // domain classes package
-        param.setDomainPackage("com.fm.creditLoan.biz.domain");
+        param.setDomainPackage("com.leFinance.creditLoan.mercury.domain");
         // domain classname will be item.className+param.domainSuffix
         param.setDomainSuffix("PO");
         // mybatis mapper.xmls dirctory
-        param.setMapperDirectory("C:\\fumin\\fm-biz\\biz-dao\\src\\main\\resources\\mybatis\\biz");
-//        param.setDaoDirectory("C:\\fumin\\fm-biz\\biz-dao\\src\\main\\java\\com\\fm\\creditLoan\\biz\\dao");
-        param.setDaoPackage("com.fm.creditLoan.biz.dao");
+        param.setMapperDirectory("C:\\fumin\\fm-mercury\\mercury-dao\\src\\main\\resources\\mybatis\\mercury");
+//        param.setDaoDirectory("C:\\fumin\\fm-mercury\\mercury-dao\\src\\main\\java\\com\\leFinance\\creditLoan\\mercury\\dao");
+        param.setDaoPackage("com.leFinance.creditLoan.mercury.dao");
         // is cover ori file's content
         param.setCoverFile(false);
 
@@ -97,15 +97,15 @@ public final class SourceGenerator {
 //        itemList.add(table6);
 
 //        GenerateSourceParamItem table7 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-//            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-//            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_defer_quotation", "metal_quotation",
-//            "GoldDeferQuotation", "黄金交易二级系统延期行情，数据保留一日后删除");
+//            "jdbc:mysql://10.60.56.178:3306/",
+//            "root", "root", "ACCT_MERCURY_REPAYMENT_APPLY", "fm_lefinance_creditLoan_dev2",
+//            "RepaymentApply", "借款还款申请表");
 //        itemList.add(table7);
 
         GenerateSourceParamItem table8 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-                "jdbc:mysql://106.14.7.190:3306/",
-                "root", "Fmyh123!@#", "ACCT_BIZ_PAY_ORDER", "fm_lefinance_creditLoan_dev",
-                "PayOrder", "支付单表");
+                "jdbc:mysql://10.60.56.178:3306/",
+                "root", "root", "ACCT_MERCURY_REPAYMENT_RECORD", "fm_lefinance_creditLoan_dev2",
+                "RepaymentRecord", "综合信贷 - 借款还款记录表");
         itemList.add(table8);
 //        GenerateSourceParamItem table9 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
 //            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",

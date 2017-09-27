@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * <P>UPDATE DATE: 2017/7/10</P>
  *
  * @author qixiafei
- * @version 0.0.1-SNAPSHOT
+ * @version 1.0
  * @since java 1.7.0
  */
 public final class RandomUtils extends Random {

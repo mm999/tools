@@ -13,7 +13,7 @@ import java.util.Objects;
  *
  * @param <T> 缓存对象类型
  * @author qixiafei
- * @version 0.0.1-SNAPSHOT
+ * @version 1.0
  * @since java 1.7.0
  */
 public class ProgramCache<T> {

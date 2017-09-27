@@ -8,7 +8,7 @@ package com.xiafei.tools.generatesource.enums;
  * <P>UPDATE DATE: 2017/7/13</P>
  *
  * @author qixiafei
- * @version 0.0.3-SNAPSHOT
+ * @version 1.0
  * @since java 1.7.0
  */
 public enum DataBaseTypeEnum {

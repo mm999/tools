@@ -8,14 +8,14 @@ import org.dom4j.Element;
 import java.util.List;
 
 /**
- * <P>Description:  . </P>
+ * <P>Description: Sax解析Xml文档例子. </P>
  * <P>CALLED BY:   齐霞飞 </P>
  * <P>UPDATE BY:   齐霞飞 </P>
  * <P>CREATE DATE: 2017/8/18</P>
  * <P>UPDATE DATE: 2017/8/18</P>
  *
  * @author qixiafei
- * @version 0.0.3-SNAPSHOT
+ * @version 1.0
  * @since java 1.7.0
  */
 public class SaxDom {
