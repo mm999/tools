@@ -58,60 +58,36 @@ public final class SourceGenerator {
         param.setCommentsUser("齐霞飞");
         param.setCommentsSince("JDK 1.7.0");
         param.setCommentsVersion("1.0");
-        // domian files dirctory
-        param.setDomainDirectory("C:\\fumin\\fm-mercury\\mercury-dao\\src\\main\\java\\com\\leFinance\\creditLoan\\mercury\\domain");
-        // domain classes package
-        param.setDomainPackage("com.leFinance.creditLoan.mercury.domain");
-        // domain classname will be item.className+param.domainSuffix
+        param.setDomainDirectory("C:\\newWork\\cash-order\\cash-order-domain\\src\\main\\java\\com\\le\\jr\\cash\\order\\domain");
+        param.setDomainPackage("com.le.jr.cash.order.domain");
         param.setDomainSuffix("PO");
-        // mybatis mapper.xmls dirctory
-        param.setMapperDirectory("C:\\fumin\\fm-mercury\\mercury-dao\\src\\main\\resources\\mybatis\\mercury");
-//        param.setDaoDirectory("C:\\fumin\\fm-mercury\\mercury-dao\\src\\main\\java\\com\\leFinance\\creditLoan\\mercury\\dao");
-        param.setDaoPackage("com.leFinance.creditLoan.mercury.dao");
+        param.setMapperDirectory("C:\\newWork\\cash-order\\cash-order-web\\src\\main\\resources\\mybatis\\mapper");
+        param.setDaoDirectory("C:\\newWork\\cash-order\\cash-order-dao\\src\\main\\java\\com\\le\\jr\\cash\\order\\dao");
+        param.setDaoPackage("com.le.jr.cash.order.dao");
         // is cover ori file's content
         param.setCoverFile(false);
 
+        String jdbcUrl = "jdbc:mysql://10.60.58.247:3306/cash_loan?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull";
+        String dbUser ="order_t_w";
+        String pwd="NTk3NjIyYmJmNDY";
+
         List<GenerateSourceParamItem> itemList = new ArrayList<>();
-//        GenerateSourceParamItem table1 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-//            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-//            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_defer_delivery_quotation", "metal_quotation",
-//            "GoldDeferDeliveryQuotation", "黄金交易二级系统延期交割行情实时信息，数据保留一日后删除");
-//        itemList.add(table1);
-//
-//        GenerateSourceParamItem table2 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-//            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-//            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_state", "metal_quotation",
-//            "GoldState", "黄金交易二级系统合约状态");
-//        itemList.add(table2);
-//
-//        GenerateSourceParamItem table5 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-//            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-//            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_spot_quotation", "metal_quotation",
-//            "GoldSpotQuotation", "黄金交易二级系统现货行情，数据保留一日后删除");
-//        itemList.add(table5);
-//
-//        GenerateSourceParamItem table6 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-//            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-//            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_forward_quotation", "metal_quotation",
-//            "GoldForwardQuotation", "黄金交易二级系统远期行情，数据保留一日后删除");
-//        itemList.add(table6);
 
-//        GenerateSourceParamItem table7 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-//            "jdbc:mysql://10.60.56.178:3306/",
-//            "root", "root", "ACCT_MERCURY_REPAYMENT_APPLY", "fm_lefinance_creditLoan_dev2",
-//            "RepaymentApply", "借款还款申请表");
-//        itemList.add(table7);
+        GenerateSourceParamItem table1 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "cash_pay_order_info", "cash_loan",
+            "PayOrderInfo", "支付单表");
+        itemList.add(table1);
 
-        GenerateSourceParamItem table8 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-                "jdbc:mysql://10.60.56.178:3306/",
-                "root", "root", "ACCT_MERCURY_REPAYMENT_RECORD", "fm_lefinance_creditLoan_dev2",
-                "RepaymentRecord", "综合信贷 - 借款还款记录表");
-        itemList.add(table8);
-//        GenerateSourceParamItem table9 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,
-//            "jdbc:mysql://m1-mysql.lejr-test.local:3306/",
-//            "order_t_w", "NTk3NjIyYmJmNDY", "metal_gold_time", "metal_quotation",
-//            "GoldTime", "黄金交易相关分时数据");
-//        itemList.add(table9);
+        GenerateSourceParamItem table2 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "cash_loan_order_info", "cash_loan",
+            "LoanOrderInfo", "借款单表");
+        itemList.add(table2);
+
+        GenerateSourceParamItem table3 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "cash_repay_order_info", "cash_loan",
+            "RepayOrderInfo", "还款单表");
+        itemList.add(table3);
+
 
         param.setItems(itemList);
 
