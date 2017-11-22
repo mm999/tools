@@ -16,15 +16,16 @@ import javax.annotation.Resource;
 @Configuration
 public class RocketMqPushConsumerConfig {
 
+
     @Resource
     private MqListenerDispatcher mqListenerDispatcher;
-    @Bean(name = "tradeStatusCallbackMQConsumer", initMethod = "start", destroyMethod = "shutdown")
-    public DefaultMQPushConsumer defaultMqConsumer(@Value("${rocket.mq.mercury.topic}") String topic,
-                                                   @Value("${rocket.mq.mercury.tag}") String tag)
-            throws MQClientException {
 
-        return registeConsumer(topic, tag, mqListenerDispatcher);
-    }
+//    @Bean(name = "consumerBeanName", initMethod = "start", destroyMethod = "shutdown")
+//    public DefaultMQPushConsumer defaultMqConsumer( String topic, String tag表达式)
+//            throws MQClientException {
+//
+//        return registeConsumer(topic, tag, mqListenerDispatcher);
+//    }
 
     /**
      * 注册消费者.

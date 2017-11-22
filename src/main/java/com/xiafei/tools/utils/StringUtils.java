@@ -316,4 +316,43 @@ public final class StringUtils extends org.apache.commons.lang.StringUtils {
         return false;
     }
 
+
+    /**
+     * 将二进制转换成16进制的字符串.
+     *
+     * @param buf 字节流
+     * @return 16进制的字符串
+     */
+    public static String bytes2HexStr(final byte buf[]) {
+        if (buf == null) {
+            return null;
+        }
+        final StringBuilder sb = new StringBuilder();
+        for (byte aBuf : buf) {
+            String hex = Integer.toHexString(aBuf & 0xFF);
+            if (hex.length() == 1) {
+                hex = '0' + hex;
+            }
+            sb.append(hex.toUpperCase());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 将16进制字符串转换为字节流.
+     *
+     * @param hexStr 16进制字符串
+     * @return 字节流
+     */
+    public static byte[] hexStr2Bytes(final String hexStr) {
+        if (hexStr == null || hexStr.length() == 0)
+            return null;
+        byte[] result = new byte[hexStr.length() >>> 1];
+        for (int i = 0; i < hexStr.length() / 2; i++) {
+            int high = Integer.parseInt(hexStr.substring(i * 2, i * 2 + 1), 16);
+            int low = Integer.parseInt(hexStr.substring(i * 2 + 1, i * 2 + 2), 16);
+            result[i] = (byte) (high * 16 + low);
+        }
+        return result;
+    }
 }
