@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * <P>Description: 编程式缓存。 </P>
+ * <P>Description: 编程式缓存，map结构。 </P>
  * <P>CALLED BY:   齐霞飞 </P>
  * <P>UPDATE BY:   齐霞飞 </P>
  * <P>CREATE DATE: 2017/8/10</P>
