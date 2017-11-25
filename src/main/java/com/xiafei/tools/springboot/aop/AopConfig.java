@@ -1,9 +1,6 @@
 package com.xiafei.tools.springboot.aop;
 
-import com.virgo.finance.fm.common.data.Code;
-import com.virgo.finance.fm.common.data.Messages;
-import com.virgo.finance.fm.common.exceptions.BizException;
-import com.virgo.finance.fm.common.util.JSONUtil;
+import com.xiafei.tools.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -33,9 +30,9 @@ public class AopConfig {
     /**
      * 定义拦截规则：拦截web.api.impl包下面的所有类返回值是Message并且不含有IgnoreAop注解的public方法.
      */
-    @Pointcut("execution(!@com.xiafei.tools.springboot.aop.IgnoreAop public " +
-            " com.virgo.finance.fm.common.data.Message " +
-            "com.virgo.finance.fm.settlement.web.api.impl.*.*(..) )")
+//    @Pointcut("execution(!@com.xiafei.tools.springboot.aop.IgnoreAop public " +
+//            " com.virgo.finance.fm.common.data.Message " +
+//            "com.virgo.finance.fm.settlement.web.api.impl.*.*(..) )")
     public void apiImplPointcut() {
     }
 
@@ -45,22 +42,23 @@ public class AopConfig {
      * @param point 切点信息对象
      * @return 接口返回内容
      */
-    @Around("apiImplPointcut()")
+//    @Around("apiImplPointcut()")
     public Object interceptor(final ProceedingJoinPoint point) {
         final MethodSignature signature = (MethodSignature) point.getSignature();
         final Method method = signature.getMethod(); //获取被拦截的方法
         final String methodName = method.getName(); //获取被拦截的方法名
         final Object[] args = point.getArgs();
-        log.info("{}.{}(),param={}", point.getTarget().getClass().getName(), methodName, JSONUtil.toJson(args));
+        log.info("{}.{}(),param={}", point.getTarget().getClass().getName(), methodName, JsonUtils.toJson(args));
 
-        // 一切正常的情况下，继续执行被拦截的方法
-        try {
-            return point.proceed();
-        } catch (BizException e) {
-            return Messages.failed(e.getCode(), e.getMessage());
-        } catch (Throwable throwable) {
-            log.error("{},uncaughtException,param={}", methodName, JSONUtil.toJson(args), throwable);
-            return Messages.failed(Code.SYSTEMEXCEPTION.getValue(), throwable.getMessage());
-        }
+//        // 一切正常的情况下，继续执行被拦截的方法
+//        try {
+//            return point.proceed();
+//        } catch (BizException e) {
+//            return Messages.failed(e.getCode(), e.getMessage());
+//        } catch (Throwable throwable) {
+//            log.error("{},uncaughtException,param={}", methodName, JSONUtil.toJson(args), throwable);
+//            return Messages.failed(Code.SYSTEMEXCEPTION.getValue(), throwable.getMessage());
+//        }
+        return null;
     }
 }

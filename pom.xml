@@ -15,7 +15,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>3.1.4.RELEASE</spring.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -30,6 +29,12 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- google生成条形码、二维码工具包 -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.3.0</version>
+        </dependency>
         <dependency>
             <groupId>com.alibaba.rocketmq</groupId>
             <artifactId>rocketmq-client</artifactId>
