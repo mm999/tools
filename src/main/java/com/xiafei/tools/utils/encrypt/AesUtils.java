@@ -1,16 +1,15 @@
 package com.xiafei.tools.utils.encrypt;
 
-import com.xiafei.tools.utils.StringUtils;
+import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
@@ -41,10 +40,20 @@ public class AesUtils {
     private static final String CHARSET = "utf-8";
 
     /**
+     * 产生随机数的种子.
+     */
+    private static final String SEED = "SHA1PRNG";
+
+    /**
      * 工具类不允许实例化.
      */
     private AesUtils() {
 
+    }
+
+    public static void main(String[] args) {
+//        System.out.println(getEncrypted("liang131401234560123456789012345", "d85975de95974ebda7d34393218904fa"));
+//        System.out.println(getDecrypted("iZeIsBY2Fc/W/hIKUliRhuWBIpeHrwz4mk+IDcWW4hp+JjXQYot4XpVfblqeRrFV", "d85975de95974ebda7d34393218904fa"));
     }
 
     /**
@@ -55,7 +64,7 @@ public class AesUtils {
      * @return 使用密钥加密的字符串
      */
     public static String getEncrypted(final String source, final String key) {
-        return StringUtils.bytes2HexStr(encrypt(source, key));
+        return Base64.encodeBase64String(encrypt(source, key));
     }
 
     /**
@@ -67,13 +76,12 @@ public class AesUtils {
      */
     public static String getDecrypted(final String source, final String key) {
         try {
-            return new String(decrypt(StringUtils.hexStr2Bytes(source), key), CHARSET);
+            return new String(decrypt(Base64.decodeBase64(source), key), CHARSET);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return null;
         }
     }
-
 
 
     /**
@@ -88,23 +96,12 @@ public class AesUtils {
             return null;
         }
         try {
-            // 创建AES的Key生产者
-            final KeyGenerator kgen = KeyGenerator.getInstance(ALGORITHM_NAME);
-            // 利用用户密码作为随机数初始化出key生产者,SecureRandom是生成安全随机数序列，
-            // password.getBytes()是种子，只要种子相同，序列就一样，所以解密只要有password就行
-            kgen.init(KEY_BITS, new SecureRandom(key.getBytes(CHARSET)));
-            // 跟据用户密码，生成一个密钥
-            final SecretKey secretKey = kgen.generateKey();
-            // 返回基本编码格式的密钥，如果此密钥不支持编码，则返回null
-            final byte[] enCodeFormat = secretKey.getEncoded();
-            // 转换为AES专用密钥
-            final SecretKeySpec secretKeySpec = new SecretKeySpec(enCodeFormat, ALGORITHM_NAME);
-            // 创建密码器
+            final SecureRandom sr = new SecureRandom();
+            final Key secureKey = getKey(key);
             final Cipher cipher = Cipher.getInstance(ALGORITHM_NAME);
-            // 初始化为加密模式的密码器
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
-            // 加密并返回结果
+            cipher.init(Cipher.ENCRYPT_MODE, secureKey, sr);
             return cipher.doFinal(source.getBytes(CHARSET));
+
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | UnsupportedEncodingException
                 | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace();
@@ -124,18 +121,30 @@ public class AesUtils {
             return null;
         }
         try {
-            final KeyGenerator kgen = KeyGenerator.getInstance(ALGORITHM_NAME);
-            kgen.init(KEY_BITS, new SecureRandom(key.getBytes(CHARSET)));
-            final SecretKey secretKey = kgen.generateKey();
-            final byte[] enCodeFormat = secretKey.getEncoded();
-            final SecretKeySpec secretKeySpec = new SecretKeySpec(enCodeFormat, ALGORITHM_NAME);
+            final Key secretKey = getKey(key);
             final Cipher cipher = Cipher.getInstance(ALGORITHM_NAME);// 创建密码器
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);// 初始化
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, new SecureRandom());// 初始化
             return cipher.doFinal(source); // 解密
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException
-                | BadPaddingException | UnsupportedEncodingException e) {
+                | BadPaddingException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+
+    private static Key getKey(String strKey) {
+        try {
+            if (strKey == null) {
+                strKey = "";
+            }
+            KeyGenerator _generator = KeyGenerator.getInstance(ALGORITHM_NAME);
+            SecureRandom secureRandom = SecureRandom.getInstance(SEED);
+            secureRandom.setSeed(strKey.getBytes(CHARSET));
+            _generator.init(128, secureRandom);
+            return _generator.generateKey();
+        } catch (Exception e) {
+            throw new RuntimeException(" 初始化密钥出现异常 ");
         }
     }
 
