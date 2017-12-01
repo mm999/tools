@@ -7,8 +7,10 @@ import com.alibaba.rocketmq.common.message.MessageExt;
 import com.xiafei.tools.exceptions.BizException;
 import com.xiafei.tools.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.ContextLoader;
 
@@ -31,7 +33,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-public class MqListenerDispatcher implements MessageListenerConcurrently, InitializingBean {
+public class MqListenerDispatcher implements MessageListenerConcurrently, ApplicationContextAware {
 
     /**
      * 所有的mq消费者beanMap.
@@ -81,8 +83,7 @@ public class MqListenerDispatcher implements MessageListenerConcurrently, Initia
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-        ApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
-        listenerMap = context.getBeansOfType(MqListener.class);
+    public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
+        listenerMap = applicationContext.getBeansOfType(MqListener.class);
     }
 }

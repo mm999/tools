@@ -30,7 +30,7 @@ public class DayKTest {
         final List<String> pageKList = new ArrayList<>();
         try (
                 BufferedReader reader = new BufferedReader(
-                        new FileReader("E:\\self-study\\tools\\src\\main\\java\\com\\xiafei\\tools\\spider\\metalquotation\\dayk.txt"));
+                        new FileReader("E:\\self-study\\tools\\src\\mail\\java\\com\\xiafei\\tools\\spider\\metalquotation\\dayk.txt"));
         ) {
             String line = reader.readLine();
             String lastTimeDay = "0";

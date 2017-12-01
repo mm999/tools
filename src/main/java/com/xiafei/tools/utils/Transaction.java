@@ -19,7 +19,7 @@ import javax.annotation.Resource;
  * @version 1.0
  * @since java 1.7.0
  */
-@Component
+//@Component 没有数据库所以这里注掉
 public class Transaction {
     @Resource
     private PlatformTransactionManager transactionManager;

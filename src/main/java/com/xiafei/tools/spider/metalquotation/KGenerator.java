@@ -78,7 +78,7 @@ public class KGenerator {
             }
         }
 
-        FileUtils.outPutToFileByLine("E:\\self-study\\tools\\src\\main\\java\\com\\xiafei\\tools\\spider\\metalquotation\\dayKInsertSql.sql", kSqlList, true);
+        FileUtils.outPutToFileByLine("E:\\self-study\\tools\\src\\mail\\java\\com\\xiafei\\tools\\spider\\metalquotation\\dayKInsertSql.sql", kSqlList, true);
 
     }
 
@@ -159,7 +159,7 @@ public class KGenerator {
         for (DayK weekK : weekKList) {
             weekSqlList.add(getOneKSql(weekK, KLineTypeEnum.WEEK));
         }
-        FileUtils.outPutToFileByLine("E:\\self-study\\tools\\src\\main\\java\\com\\xiafei\\tools\\spider\\metalquotation\\weekKInsertSql.sql", weekSqlList, true);
+        FileUtils.outPutToFileByLine("E:\\self-study\\tools\\src\\mail\\java\\com\\xiafei\\tools\\spider\\metalquotation\\weekKInsertSql.sql", weekSqlList, true);
 
     }
 
@@ -209,7 +209,7 @@ public class KGenerator {
             monthKSqlList.add(getOneKSql(monthK, KLineTypeEnum.MONTH));
         }
 
-        FileUtils.outPutToFileByLine("E:\\self-study\\tools\\src\\main\\java\\com\\xiafei\\tools\\spider\\metalquotation\\monthKInsertSql.sql", monthKSqlList, true);
+        FileUtils.outPutToFileByLine("E:\\self-study\\tools\\src\\mail\\java\\com\\xiafei\\tools\\spider\\metalquotation\\monthKInsertSql.sql", monthKSqlList, true);
     }
 
     /**
@@ -320,7 +320,7 @@ public class KGenerator {
         final List<String> result = new ArrayList<>();
         try (
                 BufferedReader reader = new BufferedReader(
-                        new FileReader("E:\\self-study\\tools\\src\\main\\java\\com\\xiafei\\tools\\spider\\metalquotation\\dayk.txt"));
+                        new FileReader("E:\\self-study\\tools\\src\\mail\\java\\com\\xiafei\\tools\\spider\\metalquotation\\dayk.txt"));
         ) {
             String line = reader.readLine();
             while (line != null) {

@@ -14,8 +14,8 @@
 ==========================================================*/
 package com.xiafei.tools.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +32,8 @@ import java.util.ResourceBundle;
  * @version 1.0
  * @since java 1.7.0
  */
+@Slf4j
 public class BundleUtil {
-    public static final Logger LOG = Logger.getLogger(BundleUtil.class);
     private static final Map<String, BundleUtil> bundleMap = new HashMap<String, BundleUtil>();
     private ResourceBundle bundle;
 
@@ -55,7 +55,7 @@ public class BundleUtil {
         try {
             return bundle.getString(key);
         } catch (Exception e) {
-            LOG.warn(String.format("-----Can't find %s' value-----", key));
+            log.warn(String.format("-----Can't find %s' value-----", key));
             return "";
         }
     }
@@ -64,7 +64,7 @@ public class BundleUtil {
         try {
             return bundle.getString(key);
         } catch (Exception e) {
-            LOG.warn(String.format("-----Can't find %s' value-----", key));
+            log.warn(String.format("-----Can't find %s' value-----", key));
         }
         return defaultValue;
     }
@@ -73,7 +73,7 @@ public class BundleUtil {
         try {
             bundle = ResourceBundle.getBundle(name);
         } catch (Exception e) {
-            LOG.warn(String.format("Can't find file: %s.property", name));
+            log.warn(String.format("Can't find file: %s.properties", name));
         }
     }
 }

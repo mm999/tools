@@ -58,35 +58,35 @@ public final class SourceGenerator {
         param.setCommentsUser("齐霞飞");
         param.setCommentsSince("JDK 1.7.0");
         param.setCommentsVersion("1.0");
-        param.setDomainDirectory("C:\\newWork\\cash-order\\cash-order-domain\\src\\main\\java\\com\\le\\jr\\cash\\order\\domain");
-        param.setDomainPackage("com.le.jr.cash.order.domain");
+        param.setDomainDirectory("C:\\code\\local\\loan\\loan-mercury\\fm-mercury-dao\\src\\mail\\java\\com\\virgo\\finance\\fm\\mercury\\dao\\domain");
+        param.setDomainPackage("com.virgo.finance.fm.mercury.dao.domain");
         param.setDomainSuffix("PO");
-        param.setMapperDirectory("C:\\newWork\\cash-order\\cash-order-web\\src\\main\\resources\\mybatis\\mapper");
-        param.setDaoDirectory("C:\\newWork\\cash-order\\cash-order-dao\\src\\main\\java\\com\\le\\jr\\cash\\order\\dao");
-        param.setDaoPackage("com.le.jr.cash.order.dao");
+        param.setMapperDirectory("C:\\code\\local\\loan\\loan-mercury\\fm-mercury-dao\\src\\mail\\resources\\mybatis\\mercury");
+        param.setDaoDirectory("C:\\code\\local\\loan\\loan-mercury\\fm-mercury-dao\\src\\mail\\java\\com\\virgo\\finance\\fm\\mercury\\dao");
+        param.setDaoPackage("com.virgo.finance.fm.mercury.dao");
         // is cover ori file's content
         param.setCoverFile(false);
 
-        String jdbcUrl = "jdbc:mysql://10.60.58.247:3306/cash_loan?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull";
-        String dbUser ="order_t_w";
-        String pwd="NTk3NjIyYmJmNDY";
+        String jdbcUrl = "jdbc:mysql://192.168.130.208:3306/fm_creditLoan_core?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=true";
+        String dbUser ="root";
+        String pwd="root";
 
         List<GenerateSourceParamItem> itemList = new ArrayList<>();
 
         GenerateSourceParamItem table1 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-                "cash_pay_order_info", "cash_loan",
-            "PayOrderInfo", "支付单表");
+                "ACCT_LOAN_MORTGAGE_VEHICLE", "fm_creditLoan_core",
+            "LoanMortgageVehichle", "贷款抵押汽车信息表");
         itemList.add(table1);
 
         GenerateSourceParamItem table2 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-                "cash_loan_order_info", "cash_loan",
-            "LoanOrderInfo", "借款单表");
+                "ACCT_LOAN_MORTGAGE_HOUSE", "fm_creditLoan_core",
+            "LoanMortgageHouse", "贷款抵押房产信息表");
         itemList.add(table2);
 
-        GenerateSourceParamItem table3 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-                "cash_repay_order_info", "cash_loan",
-            "RepayOrderInfo", "还款单表");
-        itemList.add(table3);
+//        GenerateSourceParamItem table3 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+//                "cash_repay_order_info", "cash_loan",
+//            "RepayOrderInfo", "还款单表");
+//        itemList.add(table3);
 
 
         param.setItems(itemList);

@@ -45,7 +45,7 @@ public class DayKSpider {
         final List<DayK> dayKData = new ArrayList<>();
         String url = null;
 
-        try (FileInputStream in = new FileInputStream("E:\\self-study\\tools\\src\\main\\java\\com\\xiafei\\tools\\spider\\metalquotation\\effectIndex.txt");
+        try (FileInputStream in = new FileInputStream("E:\\self-study\\tools\\src\\mail\\java\\com\\xiafei\\tools\\spider\\metalquotation\\effectIndex.txt");
              InputStreamReader ir = new InputStreamReader(in, "utf-8");
              BufferedReader br = new BufferedReader(ir)) {
             // 从文件中读取有效页面编号
@@ -84,7 +84,7 @@ public class DayKSpider {
             contentList.add(k.toString());
             System.out.println(k);
         }
-        FileUtils.outPutToFileByLine("E:\\self-study\\tools\\src\\main\\java\\com\\xiafei\\tools\\spider\\metalquotation\\dayk.txt", contentList, true);
+        FileUtils.outPutToFileByLine("E:\\self-study\\tools\\src\\mail\\java\\com\\xiafei\\tools\\spider\\metalquotation\\dayk.txt", contentList, true);
 
     }
 
