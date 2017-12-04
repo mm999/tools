@@ -1,6 +1,6 @@
 package com.xiafei.tools.generatesource;
 
-import com.xiafei.tools.utils.CollectionUtils;
+import lombok.Data;
 
 import java.util.List;
 
@@ -15,8 +15,8 @@ import java.util.List;
  * @version 1.0
  * @since java 1.7.0
  */
+@Data
 public class GenerateSourceParam {
-
 
     /**
      * 类注释的用户名.
@@ -64,116 +64,28 @@ public class GenerateSourceParam {
     private String mapperDirectory;
 
     /**
-     * 是否替换原文件，若为false则在原文件内容上追加
+     * 是否替换原文件，若为false则在原文件内容上追加.
      */
-    private boolean coverFile = false;
+    private boolean coverFile;
+
+    /**
+     * 是否使用java.time包的日期组件.
+     */
+    private boolean javaTime;
+
+    /**
+     * 是否使用了lombok插件.
+     */
+    private boolean lombok;
 
     /**
      * 生成文件的明细信息.
      */
     private List<GenerateSourceParamItem> items;
 
-    public String getDomainSuffix() {
-        return domainSuffix;
-    }
-
-    public void setDomainSuffix(String domainSuffix) {
-        this.domainSuffix = domainSuffix;
-    }
-
-    public String getDomainDirectory() {
-        return domainDirectory;
-    }
-
-    public void setDomainDirectory(final String pDomainPath) {
-        domainDirectory = pDomainPath;
-    }
-
-    public String getCommentsUser() {
-        return commentsUser;
-    }
-
-    public void setCommentsUser(final String pCommentsUser) {
-        commentsUser = pCommentsUser;
-    }
-
-    public String getCommentsSince() {
-        return commentsSince;
-    }
-
-    public void setCommentsSince(final String pCommentsSince) {
-        commentsSince = pCommentsSince;
-    }
-
-    public String getCommentsVersion() {
-        return commentsVersion;
-    }
-
-    public void setCommentsVersion(final String pCommentsVersion) {
-        commentsVersion = pCommentsVersion;
-    }
-
-    public String getDaoDirectory() {
-        return daoDirectory;
-    }
-
-    public void setDaoDirectory(final String pDaoPath) {
-        daoDirectory = pDaoPath;
-    }
-
-    public String getMapperDirectory() {
-        return mapperDirectory;
-    }
-
-    public void setMapperDirectory(final String pMapperPath) {
-        mapperDirectory = pMapperPath;
-    }
-
-    public List<GenerateSourceParamItem> getItems() {
-        return items;
-    }
-
-    public void setItems(final List<GenerateSourceParamItem> pItems) {
-        items = pItems;
-    }
-
-    public String getDomainPackage() {
-        return domainPackage;
-    }
-
-    public void setDomainPackage(final String pDomainPackage) {
-        domainPackage = pDomainPackage;
-    }
-
-    public String getDaoPackage() {
-        return daoPackage;
-    }
-
-    public void setDaoPackage(final String pDaoPackage) {
-        daoPackage = pDaoPackage;
-    }
-
-    public boolean isCoverFile() {
-        return coverFile;
-    }
-
-    public void setCoverFile(final boolean coverFile) {
-        this.coverFile = coverFile;
-    }
-
-    @Override
-    public String toString() {
-        return "GenerateSourceParam{" +
-            "commentsUser='" + commentsUser + '\'' +
-            ", commentsSince='" + commentsSince + '\'' +
-            ", commentsVersion='" + commentsVersion + '\'' +
-            ", domainDirectory='" + domainDirectory + '\'' +
-            ", domainPackage='" + domainPackage + '\'' +
-            ", daoDirectory='" + daoDirectory + '\'' +
-            ", daoPackage='" + daoPackage + '\'' +
-            ", mapperDirectory='" + mapperDirectory + '\'' +
-            ", coverFile='" + coverFile + '\'' +
-            ", items=" + CollectionUtils.toString(items) +
-            '}';
+    {
+        coverFile = false;
+        javaTime = false;
+        lombok = false;
     }
 }

@@ -37,16 +37,16 @@ public final class DomainTemplate extends SourceTemplate {
         // 第一行固定package信息
         addPackage(param.getDomainPackage(), fileContent);
         // 输出内容中增加可能出现的import信息
-        addDomainImportInfo(columnInfoList, fileContent);
+        addDomainImportInfo(param, columnInfoList, fileContent);
         // 增加类注释
         addClassComments(param, item, "持久化对象", fileContent);
         // 增加类声明
-        addClassDeclara(item.getClassName() + (param.getDomainSuffix() == null ? "" :
-            param.getDomainSuffix()), fileContent);
+        addClassDeclara(param, item.getClassName() + (param.getDomainSuffix() == null ? "" :
+                param.getDomainSuffix()), fileContent);
         // 增加字段声明
-        addPropertiesDeclara(columnInfoList, fileContent);
+        addPropertiesDeclara(param, columnInfoList, fileContent);
         // 增加get、set方法
-        addSetterAndGetter(columnInfoList, fileContent);
+        addSetterAndGetter(param, columnInfoList, fileContent);
         fileContent.add("}");
     }
 
@@ -63,10 +63,11 @@ public final class DomainTemplate extends SourceTemplate {
     /**
      * 在domain文件内容列表中增加import信息.
      *
+     * @param param
      * @param columnInfoList 字段信息
      * @param fileContent    文件内容列表
      */
-    private static void addDomainImportInfo(final List<ColumnInfo> columnInfoList, final List<String> fileContent) {
+    private static void addDomainImportInfo(final GenerateSourceParam param, final List<ColumnInfo> columnInfoList, final List<String> fileContent) {
         // 空行
         fileContent.add("");
         fileContent.add("import java.io.Serializable;");
@@ -89,58 +90,78 @@ public final class DomainTemplate extends SourceTemplate {
             }
         }
         if (existDate) {
-            fileContent.add("import java.util.Date;");
+            if (param.isJavaTime()) {
+                fileContent.add("import java.time.*;");
+
+            } else {
+
+                fileContent.add("import java.util.Date;");
+            }
         }
 
         if (existBigDecimal) {
             fileContent.add("import java.math.BigDecimal;");
+        }
+        if (param.isLombok()) {
+            fileContent.add("import lombok.Data;");
         }
     }
 
     /**
      * 增加类声明.
      *
+     * @param param
      * @param className   Domain类名字
      * @param fileContent 输出文件内容列表.
      */
-    private static void addClassDeclara(final String className, final List<String> fileContent) {
-        fileContent.add("@SuppressWarnings(\"unused\")");
+    private static void addClassDeclara(final GenerateSourceParam param, final String className, final List<String> fileContent) {
+        if (param.isLombok()) {
+            fileContent.add("@Data");
+        } else {
+            fileContent.add("@SuppressWarnings(\"unused\")");
+        }
         fileContent.add("public class " + className + " implements Serializable {");
     }
 
     /**
      * 增加字段声明.
      *
+     * @param param
      * @param columnInfoList 字段信息列表.
      * @param fileContent    输出文件内容列表.
      */
-    private static void addPropertiesDeclara(final List<ColumnInfo> columnInfoList, final List<String> fileContent) {
+    private static void addPropertiesDeclara(final GenerateSourceParam param, final List<ColumnInfo> columnInfoList, final List<String> fileContent) {
         for (ColumnInfo columnInfo : columnInfoList) {
             fileContent.add("");
             // 字段注释
             fileContent.add(getIndent(1) + "/**");
             fileContent.add(getIndent(1) + " * " + columnInfo.getComment() + ".");
             fileContent.add(getIndent(1) + " */");
-            // 字段声明
-            fileContent.add(getIndent(1) + "private " + JdbcTypeJavaTypeEnum.instance(columnInfo.getType()).javaType
-                + " " + StringUtils.underLineToHump(columnInfo.getName().toLowerCase(), false) + ";");
+
+            fileContent.add(getIndent(1) + "private " + getJavaType(columnInfo.getType(), param.isJavaTime()) + " "
+                    + StringUtils.underLineToHump(columnInfo.getName().toLowerCase(), false) + ";");
         }
     }
 
     /**
      * 增加字段的setter和getter方法.
      *
+     * @param param
      * @param columnInfoList 字段信息列表.
      * @param fileContent    输出文件内容列表.
      */
-    private static void addSetterAndGetter(final List<ColumnInfo> columnInfoList, final List<String> fileContent) {
+    private static void addSetterAndGetter(final GenerateSourceParam param, final List<ColumnInfo> columnInfoList, final List<String> fileContent) {
+        if (param.isLombok()) {
+            return;
+        }
+        final boolean isJavaTime = param.isJavaTime();
         for (ColumnInfo columnInfo : columnInfoList) {
             // 字段名称
             String pName = StringUtils.underLineToHump(columnInfo.getName().toLowerCase(), false);
             // 首字母大写的字段名称
             String pNameFirstUpper = StringUtils.firstCharToUpper(pName);
             // 字段java类型
-            String javaType = JdbcTypeJavaTypeEnum.instance(columnInfo.getType()).javaType;
+            String javaType = getJavaType(columnInfo.getType(), isJavaTime);
 
             fileContent.add("");
             // get方法
@@ -155,4 +176,25 @@ public final class DomainTemplate extends SourceTemplate {
         }
     }
 
+    /**
+     * 通过数据库字段类型获得java类型.
+     *
+     * @param columnType 数据库字段类型
+     * @param isJavaTime 是否使用java.time包中的新日期类型
+     * @return java字段类型
+     */
+    private static String getJavaType(final String columnType, final boolean isJavaTime) {
+        final String javaType;
+        // 字段声明
+        if (isJavaTime && (columnType.equals("DATETIME") || columnType.equals("TIMESTAMP"))) {
+            javaType = "LocalDateTime";
+        } else if (isJavaTime && columnType.equals("DATE")) {
+            javaType = "LocalDate";
+        } else if (isJavaTime && columnType.equals("TIME")) {
+            javaType = "LocalTime";
+        } else {
+            javaType = JdbcTypeJavaTypeEnum.instance(columnType).javaType;
+        }
+        return javaType;
+    }
 }
