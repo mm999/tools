@@ -1,4 +1,4 @@
-package com.xiafei.tools;
+package com.xiafei.tools.nosql;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -11,7 +11,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 
 /**
- * <P>Description: 测试用. </P>
+ * <P>Description: solr测试. </P>
  * <P>CALLED BY:   齐霞飞 </P>
  * <P>UPDATE BY:   齐霞飞 </P>
  * <P>CREATE DATE: 2017/12/2</P>
@@ -23,7 +23,7 @@ import java.io.IOException;
  */
 @RestController
 @RequestMapping("/test")
-public class TestController {
+public class SolrTestController {
 
     @Resource
     private SolrClient solrClient;
