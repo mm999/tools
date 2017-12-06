@@ -26,7 +26,7 @@ public class JedisClientProperties {
     /**
      * redis服务密码.
      */
-    private String passowrd;
+    private String password;
 
     /**
      * 最大线程数量.

@@ -31,7 +31,7 @@ public class JedisConfig {
      */
     @Bean
     public JedisClient init() throws Exception {
-        return new JedisClient(properties.getAddress(), properties.getPassowrd(), properties.getMaxTotal(),
+        return new JedisClient(properties.getAddress(), properties.getPassword(), properties.getMaxTotal(),
                 properties.getMaxIdle(), properties.getMaxWaitTimeMs());
     }
 

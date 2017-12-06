@@ -56,39 +56,39 @@ public final class SourceGenerator {
     public static void main(String[] args) {
         GenerateSourceParam param = new GenerateSourceParam();
         param.setCommentsUser("齐霞飞");
-        param.setCommentsSince("JDK 1.7.0");
-        param.setCommentsVersion("1.0");
-        param.setDomainDirectory("C:\\code\\local\\loan\\loan-settlement\\loan-settlement-dao\\src\\main\\java\\com\\virgo\\finance\\loan\\settlement\\dao\\domain");
-        param.setDomainPackage("com.virgo.finance.loan.settlement.dao.domain");
+        param.setCommentsSince("JDK 1.8.0");
+        param.setCommentsVersion("1.0.0");
+        param.setDomainDirectory("C:\\code\\local\\loan\\loan-mercury\\fm-mercury-dao\\src\\main\\java\\com\\virgo\\finance\\fm\\mercury\\dao\\domain");
+        param.setDomainPackage("com.virgo.finance.fm.mercury.dao.domain");
         param.setDomainSuffix("PO");
-        param.setMapperDirectory("C:\\code\\local\\loan\\loan-settlement\\loan-settlement-web\\src\\main\\resources\\settlement\\mapper");
-        param.setDaoDirectory("C:\\code\\local\\loan\\loan-settlement\\loan-settlement-dao\\src\\main\\java\\com\\virgo\\finance\\loan\\settlement\\dao");
-        param.setDaoPackage("com.virgo.finance.loan.settlement.dao");
+        param.setMapperDirectory("C:\\code\\local\\loan\\loan-mercury\\fm-mercury-dao\\src\\main\\resources\\mybatis\\mercury");
+        param.setDaoDirectory("C:\\code\\local\\loan\\loan-mercury\\fm-mercury-dao\\src\\main\\java\\com\\virgo\\finance\\fm\\mercury\\dao");
+        param.setDaoPackage("com.virgo.finance.fm.mercury.dao");
         // is cover ori file's content
-        param.setCoverFile(false);
+        param.setCoverFile(true);
         param.setJavaTime(true);
         param.setLombok(true);
 
-        String jdbcUrl = "jdbc:mysql://192.168.130.208:3306/loan_clearing?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=true";
+        String jdbcUrl = "jdbc:mysql://192.168.130.208:3306/fm_creditLoan_core?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=true";
         String dbUser ="root";
         String pwd="root";
 
         List<GenerateSourceParamItem> itemList = new ArrayList<>();
 
         GenerateSourceParamItem table1 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-                "REPAYMENT_WITHHOLDING_ORDER", "loan_clearing",
-            "RepaymentWithholdingOrder", "还款代扣主表");
+                "ACCT_LOAN_FILE_INFO", "fm_creditLoan_core",
+            "AcctLoanFileInfo", "贷款上传资料记录表");
         itemList.add(table1);
-
-        GenerateSourceParamItem table2 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-                "REPAYMENT_WITHHOLDING_RECORD", "loan_clearing",
-            "RepaymentWithholdingRecord", "还款代扣记录表");
-        itemList.add(table2);
-
-        GenerateSourceParamItem table3 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-                "REPAYMENT_WITHHOLDING_TASK", "loan_clearing",
-            "RepaymentWithholdingTask", "还款代扣任务表-当前进行中的任务，保留若干天后删除");
-        itemList.add(table3);
+//
+//        GenerateSourceParamItem table2 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+//                "REPAYMENT_WITHHOLDING_RECORD", "loan_clearing",
+//            "RepaymentWithholdingRecord", "还款代扣记录表");
+//        itemList.add(table2);
+//
+//        GenerateSourceParamItem table3 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+//                "REPAYMENT_WITHHOLDING_TASK", "loan_clearing",
+//            "RepaymentWithholdingTask", "还款代扣任务表-当前进行中的任务，保留若干天后删除");
+//        itemList.add(table3);
 
 
         param.setItems(itemList);

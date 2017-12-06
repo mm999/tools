@@ -1,7 +1,9 @@
-package com.xiafei.tools.springboot;
+package com.xiafei.tools.springboot.dubbo;
 
 import com.alibaba.dubbo.config.spring.ReferenceBean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.Resource;
 
 /**
  * <P>Description: Dubbo客户端配置. </P>
@@ -17,7 +19,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DubboConsumerConfig {
 
-    private static final String INTERFACE_VERSION = "1.0.0";
+    @Resource
+    private DubboProperties dubboProperties;
 
     /**
      * 通用产生dubbo引用bean方法，默认不检查，版本为配置文件中配置.
@@ -27,7 +30,7 @@ public class DubboConsumerConfig {
      * @return dubbo引用bean
      */
     private <T> ReferenceBean<T> getReferenceBean(final Class<T> clazz) {
-        return getReferenceBean(clazz, false, INTERFACE_VERSION);
+        return getReferenceBean(clazz, false, dubboProperties.getVersion());
     }
 
     /**
@@ -39,7 +42,7 @@ public class DubboConsumerConfig {
      * @return dubbo引用bean
      */
     private <T> ReferenceBean<T> getReferenceBean(final Class<T> clazz, final boolean isCheck) {
-        return getReferenceBean(clazz, isCheck, INTERFACE_VERSION);
+        return getReferenceBean(clazz, isCheck, dubboProperties.getVersion());
     }
 
     /**
@@ -68,6 +71,7 @@ public class DubboConsumerConfig {
         referenceBean.setInterface(clazz);
         referenceBean.setCheck(isCheck);
         referenceBean.setVersion(version);
+        referenceBean.setRetries(dubboProperties.getRetry());
         return referenceBean;
     }
 }
