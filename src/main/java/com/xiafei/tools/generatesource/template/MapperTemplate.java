@@ -273,7 +273,7 @@ public final class MapperTemplate extends SourceTemplate {
     private static void addCount(final String domainJavaPath, final ColumnInfo primaryColumn, final List<ColumnInfo> columnInfos, final String tableName, final List<String> content, final DataBaseTypeEnum dataBaseType) {
         content.add("");
         content.add(getIndent(1) + "<!-- 统计数量 -->");
-        content.add(getIndent(1) + "<select id=\"count\" parameterType=\"" + domainJavaPath + "\" resultType=\"int\" >");
+        content.add(getIndent(1) + "<select id=\"count\" parameterType=\"" + domainJavaPath + "\" resultType=\"java.lang.Integer\" >");
         content.add(getIndent(2) + "SELECT count(*)");
         content.add(getIndent(2) + "FROM " + tableName);
         content.add(getIndent(2) + "<where>");
