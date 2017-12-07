@@ -8,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <P>Description: 检查工具类，与业务耦合. </P>
@@ -87,7 +89,7 @@ public class CheckUtils {
     }
 
     /**
-     * 检查对象字段是否为空,最多遍历两层..
+     * 检查对象字段是否为空,最多向下遍历两层..
      *
      * @param nullCode 如果检查到空的字段了抛出Biz异常中的错误码
      * @param nullDesc 如果检查到空的字段了抛出Biz异常中的错误信息
@@ -95,7 +97,14 @@ public class CheckUtils {
      * @param clazz    要检查的对象class
      */
     private static void checkPropertiesNullFirstFloor(final int nullCode, final String nullDesc, final Object obj, final Class clazz) {
-        final Field[] fields = clazz.getDeclaredFields();
+        final List<Field> fieldList = Arrays.asList(clazz.getDeclaredFields());
+        Class tempClass = clazz;
+        while (tempClass != Object.class) {
+            tempClass = tempClass.getSuperclass();
+            fieldList.addAll(Arrays.asList(tempClass.getDeclaredFields()));
+        }
+        final Field[] fields = (Field[]) fieldList.toArray();
+
         for (Field field : fields) {
             field.setAccessible(true);
             // 如果有跳过注解的字段放过检查
