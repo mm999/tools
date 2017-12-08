@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -97,19 +98,20 @@ public class CheckUtils {
      * @param clazz    要检查的对象class
      */
     private static void checkPropertiesNullFirstFloor(final int nullCode, final String nullDesc, final Object obj, final Class clazz) {
-        final List<Field> fieldList = Arrays.asList(clazz.getDeclaredFields());
+        final List<Field> fieldList = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
         Class tempClass = clazz;
-        while (tempClass != Object.class) {
+        while (true) {
             tempClass = tempClass.getSuperclass();
-            if (tempClass == null) {
+            if (tempClass == null || tempClass == Object.class) {
                 break;
             }
             Field[] fields = tempClass.getDeclaredFields();
-            if (fields != null) {
-                fieldList.addAll(Arrays.asList(fields));
+            if (fields != null && fields.length > 0) {
+                fieldList.addAll(new ArrayList<>(Arrays.asList(fields)));
             }
         }
-        final Field[] fields = (Field[]) fieldList.toArray();
+        final Field[] fields = new Field[fieldList.size()];
+        fieldList.toArray(fields);
 
         for (Field field : fields) {
             field.setAccessible(true);
