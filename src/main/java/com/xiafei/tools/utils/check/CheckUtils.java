@@ -101,7 +101,13 @@ public class CheckUtils {
         Class tempClass = clazz;
         while (tempClass != Object.class) {
             tempClass = tempClass.getSuperclass();
-            fieldList.addAll(Arrays.asList(tempClass.getDeclaredFields()));
+            if (tempClass == null) {
+                break;
+            }
+            Field[] fields = tempClass.getDeclaredFields();
+            if (fields != null) {
+                fieldList.addAll(Arrays.asList(fields));
+            }
         }
         final Field[] fields = (Field[]) fieldList.toArray();
 

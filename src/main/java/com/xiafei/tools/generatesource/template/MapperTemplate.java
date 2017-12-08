@@ -181,7 +181,7 @@ public final class MapperTemplate extends SourceTemplate {
                                final List<String> content, final DataBaseTypeEnum dataBaseType) {
         content.add("");
         content.add(getIndent(1) + "<!-- 根据主键查询一行数据 -->");
-        content.add(getIndent(1) + "<select id=\"get\" parameterType=\""
+        content.add(getIndent(1) + "<select id=\"get\" parameterType=\"java.lang."
                 + JdbcTypeJavaTypeEnum.instance(primaryColumn.getType()).javaType
                 + "\" resultMap=\"" + resultId + "\">");
         content.add(getIndent(2) + "SELECT");
