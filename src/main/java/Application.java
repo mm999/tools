@@ -2,12 +2,18 @@ import com.xiafei.tools.nosql.redis.JedisClientProperties;
 import com.xiafei.tools.sftp.SftpProperties;
 import com.xiafei.tools.springboot.dubbo.DubboProperties;
 import com.xiafei.tools.springboot.mq.RocketMQProperties;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <P>Description: springboot启动类. </P>
@@ -24,6 +30,7 @@ import org.springframework.boot.web.support.SpringBootServletInitializer;
 @EnableConfigurationProperties({JedisClientProperties.class, RocketMQProperties.class, DubboProperties.class,
         SftpProperties.class})
 public class Application extends SpringBootServletInitializer {
+
     static {
         /*
            解决dubbo和lockback集成后不打印日志的问题
@@ -46,10 +53,12 @@ public class Application extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
+
     }
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
         return builder.sources(getClass());
     }
+
 }

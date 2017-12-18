@@ -76,14 +76,14 @@ public final class SourceGenerator {
         List<GenerateSourceParamItem> itemList = new ArrayList<>();
 
         GenerateSourceParamItem table1 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-                "ACCT_LOAN_MORTGAGE_VEHICLE", "fm_creditLoan_core",
-            "LoanMortgageVehicle", "贷款抵押汽车信息表");
+                "ACCT_MERCURY_REPAYMENT_SUBJECT", "fm_creditLoan_core",
+            "RepaymentSubject", "还款科目");
         itemList.add(table1);
 
-        GenerateSourceParamItem table2 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-                "ACCT_LOAN_MORTGAGE_HOUSE", "fm_creditLoan_core",
-            "LoanMortgageHouse", "贷款抵押房产信息表");
-        itemList.add(table2);
+//        GenerateSourceParamItem table2 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+//                "ACCT_LOAN_MORTGAGE_HOUSE", "fm_creditLoan_core",
+//            "LoanMortgageHouse", "贷款抵押房产信息表");
+//        itemList.add(table2);
 //
 //        GenerateSourceParamItem table3 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
 //                "REPAYMENT_WITHHOLDING_TASK", "loan_clearing",

@@ -16,6 +16,7 @@
     <properties>
         <com.jcraft.jsch.version>0.1.54</com.jcraft.jsch.version>
 
+        <spring.boot.velocity.version>1.4.7.RELEASE</spring.boot.velocity.version>
         <!-- 插件管理 start -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
@@ -44,6 +45,11 @@
             <groupId>com.google.zxing</groupId>
             <artifactId>core</artifactId>
             <version>3.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-velocity</artifactId>
+            <version>${spring.boot.velocity.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba.rocketmq</groupId>
