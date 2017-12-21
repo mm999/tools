@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -62,7 +60,7 @@ public class JvmCache {
                     log.debug("key=[{}],load from jvmCache", key);
                 }
             }
-        } else if (Duration.between(cached.getInitTime(), LocalDateTime.now()).toMillis() > millis) {
+        } else if ((System.currentTimeMillis() - cached.getInitTime()) > millis) {
             synchronized (lockObj) {
                 Item<D> maybeNewItem = cacheMap.get(key);
                 if (cached == maybeNewItem) {
@@ -83,14 +81,14 @@ public class JvmCache {
         /**
          * 初始化时间
          */
-        private LocalDateTime initTime = LocalDateTime.now();
+        private long initTime = System.currentTimeMillis();
         private T data;
 
         Item(T data) {
             this.data = data;
         }
 
-        public LocalDateTime getInitTime() {
+        public long getInitTime() {
             return initTime;
         }
 
