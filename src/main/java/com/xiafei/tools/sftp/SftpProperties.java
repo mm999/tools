@@ -14,5 +14,6 @@ public class SftpProperties {
     private String userName;
     private String password;
     private Integer timeOut;
-    private Integer connectionCount;
+    private Integer connectionMaxSize;
+    private Integer connectionInitSize;
 }

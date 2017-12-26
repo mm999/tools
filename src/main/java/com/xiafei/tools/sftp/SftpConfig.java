@@ -25,8 +25,8 @@ public class SftpConfig {
 
     @Bean
     public Sftp sftp() throws JSchException {
-        return new Sftp(sftpProperties.getHost(), sftpProperties.getPort(),
-                sftpProperties.getUserName(), sftpProperties.getPassword(),
-                sftpProperties.getTimeOut(), sftpProperties.getConnectionCount());
+        return new Sftp(sftpProperties.getHost(), sftpProperties.getPort(), sftpProperties.getUserName(),
+                sftpProperties.getPassword(), sftpProperties.getTimeOut(), sftpProperties.getConnectionInitSize(),
+                sftpProperties.getConnectionMaxSize());
     }
 }

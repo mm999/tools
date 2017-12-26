@@ -69,18 +69,36 @@ public class Sftp {
     private Integer timeOut;
 
     /**
+     * 初始和空闲时间连接数.
+     */
+    private Integer initSize;
+
+    /**
+     * 最大连接数.
+     */
+    private Integer maxSize;
+
+    /**
+     * 连接池大小.
+     */
+    private int poolSize;
+
+    /**
      * 初始化sftp连接池.
      *
      * @throws JSchException 连接异常
      */
     public Sftp(final String host, final Integer port, final String userName, final String password,
-                final Integer timeOut, final int connectionCount) throws JSchException {
+                final Integer timeOut, final Integer initSize, final Integer maxSize) throws JSchException {
         this.host = host;
         this.port = port == null ? DEFAULT_PORT : port;
         this.userName = userName;
         this.password = password;
         this.timeOut = timeOut == null ? DEFAULT_SFTP_TIMEOUT : timeOut;
-        for (int i = 0; i < connectionCount; i++) {
+        this.initSize = initSize;
+        this.maxSize = maxSize;
+        this.poolSize = initSize;
+        for (int i = 0; i < initSize; i++) {
             POOL.addLast(createChannel());
         }
 
@@ -106,11 +124,21 @@ public class Sftp {
             if (millis <= 0) {
                 // 无限等待
                 while (POOL.isEmpty()) {
-                    try {
-                        POOL.wait();
-                    } catch (InterruptedException e) {
-                        log.warn("从连接池获取sftp通道时线程被通知中断等待,sftp={}", this);
+                    if (poolSize == maxSize) {
+                        try {
+                            POOL.wait();
+                        } catch (InterruptedException e) {
+                            log.warn("从连接池获取sftp通道时线程被通知中断等待,sftp={}", this);
+                        }
+                    } else {
+                        // 如果连接池大小没有达到最大连接数，新增一个连接
+                        try {
+                            return add();
+                        } catch (JSchException e) {
+                            log.error("获取更多连接失败");
+                        }
                     }
+
                 }
                 return reconnectIfExpire(POOL.removeFirst());
             } else {
@@ -118,12 +146,21 @@ public class Sftp {
                 long future = System.currentTimeMillis() + millis;
                 long remain = millis;
                 while (POOL.isEmpty() && remain >= 0) {
-                    try {
-                        POOL.wait();
-                    } catch (InterruptedException e) {
-                        log.warn("从连接池获取sftp通道时线程被通知中断等待,sftp={}", this);
+                    if (poolSize == maxSize) {
+                        try {
+                            POOL.wait();
+                        } catch (InterruptedException e) {
+                            log.warn("从连接池获取sftp通道时线程被通知中断等待,sftp={}", this);
+                        }
+                        remain = future - System.currentTimeMillis();
+                    } else {
+                        // 如果连接池大小没有达到最大连接数，新增一个连接
+                        try {
+                            return add();
+                        } catch (JSchException e) {
+                            log.error("获取更多连接失败");
+                        }
                     }
-                    remain = future - System.currentTimeMillis();
                 }
                 if (!POOL.isEmpty()) {
                     return reconnectIfExpire(POOL.removeFirst());
@@ -142,12 +179,34 @@ public class Sftp {
     private void release(final ChannelSftp channel) {
         if (channel != null) {
             synchronized (POOL) {
-                POOL.addLast(channel);
+                if (poolSize > initSize) {
+                    remove();
+                    closeChannel(channel);
+                } else {
+                    POOL.addLast(channel);
+                }
                 POOL.notify();
 
             }
         }
     }
+
+    /**
+     * 新增一个连接，是否需要放入连接池在释放的时候做判断.
+     */
+    private ChannelSftp add() throws JSchException {
+        poolSize++;
+        return createChannel();
+    }
+
+
+    /**
+     * 删除一个连接.
+     */
+    private void remove() {
+        poolSize--;
+    }
+
 
     private ChannelSftp reconnectIfExpire(ChannelSftp sftp) {
         try {
@@ -285,9 +344,9 @@ public class Sftp {
             if (directory != null) {
                 channelSftp.cd(directory);
             }
-            if(isDirectory){
+            if (isDirectory) {
                 channelSftp.rmdir(fileName);
-            }else{
+            } else {
                 channelSftp.rm(fileName);
             }
         } finally {
@@ -377,17 +436,18 @@ public class Sftp {
     /**
      * 关闭通道和会话.
      */
-    private static void closeSftp(final Session session, final ChannelSftp channel) {
+    private static void closeChannel(final ChannelSftp channel) {
         try {
 
             if (channel != null) {
+                final Session session = channel.getSession();
+                if (session != null) {
+                    session.disconnect();
+                }
                 channel.disconnect();
             }
-            if (session != null) {
-                session.disconnect();
-            }
         } catch (Throwable e) {
-            log.error("关闭sftp连接失败,session={},channel={}", session, channel, e);
+            log.error("关闭sftp连接失败,hannel={}", channel, e);
         }
     }
 }
