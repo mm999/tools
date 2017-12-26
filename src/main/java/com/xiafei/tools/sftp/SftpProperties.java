@@ -13,4 +13,6 @@ public class SftpProperties {
     private Integer port;
     private String userName;
     private String password;
+    private Integer timeOut;
+    private Integer connectionCount;
 }
