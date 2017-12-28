@@ -36,7 +36,7 @@ public class TestController {
     private static byte[] fileBytes;
 
     static {
-        final ClassPathResource classPathResource = new ClassPathResource("Chrysanthemum.jpg");
+        final ClassPathResource classPathResource = new ClassPathResource("IMG_0004.JPG");
         try (InputStream fis = classPathResource.getInputStream();
              ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 
@@ -57,9 +57,9 @@ public class TestController {
     public String sftpTest() throws JSchException, SftpException, IOException {
         String randomStr = UUID.randomUUID().toString();
         sftp.uploadSync("/data/tempTest/" + randomStr + "/example.jpg", fileBytes);
-        sftp.getBytes("/data//tempTest/" + randomStr + "/example.jpg");
-        sftp.removeAsync("/data/tempTest/" + randomStr + "/example.jpg", false);
-        sftp.removeAsync("/data/tempTest/" + randomStr, true);
+//        sftp.getBytes("/data//tempTest/" + randomStr + "/example.jpg");
+//        sftp.removeAsync("/data/tempTest/" + randomStr + "/example.jpg", false);
+//        sftp.removeAsync("/data/tempTest/" + randomStr, true);
         return "complete";
     }
 
