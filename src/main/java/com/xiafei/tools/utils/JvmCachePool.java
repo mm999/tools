@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * <P>Description: 基于jvm内部的缓存. </P>
+ * <P>Description: 基于jvm内部的缓存池，一个项目可以统一用一个. </P>
  * <P>CALLED BY:   齐霞飞 </P>
  * <P>UPDATE BY:   齐霞飞 </P>
  * <P>CREATE DATE: 2017/12/20</P>
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 @Component
-public class JvmCache {
+public class JvmCachePool {
 
     /**
      * 缓存池.

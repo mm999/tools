@@ -1,12 +1,13 @@
 package com.xiafei.tools.utils.check;
 
-
 import com.xiafei.tools.exceptions.BizException;
 import com.xiafei.tools.retry.Code;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +35,16 @@ public class CheckUtils {
      * 在需要跳过检查的属性上加这个注解.
      */
     @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
     public @interface PropertySkipCheck {
+
+    }
+    /**
+     * 在需要跳过检查的参数上加这个注解.
+     */
+    @Target(ElementType.PARAMETER)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ParamSkipCheck {
 
     }
 

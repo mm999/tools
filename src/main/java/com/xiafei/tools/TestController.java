@@ -3,6 +3,8 @@ package com.xiafei.tools;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.xiafei.tools.sftp.Sftp;
+import com.xiafei.tools.utils.JvmCachePool;
+import com.xiafei.tools.utils.JvmExCache;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,9 +32,13 @@ import java.util.UUID;
 @RequestMapping("/test")
 public class TestController {
 
+    private static final JvmExCache<Integer> CACHE = new JvmExCache<>(10000L, true);
+    private static int COUNT = 0;
+    private static int COUNT_POOL = 0;
     @Resource
     private Sftp sftp;
-
+    @Resource
+    private JvmCachePool cachePool;
     private static byte[] fileBytes;
 
     static {
@@ -63,4 +69,15 @@ public class TestController {
         return "complete";
     }
 
+
+    @GetMapping("jvmCache")
+    public Integer jvmCacheTest() throws Exception {
+        return CACHE.getAndRefreshIfEx(() -> ++COUNT);
+    }
+
+
+    @GetMapping("jvmCachePool")
+    public Integer jvmCachePoolTest() throws Exception {
+        return cachePool.getAndRefreshIfExpire("testController", this, () -> ++COUNT_POOL);
+    }
 }
