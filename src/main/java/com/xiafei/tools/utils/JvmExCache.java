@@ -1,5 +1,6 @@
 package com.xiafei.tools.utils;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -32,9 +33,21 @@ public class JvmExCache<D> {
     private static Lock W;
 
     /**
+     * 是否超时严格检查，若为是，说明当缓存达到过期时间后，所有后进入线程均需等待缓存更新后读取，若为否，
+     * 说明当缓存达到过期时间后，挑选一个线程更新数据，其他线程直接返回.
+     * ###设为false使用cas原子操作，可以提升效率##
+     */
+    private boolean exStrict;
+
+    /**
+     * 如果非严格检查，用这个字段标识是否已经有线程拿到了更新权限.
+     */
+    private AtomicInteger updateFlag = new AtomicInteger(0);
+
+    /**
      * 缓存失效的时间点.
      */
-    private long exAt;
+    private volatile long exAt;
 
     /**
      * 缓存失效间隔.
@@ -44,7 +57,7 @@ public class JvmExCache<D> {
     /**
      * 缓存数据.
      */
-    private D data;
+    private volatile D data;
 
     /**
      * 初始化缓存对象，使用默认，非公平锁.
@@ -55,19 +68,22 @@ public class JvmExCache<D> {
         RW = new ReentrantReadWriteLock();
         R = RW.readLock();
         W = RW.writeLock();
+        exStrict = false;
         this.exInterval = exInterval;
     }
 
     /**
-     * 初始化缓存对象，指定是否公平锁.
+     * 初始化缓存对象，指定是否公平锁，非公平锁可以提升效率.
      *
      * @param exInterval 超时时间
+     * @param exStrict   是否严格检查超时
      * @param isFair     是否公平锁s
      */
-    public JvmExCache(final long exInterval, final boolean isFair) {
+    public JvmExCache(final long exInterval, final boolean exStrict, final boolean isFair) {
         RW = new ReentrantReadWriteLock(isFair);
         R = RW.readLock();
         W = RW.writeLock();
+        this.exStrict = exStrict;
         this.exInterval = exInterval;
     }
 
@@ -79,23 +95,31 @@ public class JvmExCache<D> {
      * @throws Exception task可能抛出的异常
      */
     public D getAndRefreshIfEx(final Task<D> task) throws Exception {
-        R.lock();
-
         if (data == null) {
-            R.unlock();
             return refreshData(task);
         }
-
-        if (exAt < System.currentTimeMillis()) {
-            R.unlock();
-            return refreshData(task);
+        if (exStrict) {
+            if (exAt < System.currentTimeMillis()) {
+                return refreshData(task);
+            } else {
+                try {
+                    R.lock();
+                    return data;
+                } finally {
+                    R.unlock();
+                }
+            }
         } else {
-            try {
+            if (exAt < System.currentTimeMillis() && updateFlag.compareAndSet(0, 1)) {
+                data = task.invoke();
+                exAt = System.currentTimeMillis() + exInterval;
+                updateFlag.set(0);
                 return data;
-            } finally {
-                R.unlock();
+            } else {
+                return data;
             }
         }
+
     }
 
     private D refreshData(final Task<D> task) throws Exception {
