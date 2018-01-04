@@ -5,6 +5,8 @@ import com.jcraft.jsch.SftpException;
 import com.xiafei.tools.sftp.Sftp;
 import com.xiafei.tools.utils.JvmCachePool;
 import com.xiafei.tools.utils.JvmExCache;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +32,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/test")
+@RefreshScope
 public class TestController {
 
     private static final JvmExCache<Integer> CACHE = new JvmExCache<>(10000L, true);
@@ -40,6 +43,9 @@ public class TestController {
     @Resource
     private JvmCachePool cachePool;
     private static byte[] fileBytes;
+
+    @Value("${from}")
+    private String from;
 
     static {
         final ClassPathResource classPathResource = new ClassPathResource("IMG_0004.JPG");
@@ -79,5 +85,10 @@ public class TestController {
     @GetMapping("jvmCachePool")
     public Integer jvmCachePoolTest() throws Exception {
         return cachePool.getAndRefreshIfExpire("testController", this, () -> ++COUNT_POOL);
+    }
+
+    @GetMapping("config")
+    public String getConfig() {
+        return from;
     }
 }

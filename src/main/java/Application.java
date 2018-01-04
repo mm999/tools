@@ -4,12 +4,14 @@ import com.xiafei.tools.springboot.dubbo.DubboProperties;
 import com.xiafei.tools.springboot.mq.RocketMQProperties;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.core.env.Environment;
 
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -59,6 +61,12 @@ public class Application extends SpringBootServletInitializer {
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
         return builder.sources(getClass());
+    }
+
+    @Autowired
+    void setEnviroment(Environment env) {
+        System.out.println("read <<from>> from env: "
+                + env.getProperty("from"));
     }
 
 }

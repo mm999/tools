@@ -47,12 +47,12 @@ public class JvmExCache<D> {
     private D data;
 
     /**
-     * 初始化缓存对象，使用公平锁.
+     * 初始化缓存对象，使用默认，非公平锁.
      *
      * @param exInterval 超时时间
      */
     public JvmExCache(final long exInterval) {
-        RW = new ReentrantReadWriteLock(true);
+        RW = new ReentrantReadWriteLock();
         R = RW.readLock();
         W = RW.writeLock();
         this.exInterval = exInterval;
