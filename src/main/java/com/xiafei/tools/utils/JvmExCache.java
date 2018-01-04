@@ -33,14 +33,14 @@ public class JvmExCache<D> {
     private static Lock W;
 
     /**
-     * 是否超时严格检查，若为是，说明当缓存达到过期时间后，所有后进入线程均需等待缓存更新后读取，若为否，
-     * 说明当缓存达到过期时间后，挑选一个线程更新数据，其他线程直接返回.
+     * 是否允许脏读，若为是，当缓存达到过期时间后，挑选一个线程更新数据，其他线程读取更新前的数据直接返回.
+     * 若为否，说明缓存达到过期时间后，所有后进入线程均需等待缓存更新后读取，
      * ###设为false使用cas原子操作，可以提升效率##
      */
-    private boolean exStrict;
+    private boolean dirtyRead;
 
     /**
-     * 如果非严格检查，用这个字段标识是否已经有线程拿到了更新权限.
+     * 如果允许脏读，用这个字段标识是否已经有线程拿到了更新权限.
      */
     private AtomicInteger updateFlag = new AtomicInteger(0);
 
@@ -68,7 +68,7 @@ public class JvmExCache<D> {
         RW = new ReentrantReadWriteLock();
         R = RW.readLock();
         W = RW.writeLock();
-        exStrict = false;
+        dirtyRead = true;
         this.exInterval = exInterval;
     }
 
@@ -76,14 +76,14 @@ public class JvmExCache<D> {
      * 初始化缓存对象，指定是否公平锁，非公平锁可以提升效率.
      *
      * @param exInterval 超时时间
-     * @param exStrict   是否严格检查超时
+     * @param dirtyRead  是否允许脏读
      * @param isFair     是否公平锁s
      */
-    public JvmExCache(final long exInterval, final boolean exStrict, final boolean isFair) {
+    public JvmExCache(final long exInterval, final boolean dirtyRead, final boolean isFair) {
         RW = new ReentrantReadWriteLock(isFair);
         R = RW.readLock();
         W = RW.writeLock();
-        this.exStrict = exStrict;
+        this.dirtyRead = dirtyRead;
         this.exInterval = exInterval;
     }
 
@@ -98,7 +98,17 @@ public class JvmExCache<D> {
         if (data == null) {
             return refreshData(task);
         }
-        if (exStrict) {
+        if (dirtyRead) {
+            if (exAt < System.currentTimeMillis() && updateFlag.compareAndSet(0, 1)) {
+                data = task.invoke();
+                exAt = System.currentTimeMillis() + exInterval;
+                updateFlag.set(0);
+                return data;
+            } else {
+                return data;
+            }
+
+        } else {
             if (exAt < System.currentTimeMillis()) {
                 return refreshData(task);
             } else {
@@ -108,15 +118,6 @@ public class JvmExCache<D> {
                 } finally {
                     R.unlock();
                 }
-            }
-        } else {
-            if (exAt < System.currentTimeMillis() && updateFlag.compareAndSet(0, 1)) {
-                data = task.invoke();
-                exAt = System.currentTimeMillis() + exInterval;
-                updateFlag.set(0);
-                return data;
-            } else {
-                return data;
             }
         }
 
