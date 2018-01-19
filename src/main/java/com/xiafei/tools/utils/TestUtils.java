@@ -16,7 +16,16 @@ import java.util.Date;
  */
 public class TestUtils {
 
-    public static <T> T setProperties(T object) throws IllegalAccessException {
+    /**
+     * 给对象设置一些初始属性.
+     *
+     * @param object 要改变属性的对象
+     * @param serial 方便保证唯一性，允许传入一个序列号
+     * @param <T>
+     * @return
+     * @throws IllegalAccessException
+     */
+    public static <T> T setProperties(T object, Long serial) throws IllegalAccessException {
         Class clazz = object.getClass();
         Field[] fields = clazz.getDeclaredFields();
         for (Field f : fields) {
@@ -27,7 +36,7 @@ public class TestUtils {
             }
             Class valCls = f.getType();
             if (valCls == String.class) {
-                f.set(object, "测试");
+                f.set(object, "测试" + serial);
             } else if (Byte.class == valCls) {
                 f.set(object, (byte) 1);
             } else if (Short.class == valCls) {
@@ -47,7 +56,7 @@ public class TestUtils {
             } else if (Date.class == valCls) {
                 f.set(object, new Date());
             } else {
-                System.out.println("对象字段忽略" + f.getName());
+                System.out.println("引用类型对象字段忽略" + f.getName());
             }
         }
         return object;
