@@ -21,6 +21,10 @@ public class TestUtils {
         Field[] fields = clazz.getDeclaredFields();
         for (Field f : fields) {
             f.setAccessible(true);
+            if (java.lang.reflect.Modifier.isFinal(f.getModifiers())) {
+                System.out.println("final对象字段忽略" + f.getName());
+                continue;
+            }
             Class valCls = f.getType();
             if (valCls == String.class) {
                 f.set(object, "测试");
