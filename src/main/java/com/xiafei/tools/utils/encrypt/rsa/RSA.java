@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Signature;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -106,6 +107,50 @@ class RSA {
     }
 
     /**
+     * 签名字符串
+     *
+     * @param text       需要签名的字符串
+     * @param privateKey 私钥(BASE64编码)
+     * @return 签名结果(BASE64编码)
+     */
+    static String sign(String text, String privateKey, String charset) throws Exception {
+
+        byte[] keyBytes = Base64.decodeBase64(privateKey);
+        PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+        PrivateKey privateK = keyFactory.generatePrivate(pkcs8KeySpec);
+        Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
+        signature.initSign(privateK);
+        signature.update(getContentBytes(text, charset));
+        byte[] result = signature.sign();
+        return Base64.encodeBase64String(result);
+
+    }
+
+    /**
+     * 验证签名字符串
+     *
+     * @param src       需要验签的字符串
+     * @param sign      客户签名结果
+     * @param publicKey 签名私钥对应的公钥(BASE64编码)
+     * @param charset   编码格式
+     * @return 验签结果
+     */
+    public static boolean verify(String src, String sign, String publicKey, String charset) throws Exception {
+        byte[] keyBytes = Base64.decodeBase64(publicKey);
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+        PublicKey publicK = keyFactory.generatePublic(keySpec);
+
+        Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
+        signature.initVerify(publicK);
+        signature.update(getContentBytes(src, charset));
+        return signature.verify(Base64.decodeBase64(sign));
+
+
+    }
+
+    /**
      * 分段处理.
      *
      * @param cipher       密码操作对象
@@ -156,28 +201,6 @@ class RSA {
         return (RSAPrivateKey) KeyFactory.getInstance(KEY_ALGORITHM).generatePrivate(new PKCS8EncodedKeySpec(Base64.decodeBase64(RSA_PRI_KEY)));
     }
 
-
-    /**
-     * 签名字符串
-     *
-     * @param text       需要签名的字符串
-     * @param privateKey 私钥(BASE64编码)
-     * @return 签名结果(BASE64编码)
-     */
-    static String sign(String text, String privateKey, String charset) throws Exception {
-
-        byte[] keyBytes = Base64.decodeBase64(privateKey);
-        PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
-        PrivateKey privateK = keyFactory.generatePrivate(pkcs8KeySpec);
-        Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
-        signature.initSign(privateK);
-        signature.update(getContentBytes(text, charset));
-        byte[] result = signature.sign();
-        return Base64.encodeBase64String(result);
-
-    }
-
     /**
      * 使用指定字符集将内容转成字节流.
      *
@@ -194,6 +217,12 @@ class RSA {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("签名过程中出现错误,指定的编码集不对,您目前指定的编码集是:" + charset);
         }
+    }
+
+    public static void main(String[] args) {
+        final String s = Base64.encodeBase64String("测测需要多少字符测测需要多少字符".getBytes());
+        System.out.println(s);
+        System.out.println(s.length());
     }
 
 }

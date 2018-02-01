@@ -58,26 +58,26 @@ public final class SourceGenerator {
         param.setCommentsUser("齐霞飞");
         param.setCommentsSince("JDK 1.8.0");
         param.setCommentsVersion("1.0.0");
-        param.setDomainDirectory("C:\\code\\local\\loan\\loan-mercury\\fm-mercury-dao\\src\\main\\java\\com\\virgo\\finance\\fm\\mercury\\dao\\domain");
-        param.setDomainPackage("com.virgo.finance.fm.mercury.dao.domain");
-        param.setDomainSuffix("PO");
-        param.setMapperDirectory("C:\\code\\local\\loan\\loan-mercury\\fm-mercury-dao\\src\\main\\resources\\mybatis\\mercury");
-        param.setDaoDirectory("C:\\code\\local\\loan\\loan-mercury\\fm-mercury-dao\\src\\main\\java\\com\\virgo\\finance\\fm\\mercury\\dao");
-        param.setDaoPackage("com.virgo.finance.fm.mercury.dao");
+        param.setDomainDirectory("C:\\code\\local\\yx\\pay\\pay-domain\\src\\main\\java\\com\\virgo\\finance\\pay\\domain\\po");
+        param.setDomainPackage("com.virgo.finance.pay.domain.po");
+        param.setDomainSuffix("Po");
+        param.setMapperDirectory("C:\\code\\local\\yx\\pay\\pay-web\\src\\main\\resources\\pay\\mappings");
+        param.setDaoDirectory("C:\\code\\local\\yx\\pay\\pay-dao\\src\\main\\java\\com\\virgo\\finance\\pay\\dao");
+        param.setDaoPackage("com.virgo.finance.pay.dao");
         // is cover ori file's content
         param.setCoverFile(true);
-        param.setJavaTime(true);
+        param.setJavaTime(false);
         param.setLombok(true);
 
-        String jdbcUrl = "jdbc:mysql://192.168.130.208:3306/fm_creditLoan_core?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=true";
-        String dbUser ="root";
-        String pwd="root";
+        String jdbcUrl = "jdbc:mysql://192.168.130.208:3306/pay?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=true";
+        String dbUser = "root";
+        String pwd = "root";
 
         List<GenerateSourceParamItem> itemList = new ArrayList<>();
 
-        GenerateSourceParamItem table1 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-                "ACCT_MERCURY_REPAYMENT_SUBJECT", "fm_creditLoan_core",
-            "RepaymentSubject", "还款科目");
+        GenerateSourceParamItem table1 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL, jdbcUrl, dbUser, pwd,
+                "DYNAMIC_DUBBO_CONFIG", "pay",
+                "DynamicDubboConfig", "动态dubbo接口配置");
         itemList.add(table1);
 
 //        GenerateSourceParamItem table2 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,

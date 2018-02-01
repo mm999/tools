@@ -19,6 +19,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class DubboProperties {
 
     /**
+     * 应用名.
+     */
+    private String applicationName;
+    /**
      * dubbo接口版本号.
      */
     private String version;
@@ -27,4 +31,9 @@ public class DubboProperties {
      * dubbo接口重试次数
      */
     private Integer retry;
+
+    /**
+     * 连接超时.
+     */
+    private Integer timeOut;
 }

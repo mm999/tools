@@ -9,12 +9,12 @@ import javax.annotation.Resource;
  * <P>Description: Dubbo客户端配置. </P>
  * <P>CALLED BY:   齐霞飞 </P>
  * <P>UPDATE BY:   齐霞飞 </P>
- * <P>CREATE DATE: 2017/11/6</P>
- * <P>UPDATE DATE: 2017/11/6</P>
+ * <P>CREATE DATE: 2018/2/1</P>
+ * <P>UPDATE DATE: 2018/2/1</P>
  *
  * @author 齐霞飞
  * @version 1.0
- * @since java 1.7.0
+ * @since java 1.8.0
  */
 @Configuration
 public class DubboConsumerConfig {
@@ -72,6 +72,7 @@ public class DubboConsumerConfig {
         referenceBean.setCheck(isCheck);
         referenceBean.setVersion(version);
         referenceBean.setRetries(dubboProperties.getRetry());
+        referenceBean.setTimeout(dubboProperties.getTimeOut());
         return referenceBean;
     }
 }

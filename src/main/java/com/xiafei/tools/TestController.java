@@ -35,7 +35,7 @@ import java.util.UUID;
 @RefreshScope
 public class TestController {
 
-    private static final JvmExCache<Integer> CACHE = new JvmExCache<>(10000L, true);
+    private static final JvmExCache<Integer> CACHE = new JvmExCache<>(10000L, true, false);
     private static int COUNT = 0;
     private static int COUNT_POOL = 0;
     @Resource
