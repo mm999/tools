@@ -2,11 +2,10 @@ package com.xiafei.tools;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
-import com.xiafei.tools.sftp.Sftp;
+import com.xiafei.tools.sftp.SftpProperties;
+import com.xiafei.tools.utils.JSONUtil;
 import com.xiafei.tools.utils.JvmCachePool;
 import com.xiafei.tools.utils.JvmExCache;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +16,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.UUID;
 
 /**
  * <P>Description: . </P>
@@ -32,20 +30,21 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/test")
-@RefreshScope
 public class TestController {
 
     private static final JvmExCache<Integer> CACHE = new JvmExCache<>(10000L, true, false);
     private static int COUNT = 0;
     private static int COUNT_POOL = 0;
-    @Resource
-    private Sftp sftp;
+    //    @Resource
+//    private Sftp sftp;
     @Resource
     private JvmCachePool cachePool;
     private static byte[] fileBytes;
+    @Resource
+    private SftpProperties sftpProperties;
 
-    @Value("${from}")
-    private String from;
+//    @Value("${from}")
+//    private String from;
 
     static {
         final ClassPathResource classPathResource = new ClassPathResource("IMG_0004.JPG");
@@ -67,8 +66,8 @@ public class TestController {
 
     @GetMapping("/sftp")
     public String sftpTest() throws JSchException, SftpException, IOException {
-        String randomStr = UUID.randomUUID().toString();
-        sftp.uploadSync("/data/tempTest/" + randomStr + "/example.jpg", fileBytes);
+//        String randomStr = UUID.randomUUID().toString();
+//        sftp.uploadSync("/data/tempTest/" + randomStr + "/example.jpg", fileBytes);
 //        sftp.getBytes("/data//tempTest/" + randomStr + "/example.jpg");
 //        sftp.removeAsync("/data/tempTest/" + randomStr + "/example.jpg", false);
 //        sftp.removeAsync("/data/tempTest/" + randomStr, true);
@@ -87,8 +86,14 @@ public class TestController {
         return cachePool.getAndRefreshIfExpire("testController", this, () -> ++COUNT_POOL);
     }
 
-    @GetMapping("config")
-    public String getConfig() {
-        return from;
+//    @GetMapping("config")
+//    public String getConfig() {
+////        return from;
+//    }
+
+
+    @GetMapping("sftPro")
+    public String sftpProperties() {
+        return JSONUtil.toJson(sftpProperties);
     }
 }

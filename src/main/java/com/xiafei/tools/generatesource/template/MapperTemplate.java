@@ -152,20 +152,39 @@ public final class MapperTemplate extends SourceTemplate {
      */
     private static void addSqlTemplate(ColumnInfo primaryColumn, List<ColumnInfo> columnInfos, List<String> content, final DataBaseTypeEnum dataBaseType) {
         // 先增加全字段模板
-        content.add("");
-        content.add(getIndent(1) + "<!-- 基础字段 -->");
-        content.add(getIndent(1) + "<sql id=\"Base_Columns\">");
-        content.add(getIndent(2) + primaryColumn.getName() + ",");
-        content.add(getIndent(2) + "<include refid=\"Columns_For_Insert\"/>");
-        content.add(getIndent(1) + "</sql>");
+        if(primaryColumn == null){
+            content.add("");
+            content.add("");
+            content.add(getIndent(1) + "<!-- 基础字段 -->");
+            content.add(getIndent(1) + "<sql id=\"Base_Columns\">");
+            cycleAddColumnName(getIndent(2), columnInfos, content, dataBaseType);
+            content.add(getIndent(1) + "</sql>");
 
-        // 增加insert模板，不包含主键
-        content.add("");
-        content.add(getIndent(1) + "<!-- Insert使用字段 -->");
-        content.add(getIndent(1) + "<sql id=\"Columns_For_Insert\">");
-        // 增加字段信息，不包含主键
-        cycleAddColumnName(getIndent(2), columnInfos, content, dataBaseType);
-        content.add(getIndent(1) + "</sql>");
+            // 增加insert模板，不包含主键
+            content.add("");
+            content.add(getIndent(1) + "<!-- Insert使用字段 -->");
+            content.add(getIndent(1) + "<sql id=\"Columns_For_Insert\">");
+            // 增加字段信息，不包含主键
+            cycleAddColumnName(getIndent(2), columnInfos, content, dataBaseType);
+            content.add(getIndent(1) + "</sql>");
+
+        }else{
+            content.add("");
+            content.add(getIndent(1) + "<!-- 基础字段 -->");
+            content.add(getIndent(1) + "<sql id=\"Base_Columns\">");
+            content.add(getIndent(2) + primaryColumn.getName() + ",");
+            content.add(getIndent(2) + "<include refid=\"Columns_For_Insert\"/>");
+            content.add(getIndent(1) + "</sql>");
+
+            // 增加insert模板，不包含主键
+            content.add("");
+            content.add(getIndent(1) + "<!-- Insert使用字段 -->");
+            content.add(getIndent(1) + "<sql id=\"Columns_For_Insert\">");
+            // 增加字段信息，不包含主键
+            cycleAddColumnName(getIndent(2), columnInfos, content, dataBaseType);
+            content.add(getIndent(1) + "</sql>");
+        }
+
     }
 
     /**

@@ -37,6 +37,15 @@ public class BundleUtil {
     private static final Map<String, BundleUtil> bundleMap = new HashMap<String, BundleUtil>();
     private ResourceBundle bundle;
 
+
+    private BundleUtil(String name) {
+        try {
+            bundle = ResourceBundle.getBundle(name);
+        } catch (Exception e) {
+            log.warn(String.format("Can't find file: %s.properties", name));
+        }
+    }
+
     public static BundleUtil newInstance(String name) {
         if (StringUtils.isBlank(name)) {
             return new BundleUtil(null);
@@ -69,11 +78,4 @@ public class BundleUtil {
         return defaultValue;
     }
 
-    private BundleUtil(String name) {
-        try {
-            bundle = ResourceBundle.getBundle(name);
-        } catch (Exception e) {
-            log.warn(String.format("Can't find file: %s.properties", name));
-        }
-    }
 }

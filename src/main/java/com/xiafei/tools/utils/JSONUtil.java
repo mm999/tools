@@ -1,15 +1,24 @@
 package com.xiafei.tools.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.bind.DateTypeAdapter;
+import com.google.gson.reflect.TypeToken;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class JSONUtil {
     private static final Logger LOG = Logger.getLogger(JSONUtil.class);
@@ -17,6 +26,35 @@ public class JSONUtil {
             .setDateFormat("yyyy-MM-dd HH:mm:ss").
                     registerTypeAdapter(Date.class, new DateTypeAdapter())
             .create();
+
+    public static void main(String[] args) throws IOException {
+        Map<String, Object> data = new HashMap<>();
+        data.put("dd", "1");
+        data.put("cc", "2");
+        data.put("aa", "3");
+        List<Map<String, Object>> list1 = new ArrayList<>();
+        Map<String, Object> data2 = new HashMap<>();
+        data2.put("ccc", "1");
+        data2.put("aaa", "2");
+        list1.add(data2);
+        Map<String, Object> data3 = new HashMap<>();
+        data3.put("ddd", "1");
+        data3.put("bbb", "2");
+        list1.add(data3);
+        data.put("bb", list1);
+        System.out.println(gson.toJson(data));
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writeValueAsString(data));
+        String json = gson.toJson(data);
+        Map<String, Object> ret = gson.fromJson(json, new TypeToken<TreeMap<String, Object>>() {
+        }.getType());
+
+        Map<String, Object> ret2 = mapper.readValue(json, TreeMap.class);
+
+        System.out.println(gson.toJson(ret));
+        System.out.println(mapper.writeValueAsString(ret2));
+
+    }
 
     public static <T> T fromJson(String jsonStr, Class<T> clazz) {
         try {
