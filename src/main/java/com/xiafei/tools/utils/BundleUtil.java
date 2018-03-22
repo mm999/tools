@@ -46,7 +46,7 @@ public class BundleUtil {
         }
     }
 
-    public static BundleUtil newInstance(String name) {
+    public static BundleUtil instance(String name) {
         if (StringUtils.isBlank(name)) {
             return new BundleUtil(null);
         }

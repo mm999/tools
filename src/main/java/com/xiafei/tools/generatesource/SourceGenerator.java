@@ -163,10 +163,18 @@ public final class SourceGenerator {
 //                "COOP_TPLT_REL", "lease",
 //            "CoopTpltRel", "合作方-合同模板关联关系信息表");
 //        itemList.add(table20);//
-        GenerateSourceParamItem table20 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-                "SEND_LOG", "lease",
-                "SendLog", "发送日志");
-        itemList.add(table20);
+//        GenerateSourceParamItem table21 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+//                "SEND_LOG", "lease",
+//                "SendLog", "发送日志");
+//        itemList.add(table21);
+//        GenerateSourceParamItem table22 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+//                "REPAYMENT_FAIL_RECORD", "lease",
+//                "RepaymentFailRecord", "还款失败记录表");
+//        itemList.add(table22);
+        GenerateSourceParamItem table23 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "TIAN_YAN_CHA_CO_RECORD", "lease",
+                "TianYanChaCoRecord", "天眼查查询企业基本信息调用记录表");
+        itemList.add(table23);
         param.setItems(itemList);
 
         exec(param);

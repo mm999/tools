@@ -1,6 +1,6 @@
 package com.xiafei.tools.httpclient;
 
-import com.xiafei.tools.utils.JSONUtil;
+import com.xiafei.tools.utils.JsonUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -42,7 +42,7 @@ public class TianYanCha {
         final CloseableHttpResponse execute = client.execute(get);
         String json = EntityUtils.toString(execute.getEntity(), "utf-8");
         log.info("search353(),word={},resp={}", word, json);
-        return JSONUtil.fromJson(json, Resp353.class);
+        return JsonUtil.fromJson(json, Resp353.class);
     }
 
     /**
@@ -57,7 +57,7 @@ public class TianYanCha {
         final CloseableHttpResponse execute = client.execute(get);
         String json = EntityUtils.toString(execute.getEntity(), "utf-8");
         log.info("search362(),id={},resp={}", id, json);
-        return JSONUtil.fromJson(json, Resp362.class);
+        return JsonUtil.fromJson(json, Resp362.class);
     }
 
     @Data

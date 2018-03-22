@@ -1,6 +1,5 @@
 package com.xiafei.tools.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -20,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class JSONUtil {
-    private static final Logger LOG = Logger.getLogger(JSONUtil.class);
+public class JsonUtil {
+    private static final Logger LOG = Logger.getLogger(JsonUtil.class);
     private static final Gson gson = new GsonBuilder()
             .setDateFormat("yyyy-MM-dd HH:mm:ss").
                     registerTypeAdapter(Date.class, new DateTypeAdapter())
@@ -113,7 +112,7 @@ public class JSONUtil {
         return srcJObj;
     }
 
-    private JSONUtil() {
+    private JsonUtil() {
 
     }
 

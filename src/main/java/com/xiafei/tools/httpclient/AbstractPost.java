@@ -2,7 +2,7 @@ package com.xiafei.tools.httpclient;
 
 
 import com.google.gson.reflect.TypeToken;
-import com.xiafei.tools.utils.JSONUtil;
+import com.xiafei.tools.utils.JsonUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -87,7 +87,7 @@ public abstract class AbstractPost {
         } else {
             post.addHeader("Content-Type", "application/json;charset=UTF-8");
             StringEntity entity = new StringEntity(
-                    JSONUtil.toJson(respMap, new TypeToken<Map<String, Object>>() {
+                    JsonUtil.toJson(respMap, new TypeToken<Map<String, Object>>() {
                     }.getType()),
                     "utf-8");
             entity.setContentEncoding("utf-8");

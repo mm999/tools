@@ -3,6 +3,8 @@ package com.xiafei.tools.front;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +21,26 @@ import java.util.Map;
  * @since java 1.8.0
  */
 public class CodeVelocityResolver {
+
+    /**
+     * 使用velocity引擎解析指定路径下的文件模板.
+     *
+     * @param inputStream 模板文件内容输入流
+     * @param params      参数
+     * @return 解析后的结果
+     */
+    public static String parse(InputStream inputStream, Map<String, Object> params) {
+
+        // 初始化并取得Velocity引擎
+        VelocityEngine ve = new VelocityEngine();
+        ve.init();
+        VelocityContext context = new VelocityContext(params);
+        // 输出流
+        StringWriter writer = new StringWriter();
+        // 转换输出
+        ve.evaluate(context, writer, "", new InputStreamReader(inputStream)); // 关键方法
+        return writer.toString();
+    }
 
     /**
      * 使用velocity引擎解析指定路径下的文件模板

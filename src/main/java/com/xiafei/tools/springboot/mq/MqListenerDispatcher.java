@@ -5,7 +5,7 @@ import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import com.alibaba.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import com.alibaba.rocketmq.common.message.MessageExt;
 import com.xiafei.tools.exceptions.BizException;
-import com.xiafei.tools.utils.JSONUtil;
+import com.xiafei.tools.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -56,7 +56,7 @@ public class MqListenerDispatcher implements MessageListenerConcurrently, Applic
     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
 
         for (MessageExt msg : msgs) {
-            log.info("{},msg={}", LOG_PREFIX, JSONUtil.toJson(msg));
+            log.info("{},msg={}", LOG_PREFIX, JsonUtil.toJson(msg));
             final ConsumeConcurrentlyStatus consumeConcurrentlyStatus;
             try {
                 final MqListener listener = listenerMap.get(msg.getTags());

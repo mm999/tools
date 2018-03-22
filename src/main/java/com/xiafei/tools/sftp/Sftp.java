@@ -134,18 +134,36 @@ public class Sftp {
         ChannelSftp channel = null;
         try {
             channel = fetch();
-            final InputStream is = channel.get(path);
-            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            final byte[] buffer = new byte[Constants.SFTP_BUFFER_SIZE];
-            int remain;
-            while ((remain = is.read(buffer, 0, Constants.SFTP_BUFFER_SIZE)) > 0) {
-                bos.write(buffer, 0, remain);
+            try (final InputStream is = channel.get(path);
+                 final ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                final byte[] buffer = new byte[Constants.SFTP_BUFFER_SIZE];
+                int remain;
+                while ((remain = is.read(buffer, 0, Constants.SFTP_BUFFER_SIZE)) > 0) {
+                    bos.write(buffer, 0, remain);
+                }
+                return bos.toByteArray();
             }
-            return bos.toByteArray();
+
         } finally {
             release(channel);
         }
 
+    }
+
+    /**
+     * 从sftp服务器上获取文件的输入流.
+     *
+     * @param path 文件路径
+     * @return 文件的输入流
+     */
+    public InputStream getStream(final String path) throws SftpException {
+        ChannelSftp channel = null;
+        try {
+            channel = fetch();
+            return channel.get(path);
+        } finally {
+            release(channel);
+        }
     }
 
     /**
@@ -177,9 +195,13 @@ public class Sftp {
         ChannelSftp channelSftp = null;
         try {
             channelSftp = fetch();
-            final ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-            cycleMkDir(path, channelSftp);
-            channelSftp.put(bis, path);
+            try (final ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
+                cycleMkDir(path, channelSftp);
+                channelSftp.put(bis, path);
+            } catch (IOException e) {
+                log.warn("sftp同步上传后关闭byte数组输入流失败");
+            }
+
         } finally {
             release(channelSftp);
         }

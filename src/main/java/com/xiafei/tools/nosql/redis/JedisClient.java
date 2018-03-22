@@ -44,7 +44,7 @@ public class JedisClient {
     private static Integer maxWaitTime = 3000;
 
     static {
-        BundleUtil bundle = BundleUtil.newInstance("redis");
+        BundleUtil bundle = BundleUtil.instance("redis");
         if (bundle != null && jedisCluster == null && !StringUtils.isBlank(bundle.getString("redisLock"))) {
             String redisStr = bundle.getString("redisLock");
             if (!StringUtils.isEmpty(redisStr)) {

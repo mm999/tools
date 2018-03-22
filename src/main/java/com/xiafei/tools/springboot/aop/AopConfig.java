@@ -1,6 +1,6 @@
 package com.xiafei.tools.springboot.aop;
 
-import com.xiafei.tools.utils.JSONUtil;
+import com.xiafei.tools.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -46,7 +46,7 @@ public class AopConfig {
         final Method method = signature.getMethod(); //获取被拦截的方法
         final String methodName = method.getName(); //获取被拦截的方法名
         final Object[] args = point.getArgs();
-        log.info("{}.{}(),param={}", point.getTarget().getClass().getName(), methodName, JSONUtil.toJson(args));
+        log.info("{}.{}(),param={}", point.getTarget().getClass().getName(), methodName, JsonUtil.toJson(args));
 
 //        // 一切正常的情况下，继续执行被拦截的方法
 //        try {

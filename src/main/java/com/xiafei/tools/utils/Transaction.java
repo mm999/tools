@@ -37,11 +37,11 @@ public class Transaction {
         final TransactionStatus status = transactionManager.getTransaction(definition);
         try {
             task.task();
+            transactionManager.commit(status);
         } catch (Exception e) {
             transactionManager.rollback(status);
             throw e;
         }
-        transactionManager.commit(status);
     }
 
     /**
