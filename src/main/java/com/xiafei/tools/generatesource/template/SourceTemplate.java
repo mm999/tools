@@ -2,7 +2,7 @@ package com.xiafei.tools.generatesource.template;
 
 import com.xiafei.tools.generatesource.GenerateSourceParam;
 import com.xiafei.tools.generatesource.GenerateSourceParamItem;
-import com.xiafei.tools.utils.DateUtils;
+import com.xiafei.tools.common.DateUtils;
 
 import java.util.Date;
 import java.util.List;

@@ -7,7 +7,7 @@ import com.xiafei.tools.generatesource.enums.ColumnKeyEnum;
 import com.xiafei.tools.generatesource.enums.DataBaseTypeEnum;
 import com.xiafei.tools.generatesource.enums.JdbcTypeJavaTypeEnum;
 import com.xiafei.tools.generatesource.enums.JdbcTypeMyBatisEnum;
-import com.xiafei.tools.utils.StringUtils;
+import com.xiafei.tools.common.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;

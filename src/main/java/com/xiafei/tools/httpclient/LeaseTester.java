@@ -1,7 +1,7 @@
 package com.xiafei.tools.httpclient;
 
-import com.xiafei.tools.utils.JsonUtil;
-import com.xiafei.tools.utils.encrypt.rsa.RSAUtil;
+import com.xiafei.tools.common.JsonUtil;
+import com.xiafei.tools.common.encrypt.rsa.RSAUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,16 +26,16 @@ public class LeaseTester {
 
     private static final String URL = "http://127.0.0.1:9888/service/toFund";
 
-
+    private static final String APPLY_NO = "2018032319540500784000100003";
     public static void main(String[] args) {
         // 状态回调测试
 //        statusTest();
         // 还款计划推送测试
 //        pushPlan();
         // 划扣记录推送测试
-//        pushDeduct();
+        pushDeduct();
         // 划扣失败记录推送测试
-        pushFailedDeduct();
+//        pushFailedDeduct();
     }
 
     /**
@@ -44,7 +44,7 @@ public class LeaseTester {
     private static void statusTest() {
         // 申请单号列表，如果状态是1审核通过或4签名设备合同已回调，则只能传递一个申请单号.
         final ArrayList<String> applyNoList = new ArrayList<>();
-        applyNoList.add("2018032110372800275000100008");
+        applyNoList.add(APPLY_NO);
         // 做幂等判断的这批申请单状态变更唯一序号
         final String batchNo = UUID.randomUUID().toString().replace("-", "");
         // 租赁贷款开始日期
@@ -52,9 +52,9 @@ public class LeaseTester {
         // 租赁贷款结束日期
         final String endDate = "20190420";
         // 签名合同文件路径
-        final String contractPath = "/files/apply/2018032110372800275000100008/APPLY_CONTRACT";
+        final String contractPath = "/files/apply/2018032313561400838000100005/APPLY_CONTRACT";
         // 0-创建成功-审核中,1-审核通过,2-审核拒绝,3-设备安装已确认,4-签名设备合同已回调,5-待放款,6-放款成功,7-放款失败
-        final String status = "1";
+        final String status = "6";
 
         final TreeMap<String, Object> data = new TreeMap<>();
         data.put("status", status);
@@ -108,9 +108,9 @@ public class LeaseTester {
 
         final Map<String, Object> infoMap0 = new TreeMap<>();
         result.add(infoMap0);
-
-        infoMap0.put("applyNo", "2018032110372800275000100008");
-        infoMap0.put("deductNo", "1");
+        final String deductNo = UUID.randomUUID().toString().replace("-","");
+        infoMap0.put("applyNo", APPLY_NO);
+        infoMap0.put("deductNo", deductNo);
         //0-客户银行卡，1-保证金账户
         infoMap0.put("acctType", "1");
         infoMap0.put("bankNo", RSAUtil.encryptTemp("yhk", "LEASE"));
@@ -120,8 +120,8 @@ public class LeaseTester {
         final Map<String, Object> infoMap1 = new TreeMap<>();
         result.add(infoMap1);
 
-        infoMap1.put("applyNo", "2018032110372800275000100008");
-        infoMap1.put("deductNo", "1");
+        infoMap1.put("applyNo", APPLY_NO);
+        infoMap1.put("deductNo", deductNo);
         //0-客户银行卡，1-保证金账户
         infoMap1.put("acctType", "0");
         infoMap1.put("bankNo", RSAUtil.encryptTemp("yhk", "LEASE"));
@@ -131,8 +131,8 @@ public class LeaseTester {
         final Map<String, Object> infoMap2 = new TreeMap<>();
         result.add(infoMap0);
 
-        infoMap2.put("applyNo", "2018032110372800275000100008");
-        infoMap2.put("deductNo", "1");
+        infoMap2.put("applyNo", APPLY_NO);
+        infoMap2.put("deductNo", deductNo);
         //0-客户银行卡，1-保证金账户
         infoMap2.put("acctType", "1");
         infoMap2.put("bankNo", RSAUtil.encryptTemp("yhk", "LEASE"));
@@ -153,7 +153,7 @@ public class LeaseTester {
 
         final Map<String, Object> infoMap0 = new TreeMap<>();
         result.add(infoMap0);
-        infoMap0.put("applyNo", "2018032110372800275000100008");
+        infoMap0.put("applyNo", APPLY_NO);
         infoMap0.put("failNo", "1");
         //0-客户银行卡，1-保证金账户
         infoMap0.put("acctType", "1");
@@ -182,7 +182,7 @@ public class LeaseTester {
         // ===========每一个还款计划信息map对应一个申请单号
         final TreeMap<String, Object> infoMap0 = new TreeMap<>();
         result.add(infoMap0);
-        infoMap0.put("applyNo", "2018032110372800275000100009");
+        infoMap0.put("applyNo", APPLY_NO);
         infoMap0.put(period, "12");
         infoMap0.put(monthAmount, "1000000");
         // 开始日期
@@ -192,20 +192,6 @@ public class LeaseTester {
         startDate.set(Calendar.DAY_OF_MONTH, 20);
         infoMap0.put("planList", buildPlanList(Integer.parseInt(infoMap0.get(period).toString()),
                 Integer.parseInt(infoMap0.get(monthAmount).toString()), startDate));
-        // ===========每一个还款计划信息map对应一个申请单号
-        final TreeMap<String, Object> infoMap1 = new TreeMap<>();
-        result.add(infoMap1);
-        infoMap1.put("applyNo", "2018032110372800275000100008");
-        infoMap1.put(period, "12");
-        infoMap1.put(monthAmount, "1000000");
-        // 开始日期
-        final Calendar startDate1 = Calendar.getInstance();
-        startDate1.set(Calendar.YEAR, 2018);
-        startDate1.set(Calendar.MONTH, 4);
-        startDate1.set(Calendar.DAY_OF_MONTH, 20);
-        infoMap1.put("planList", buildPlanList(Integer.parseInt(infoMap0.get(period).toString()),
-                Integer.parseInt(infoMap0.get(monthAmount).toString()), startDate1));
-
         return result;
     }
 
@@ -239,9 +225,9 @@ public class LeaseTester {
         final TreeMap<String, Object> result = new TreeMap<>();
         result.put("startDate", getYyyyMmDdStr(startDate));
         startDate.add(Calendar.MONTH, 1);
-        result.put("endDate", getYyyyMmDdStr(startDate));
-        startDate.add(Calendar.DAY_OF_MONTH, -1);
         result.put("dueDate", getYyyyMmDdStr(startDate));
+        startDate.add(Calendar.DAY_OF_MONTH, -1);
+        result.put("endDate", getYyyyMmDdStr(startDate));
         startDate.add(Calendar.DAY_OF_MONTH, 1);
         // 0-待执行，1-正在执行，2-逾期执行中，3-已结清
         result.put("status", status);

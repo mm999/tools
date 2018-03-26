@@ -1,10 +1,9 @@
 package com.xiafei.tools.spider.metalquotation;
 
 import com.xiafei.tools.spider.NoLoginPageGetter;
-import com.xiafei.tools.spider.metalquotation.DayK;
-import com.xiafei.tools.utils.FileUtils;
-import com.xiafei.tools.utils.MapUtils;
-import com.xiafei.tools.utils.StringUtils;
+import com.xiafei.tools.common.FileUtils;
+import com.xiafei.tools.common.MapUtils;
+import com.xiafei.tools.common.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;

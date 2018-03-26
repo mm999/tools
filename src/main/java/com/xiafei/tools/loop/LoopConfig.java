@@ -14,7 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * <P>Description: 定时任务配置，会自动扫描实现了LoopTask接口的bean. </P>
+ * <P>Description: 定时任务配置. </P>
  * <P>CALLED BY:   齐霞飞 </P>
  * <P>UPDATE BY:   齐霞飞 </P>
  * <P>CREATE DATE: 2018/2/6</P>
@@ -46,11 +46,19 @@ public class LoopConfig implements ApplicationContextAware {
             }
 
             final ScheduledExecutorService ses = Executors.newScheduledThreadPool(loopTaskList.size());
+
+
             for (LoopTask task : loopTaskList) {
-                if (task.concurrent()) {
-                    ses.scheduleAtFixedRate(task::invoke, 1000L, task.delay(), TimeUnit.MILLISECONDS);
+                if (task.fixTime() != null) {
+                    ses.scheduleAtFixedRate(task::invoke, task.fixTime() - System.currentTimeMillis(),
+                            TimeUnit.DAYS.toMillis(1), TimeUnit.MILLISECONDS);
                 } else {
-                    ses.scheduleWithFixedDelay(task::invoke, 1000L, task.delay(), TimeUnit.MILLISECONDS);
+
+                    if (task.concurrent()) {
+                        ses.scheduleAtFixedRate(task::invoke, 1000L, task.delay(), TimeUnit.MILLISECONDS);
+                    } else {
+                        ses.scheduleWithFixedDelay(task::invoke, 1000L, task.delay(), TimeUnit.MILLISECONDS);
+                    }
                 }
                 log.info("{},循环定时任务启动成功，间隔={}，并发={}", task.getClass().getName(), task.delay(), task.concurrent());
             }

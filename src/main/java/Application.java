@@ -1,9 +1,7 @@
 import com.xiafei.tools.nosql.redis.JedisClientProperties;
 import com.xiafei.tools.sftp.SftpProperties;
-import com.xiafei.tools.springboot.dubbo.DubboProperties;
-import com.xiafei.tools.springboot.mq.RocketMQProperties;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
+import com.xiafei.tools.spring.springboot.dubbo.DubboProperties;
+import com.xiafei.tools.spring.springboot.mq.RocketMQProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,10 +10,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.core.env.Environment;
-
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * <P>Description: springboot启动类. </P>

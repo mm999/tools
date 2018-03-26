@@ -1,7 +1,7 @@
 package com.xiafei.tools;
 
-import com.xiafei.tools.utils.JsonUtil;
-import com.xiafei.tools.utils.encrypt.rsa.RSAUtil;
+import com.xiafei.tools.common.JsonUtil;
+import com.xiafei.tools.common.encrypt.rsa.RSAUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;

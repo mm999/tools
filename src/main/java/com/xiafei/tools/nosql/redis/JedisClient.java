@@ -1,7 +1,7 @@
 package com.xiafei.tools.nosql.redis;
 
 import com.xiafei.tools.enums.JedisEnums;
-import com.xiafei.tools.utils.BundleUtil;
+import com.xiafei.tools.common.BundleUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import redis.clients.jedis.HostAndPort;
@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 /**
@@ -44,7 +45,7 @@ public class JedisClient {
     private static Integer maxWaitTime = 3000;
 
     static {
-        BundleUtil bundle = BundleUtil.instance("redis");
+        ResourceBundle bundle = BundleUtil.instance("redis");
         if (bundle != null && jedisCluster == null && !StringUtils.isBlank(bundle.getString("redisLock"))) {
             String redisStr = bundle.getString("redisLock");
             if (!StringUtils.isEmpty(redisStr)) {
@@ -57,10 +58,28 @@ public class JedisClient {
                     jedisClusterNodes.add(new HostAndPort(url[0], port));
                 }
                 JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-                jedisPoolConfig.setMaxTotal(Integer.valueOf(bundle.getString("maxTotal", "100")));//the max number of connection
-                jedisPoolConfig.setMaxIdle(Integer.valueOf(bundle.getString("maxIdle", "50")));//the max number of free
-                jedisPoolConfig.setMaxWaitMillis(Long.valueOf(bundle.getString("maxWaitTime", "1000")));//the longest time of waiting
-                String encryptRedise = bundle.getString("encryptRedise");
+                try {
+                    jedisPoolConfig.setMaxTotal(Integer.valueOf(bundle.getString("maxTotal")));//the max number of connection
+                } catch (RuntimeException e) {
+                    jedisPoolConfig.setMaxTotal(100);//the max number of connection
+                }
+                try {
+
+                    jedisPoolConfig.setMaxIdle(Integer.valueOf(bundle.getString("maxIdle")));//the max number of free
+                } catch (RuntimeException e) {
+                    jedisPoolConfig.setMaxIdle(50);//the max number of free
+                }
+                try {
+                    jedisPoolConfig.setMaxWaitMillis(Long.valueOf(bundle.getString("maxWaitTime")));//the longest time of waiting
+                } catch (RuntimeException e) {
+                    jedisPoolConfig.setMaxWaitMillis(1000L);//the longest time of waiting
+                }
+                String encryptRedise = null;
+                try {
+                    encryptRedise = bundle.getString("encryptRedise");
+                } catch (RuntimeException e) {
+                }
+
                 if (encryptRedise != null && encryptRedise.equals("false")) {
                     jedisCluster = new JedisCluster(jedisClusterNodes, 5000, 5000, 1, jedisPoolConfig);
                 } else {

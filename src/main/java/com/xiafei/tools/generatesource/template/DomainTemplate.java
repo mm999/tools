@@ -4,7 +4,7 @@ import com.xiafei.tools.generatesource.ColumnInfo;
 import com.xiafei.tools.generatesource.GenerateSourceParam;
 import com.xiafei.tools.generatesource.GenerateSourceParamItem;
 import com.xiafei.tools.generatesource.enums.JdbcTypeJavaTypeEnum;
-import com.xiafei.tools.utils.StringUtils;
+import com.xiafei.tools.common.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

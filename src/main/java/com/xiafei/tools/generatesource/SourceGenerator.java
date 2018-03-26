@@ -4,9 +4,9 @@ import com.xiafei.tools.generatesource.enums.DataBaseTypeEnum;
 import com.xiafei.tools.generatesource.template.DaoTemplate;
 import com.xiafei.tools.generatesource.template.DomainTemplate;
 import com.xiafei.tools.generatesource.template.MapperTemplate;
-import com.xiafei.tools.utils.DBUtils;
-import com.xiafei.tools.utils.FileUtils;
-import com.xiafei.tools.utils.StringUtils;
+import com.xiafei.tools.common.Db;
+import com.xiafei.tools.common.FileUtils;
+import com.xiafei.tools.common.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -202,7 +202,7 @@ public final class SourceGenerator {
 
                 try {
                     // 建立数据库连接
-                    final Connection conn = DBUtils.getMysqlConnection(item.getUrl(), item.getUser(), item.getPassword());
+                    final Connection conn = Db.getMysqlConn(item.getUrl(), item.getUser(), item.getPassword());
                     // 执行sql
                     String sql = MYSQL_SQL_TEMPLATE.replace("$tableName", item.getTableName()).replace("$tableSchema", item.getTableSchema());
                     LOGGER.info("查询表结构，sql：{}", sql);

@@ -1,8 +1,8 @@
 package com.xiafei.tools.spider.metalquotation;
 
-import com.xiafei.tools.utils.BeanUtils;
-import com.xiafei.tools.utils.MapUtils;
-import com.xiafei.tools.utils.StringUtils;
+import com.xiafei.tools.common.BeanUtils;
+import com.xiafei.tools.common.MapUtils;
+import com.xiafei.tools.common.StringUtils;
 
 import java.beans.IntrospectionException;
 import java.io.BufferedReader;

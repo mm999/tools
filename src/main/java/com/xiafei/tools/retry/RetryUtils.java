@@ -1,5 +1,8 @@
 package com.xiafei.tools.retry;
 
+import com.xiafei.tools.data.Code;
+import com.xiafei.tools.data.Message;
+import com.xiafei.tools.data.Messages;
 import org.slf4j.Logger;
 
 /**

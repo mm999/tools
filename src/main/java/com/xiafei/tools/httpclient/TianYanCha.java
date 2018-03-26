@@ -1,6 +1,6 @@
 package com.xiafei.tools.httpclient;
 
-import com.xiafei.tools.utils.JsonUtil;
+import com.xiafei.tools.common.JsonUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
