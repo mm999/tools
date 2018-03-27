@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ToString
 public class Sftp {
 
+
     /**
      * ssh默认端口号.
      */
@@ -47,16 +48,18 @@ public class Sftp {
     /**
      * 连接池.
      */
-    private static final LinkedList<ChannelSftp> POOL = new LinkedList<>();
+    private final LinkedList<ChannelSftp> POOL = new LinkedList<>();
 
     /**
      * 文件上传线程池，因文件上传速度主要取决于网络及服务器硬盘写速度，所以使用单线程的线程池.
      */
-    private static final Executor UPLOAD_THREADS = Executors.newSingleThreadExecutor();
+    private final Executor UPLOAD_THREADS = Executors.newSingleThreadExecutor();
     /**
      * SHELL操作连接池.
      */
-    private static Executor SHEEL_THREADS = Executors.newCachedThreadPool();
+    private Executor SHEEL_THREADS = Executors.newCachedThreadPool();
+
+    private String logPrefix = "";
 
     /**
      * sftp主机ip.
@@ -108,7 +111,7 @@ public class Sftp {
      * @throws JSchException 连接异常
      */
     public Sftp(final String host, final Integer port, final String userName, final String password,
-                final Integer timeOut, final Integer initSize, final Integer maxSize) throws JSchException {
+                final Integer timeOut, final Integer initSize, final Integer maxSize) {
         this.host = host;
         this.port = port == null ? DEFAULT_PORT : port;
         this.userName = userName;
@@ -118,10 +121,16 @@ public class Sftp {
         this.maxSize = maxSize;
         this.poolSize = initSize;
         this.needSize = new AtomicInteger(0);
-        for (int i = 0; i < initSize; i++) {
-            POOL.addLast(createChannel());
-        }
+        logPrefix = host + port;
+        try {
+            for (int i = 0; i < initSize; i++) {
 
+                POOL.addLast(createChannel());
+
+            }
+        } catch (JSchException e) {
+            log.error("初始化sftp报错,host={}，port={},userName={},password={}", host, port, userName, password, e);
+        }
     }
 
     /**
@@ -199,7 +208,7 @@ public class Sftp {
                 cycleMkDir(path, channelSftp);
                 channelSftp.put(bis, path);
             } catch (IOException e) {
-                log.warn("sftp同步上传后关闭byte数组输入流失败");
+                log.warn("{}sftp同步上传后关闭byte数组输入流失败", logPrefix);
             }
 
         } finally {
@@ -217,11 +226,11 @@ public class Sftp {
         UPLOAD_THREADS.execute(() -> {
             try {
                 uploadSync(path, bytes);
-                log.info("uploadAsync success,path={}", path);
+                log.info("{}uploadAsync success,path={}", logPrefix, path);
             } catch (SftpException e) {
-                log.error("uploadAsync with bytes file operate exception,path={}", path, e);
+                log.error("{}uploadAsync with bytes file operate exception,path={}", logPrefix, path, e);
             } catch (Throwable e) {
-                log.error("uploadAsync with bytes uncaught exception,path={}", path, e);
+                log.error("{}uploadAsync with bytes uncaught exception,path={}", logPrefix, path, e);
             }
         });
     }
@@ -254,11 +263,11 @@ public class Sftp {
         UPLOAD_THREADS.execute(() -> {
             try {
                 uploadSync(path, is);
-                log.info("uploadAsync success,path={}", path);
+                log.info("{}uploadAsync success,path={}", logPrefix, path);
             } catch (SftpException e) {
-                log.error("uploadAsync with inputStream file operate exception,path={}", path, e);
+                log.error("{}uploadAsync with inputStream file operate exception,path={}", logPrefix, path, e);
             } catch (Throwable e) {
-                log.error("uploadAsync with inputStream uncaught exception,path={}", path, e);
+                log.error("{}uploadAsync with inputStream uncaught exception,path={}", logPrefix, path, e);
             }
         });
     }
@@ -290,12 +299,12 @@ public class Sftp {
         UPLOAD_THREADS.execute(() -> {
             try {
                 uploadSync(remotePath, localPath);
-                log.info("uploadAsync success,remotePath={},localPath={}", remotePath, localPath);
+                log.info("{}uploadAsync success,remotePath={},localPath={}", logPrefix, remotePath, localPath);
             } catch (SftpException e) {
-                log.error("uploadAsync with inputStream file operate exception,remotePath={},localPath={}", remotePath,
+                log.error("{}uploadAsync with inputStream file operate exception,remotePath={},localPath={}", logPrefix, remotePath,
                         localPath, e);
             } catch (Throwable e) {
-                log.error("uploadAsync with inputStream uncaught exception,remotePath={},localPath={}", remotePath,
+                log.error("{}uploadAsync with inputStream uncaught exception,remotePath={},localPath={}", logPrefix, remotePath,
                         localPath, e);
             }
         });
@@ -342,11 +351,11 @@ public class Sftp {
         SHEEL_THREADS.execute(() -> {
             try {
                 removeSync(path, isDirectory);
-                log.info("removeAsync success,path={}", path);
+                log.info("{}removeAsync success,path={}", logPrefix, path);
             } catch (SftpException e) {
-                log.error("removeAsync file operate exception,path={}", path, e);
+                log.error("{}removeAsync file operate exception,path={}", logPrefix, path, e);
             } catch (Throwable e) {
-                log.error("removeAsync uncaught exception,path={}", path, e);
+                log.error("{}removeAsync uncaught exception,path={}", logPrefix, path, e);
             }
 
         });
@@ -359,7 +368,7 @@ public class Sftp {
      * @param channelSftp sftp通道
      * @throws SftpException sftp异常
      */
-    private static void cycleMkDir(final String path, final ChannelSftp channelSftp) throws SftpException {
+    private void cycleMkDir(final String path, final ChannelSftp channelSftp) throws SftpException {
         if (path.contains(Constants.FILE_SEPARATOR)) {
 
             final String[] fullItem = path.split(Constants.FILE_SEPARATOR);
@@ -375,11 +384,11 @@ public class Sftp {
                     channelSftp.cd(item);
                 } catch (SftpException sException) {
                     if (ChannelSftp.SSH_FX_NO_SUCH_FILE == sException.id) {
-                        log.debug("sftp服务器创建文件路径={}", item);
+                        log.debug("{}sftp服务器创建文件路径={}", logPrefix, item);
                         channelSftp.mkdir(item);
                         channelSftp.cd(item);
                     } else {
-                        log.error("sftp.cd 报错", sException);
+                        log.error("{}sftp.cd 报错", logPrefix, sException);
                     }
                 }
             }
@@ -549,7 +558,7 @@ public class Sftp {
     /**
      * 关闭通道和会话.
      */
-    private static void closeChannel(final ChannelSftp channel) {
+    private void closeChannel(final ChannelSftp channel) {
         try {
 
             if (channel != null) {

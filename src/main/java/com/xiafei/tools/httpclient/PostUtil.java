@@ -69,8 +69,9 @@ public class PostUtil {
 
 
     public static void main(String[] args) {
+        System.out.println("{\"data\":{\"applyNoList\":[\"2018032110372800275000100009\"],\"batchNo\":\"bcd6db039310440fb58be8afbf88a0c0\",\"status\":\"1\"},\"service\":\"lease_apply_callback\",\"sign\":\"aaJNyxHWMT+O48/FG5eNBOwezxKK7MMz0xOXdVKweYDfEReFaVuruYfl+zDZOrc4IU6qGeU1oX4y\\nYgA4pNR2P4OtZD0VAK1zF4dPsIEjbV22oDUqQubcVCoKD80D9/FVnIRpyFD4RH3EaBtCgLbI2hgI\\nLX1B8QXZEOmH4BHPAOs\\u003d\",\"systemId\":\"FUND_JX\",\"version\":\"1.0\"}");
         System.out.println("服务器返回：" + postJson("http://127.0.0.1:9888/service/toFund",
-                "{\"data\":{\"applyNoList\":[\"2018032110372800275000100008\"],\"batchNo\":\"2018032110372800275000100009\",\"endDate\":\"20190321\",\"signedFilePath\":\"/files/apply/2018032110372800275000100008/APPLY_CONTRACT\",\"startDate\":\"20180321\",\"status\":\"6\"},\"service\":\"lease_apply_callback\",\"sign\":\"Je301edTmW0jSGEdiSS1jvX2mr16GjUpKjAfUxHfPtU8doBwqs4ZBXfkiDLJqc1Nw0QEZPDFPr/51QU38EmBYpJru+YHmub5LcMEh7tMy1GS6OcVixmi5UqhiuFnVb6e1WixMBIFyfRRiEf5iHS0fBAKvbgFG1EmQ/8Z79pF8js=\",\"systemId\":\"FUND_JX\",\"version\":\"1.0\"}"));
+                "{\"data\":{\"applyNoList\":[\"2018032110372800275000100009\"],\"batchNo\":\"bcd6db039310440fb58be8afbf88a0c0\",\"status\":\"1\"},\"service\":\"lease_apply_callback\",\"sign\":\"aaJNyxHWMT+O48/FG5eNBOwezxKK7MMz0xOXdVKweYDfEReFaVuruYfl+zDZOrc4IU6qGeU1oX4y\\nYgA4pNR2P4OtZD0VAK1zF4dPsIEjbV22oDUqQubcVCoKD80D9/FVnIRpyFD4RH3EaBtCgLbI2hgI\\nLX1B8QXZEOmH4BHPAOs\\u003d\",\"systemId\":\"FUND_JX\",\"version\":\"1.0\"}"));
     }
 
     /**

@@ -24,16 +24,17 @@ import java.util.UUID;
  */
 public class LeaseTester {
 
-    private static final String URL = "http://127.0.0.1:9888/service/toFund";
+    private static final String URL = "http://39.106.38.32/lease/service/toFund";
+//    private static final String URL = "http://localhost:9888/lease/service/toFund";
 
-    private static final String APPLY_NO = "2018032319540500784000100003";
+    private static final String APPLY_NO = "2018032618100100844C0A882DF00048";
     public static void main(String[] args) {
         // 状态回调测试
-//        statusTest();
+        statusTest();
         // 还款计划推送测试
 //        pushPlan();
         // 划扣记录推送测试
-        pushDeduct();
+//        pushDeduct();
         // 划扣失败记录推送测试
 //        pushFailedDeduct();
     }
@@ -46,22 +47,22 @@ public class LeaseTester {
         final ArrayList<String> applyNoList = new ArrayList<>();
         applyNoList.add(APPLY_NO);
         // 做幂等判断的这批申请单状态变更唯一序号
-        final String batchNo = UUID.randomUUID().toString().replace("-", "");
-        // 租赁贷款开始日期
-        final String startDate = "20180420";
-        // 租赁贷款结束日期
-        final String endDate = "20190420";
+        final String batchNo = "8d314b8d52bc48359c361698cedc633a";
+//        // 租赁贷款开始日期
+//        final String startDate = "20180420";
+//        // 租赁贷款结束日期
+//        final String endDate = "20190420";
         // 签名合同文件路径
-        final String contractPath = "/files/apply/2018032313561400838000100005/APPLY_CONTRACT";
+        final String contractPath = "/uploadfile/20170832/3018032110372800275000100009/FJDL103100/1/sourceFile/APPLY_CONTRACT.pdf";
         // 0-创建成功-审核中,1-审核通过,2-审核拒绝,3-设备安装已确认,4-签名设备合同已回调,5-待放款,6-放款成功,7-放款失败
-        final String status = "6";
+        final String status = "1";
 
         final TreeMap<String, Object> data = new TreeMap<>();
         data.put("status", status);
         data.put("applyNoList", applyNoList);
         data.put("signedFilePath", contractPath);
-        data.put("startDate", startDate);
-        data.put("endDate", endDate);
+//        data.put("startDate", startDate);
+//        data.put("endDate", endDate);
         data.put("batchNo", batchNo);
         // 调用请求
         sendToPt(data, "lease_apply_callback");

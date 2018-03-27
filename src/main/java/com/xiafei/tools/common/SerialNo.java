@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <P>Description:生成序列号服务.
- * 序列号组成：15位年月日时分秒毫秒 yyyyMMddHHmmssSSS + 8位16进制本机ip +4位模块编码 + 5位流水号，共32位
+ * 序列号组成：19位年月日时分秒毫秒 yyyyMMddHHmmssSSS + 8位16进制本机ip + 5位流水号，共36位
  * 每个系统可以支持每毫秒9万9千9百9十9次请求
  * 注：支持分布式系统</P>
  * <P>CALLED BY:   齐霞飞 </P>
@@ -32,8 +32,7 @@ public class SerialNo {
     private static String IP_HEX = "";
 
     public static void main(String[] args) {
-        System.out.println(next(ModuleEnum.APPLY));
-        System.out.println(IP_HEX);
+        System.out.println(next());
     }
 
     static {
@@ -54,11 +53,10 @@ public class SerialNo {
     /**
      * 获取序列号.
      *
-     * @param module 模块枚举值
      * @return 序列号
      */
-    public static String next(ModuleEnum module) {
-        return SDF.format(System.currentTimeMillis()).concat(IP_HEX).concat(module.code).concat(getLastFive());
+    public static String next() {
+        return SDF.format(System.currentTimeMillis()).concat(IP_HEX).concat(getLastFive());
     }
 
     /**
@@ -77,24 +75,5 @@ public class SerialNo {
         }
         return String.format("%05d", no);
     }
-
-
-    /**
-     * 模块枚举.
-     */
-    public enum ModuleEnum {
-
-        APPLY("0001", "租赁申请"),
-        CONTRACT("0002", "合同");
-
-        public final String code;
-        public final String desc;
-
-        ModuleEnum(final String code, final String desc) {
-            this.code = code;
-            this.desc = desc;
-        }
-    }
-
 
 }

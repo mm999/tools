@@ -1,14 +1,13 @@
-<html>
+﻿<html>
 <head>
 
 </head>
 <body>
 <h1>只为了测试合同模板，真实的模板肯定比这个复杂</h1>
-$!{data.applyNo}
-$!{data.userId}
-$!{data.cstmMerCode}
-<img style="width:20px;height:20px;" src="$!{data.cardImgPath}"/>
-
-
+    $!{data.applyNo}
+<img style="width:20px;height:20px;" src="$!{data.userSignPath}"/>
+<div>
+	<span style="color:white">jxtestsign</span>
+</div>
 </body>
 </html>

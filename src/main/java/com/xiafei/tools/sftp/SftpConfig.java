@@ -22,11 +22,11 @@ public class SftpConfig {
 
     @Resource
     private SftpProperties sftpProperties;
-//
-//    @Bean
-//    public Sftp sftp() throws JSchException {
-//        return new Sftp(sftpProperties.getHost(), sftpProperties.getPort(), sftpProperties.getUserName(),
-//                sftpProperties.getPassword(), sftpProperties.getTimeOut(), sftpProperties.getConnectionInitSize(),
-//                sftpProperties.getConnectionMaxSize());
-//    }
+
+    @Bean
+    public Sftp sftp() throws JSchException {
+        return new Sftp(sftpProperties.getKry().getHost(), sftpProperties.getKry().getPort(), sftpProperties.getKry().getUserName(),
+                sftpProperties.getKry().getPassword(), sftpProperties.getKry().getTimeOut(), sftpProperties.getKry().getConnectionInitSize(),
+                sftpProperties.getKry().getConnectionMaxSize());
+    }
 }

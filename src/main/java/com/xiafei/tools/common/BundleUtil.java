@@ -55,11 +55,16 @@ public class BundleUtil {
         if (!bundleMap.containsKey(name)) {
             synchronized (BundleUtil.class) {
                 if (!bundleMap.containsKey(name)) {
-                    bundleMap.put(name, ResourceBundle.getBundle(name));
+                    try {
+                        bundleMap.put(name, ResourceBundle.getBundle(name));
+                    } catch (RuntimeException e) {
+                        return null;
+                    }
                 }
             }
         }
         return bundleMap.get(name);
     }
+
 
 }

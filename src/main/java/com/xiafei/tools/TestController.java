@@ -1,17 +1,24 @@
 package com.xiafei.tools;
 
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 import com.xiafei.tools.common.JsonUtil;
 import com.xiafei.tools.common.encrypt.rsa.RSAUtil;
+import com.xiafei.tools.sftp.Sftp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 /**
  * <P>Description: . </P>
@@ -32,8 +39,8 @@ public class TestController {
 //    private static final JvmExCache<Integer> CACHE = new JvmExCache<>(10000L, true, false);
 //    private static int COUNT = 0;
 //    private static int COUNT_POOL = 0;
-    //    @Resource
-//    private Sftp sftp;
+        @Resource
+    private Sftp sftp;
 //    @Resource
 //    private JvmCachePool cachePool;
 //    private static byte[] fileBytes;
@@ -61,15 +68,12 @@ public class TestController {
 //        }
 //    }
 //
-//    @GetMapping("/sftp")
-//    public String sftpTest() throws JSchException, SftpException, IOException {
-//        String randomStr = UUID.randomUUID().toString();
-//        sftp.uploadSync("/data/tempTest/" + randomStr + "/example.jpg", fileBytes);
-//        sftp.getBytes("/data//tempTest/" + randomStr + "/example.jpg");
-//        sftp.removeAsync("/data/tempTest/" + randomStr + "/example.jpg", false);
-//        sftp.removeAsync("/data/tempTest/" + randomStr, true);
-//        return "complete";
-//    }
+    @GetMapping("/sftp")
+    public String sftpTest() throws JSchException, SftpException, IOException {
+        String randomStr = UUID.randomUUID().toString();
+        final byte[] bytes = sftp.getBytes("/uploadfile/20170832/3018032110372800275000100009/FJDL103100/1/sourceFile/APPLY_CONTRACT.pdf");
+        return "complete";
+    }
 
 
 //    @GetMapping("jvmCache")
