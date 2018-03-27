@@ -6,8 +6,19 @@
 <h1>只为了测试合同模板，真实的模板肯定比这个复杂</h1>
     $!{data.applyNo}
 <img style="width:20px;height:20px;" src="$!{data.userSignPath}"/>
-<div>
-	<span style="color:white">jxtestsign</span>
+<div style="margin-left:800px">
+	<span style="color:black">jxjzsignhere</span>
 </div>
+<table>
+    <tr>
+        <td>jxjzsignhere</td>
+    </tr>
+    <tr>
+        <td>jxjzsignhere</td>
+    </tr>
+    <tr>
+        <td>jxjzsignhere</td>
+    </tr>
+</table>
 </body>
 </html>

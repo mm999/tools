@@ -1,4 +1,4 @@
-package com.xiafei.tools.spider.cert;
+package com.xiafei.tools.cert;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
