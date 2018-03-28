@@ -36,15 +36,16 @@ public class Constants {
     /**
      * sftp服务器的文件路径分隔符.
      */
-//    public static final String FILE_SEPARATOR = File.separator;
-    public static final String FILE_SEPARATOR = "/";
+//    public static final String FILE_SEPARATOR_FORWARD = File.separator;
+    public static final String FILE_SEPARATOR_FORWARD = "/";
+    public static final String FILE_SEPARATOR_BACK = "\\";
     /**
      * 用户类文件上传路径前缀.
      */
-    public static final String UPLOAD_PATH_USER_PREFIX = FILE_SEPARATOR + "data" + FILE_SEPARATOR + "user" + FILE_SEPARATOR;
+    public static final String UPLOAD_PATH_USER_PREFIX = FILE_SEPARATOR_FORWARD + "data" + FILE_SEPARATOR_FORWARD + "user" + FILE_SEPARATOR_FORWARD;
     /**
      * 贷款类文件上传路径前缀.
      */
-    public static final String UPLOAD_PATH_LOAN_PREFIX = FILE_SEPARATOR + "data" + FILE_SEPARATOR + "loan" + FILE_SEPARATOR;
+    public static final String UPLOAD_PATH_LOAN_PREFIX = FILE_SEPARATOR_FORWARD + "data" + FILE_SEPARATOR_FORWARD + "loan" + FILE_SEPARATOR_FORWARD;
 
 }

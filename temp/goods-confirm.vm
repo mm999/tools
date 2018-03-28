@@ -1,0 +1,43 @@
+<html>
+<head>
+</head>
+<body>
+<h1 style="text-align:center;">验收确认函</h1>
+<p style="text-indent: 2em;">
+    承租人点击确认即代表承租人确认了以下内容:</p>
+
+<p style="text-indent: 2em;">
+
+    <font style="font-weight: bold">出卖人已按照编号为$!{data.contractNo}
+        的《产品买卖合同》约定向承租人交付了全部设备（即租赁物），承租人已经对所购设备认真验收，票据、合格证、配件等均齐全完备，设备符合承租人要求。</font>
+
+</p>
+<p style="text-indent: 2em;">
+    租赁物件清单：</p>
+<table border="1">
+    <thead>
+    <tr>
+        <th>序号</th>
+        <th>租赁物名称</th>
+        <th>规格型号</th>
+        <th>产品序列号</th>
+        <th>数量</th>
+    </tr>
+    </thead>
+    <tbody>
+        #foreach ($item in $data.goodsList)
+        <tr>
+            <td>$!{item.increasedId}</td>
+            <td>$!{item.name}</td>
+            <td>$!{item.model}</td>
+            <td>$!{item.serialNo}</td>
+            <td>$!{item.num}</td>
+        </tr>
+        #end
+    </tbody>
+</table>
+<div style="height:200px;"></div>
+<div class="signArea" style="text-align:left;">承租人签章：$!{data.userSignImg}</div>
+<div class="signArea" style="text-align:right">出卖人签章：<span style="color:white;">jxjzsignhere</span><span style="color:white;">万恶的占位符</span></div>
+</body>
+</html>

@@ -121,7 +121,7 @@ public class Sftp {
         this.maxSize = maxSize;
         this.poolSize = initSize;
         this.needSize = new AtomicInteger(0);
-        logPrefix = host + port;
+        logPrefix = host + ":" + port + ",";
         try {
             for (int i = 0; i < initSize; i++) {
 
@@ -321,8 +321,12 @@ public class Sftp {
             channelSftp = fetch();
             final String directory;
             final String fileName;
-            if (path.contains(Constants.FILE_SEPARATOR)) {
-                final int lastIndex = path.lastIndexOf(Constants.FILE_SEPARATOR);
+            if (path.contains(Constants.FILE_SEPARATOR_FORWARD)) {
+                final int lastIndex = path.lastIndexOf(Constants.FILE_SEPARATOR_FORWARD);
+                directory = path.substring(0, lastIndex);
+                fileName = path.substring(lastIndex + 1);
+            } else if (path.contains(Constants.FILE_SEPARATOR_BACK)) {
+                final int lastIndex = path.lastIndexOf(Constants.FILE_SEPARATOR_BACK);
                 directory = path.substring(0, lastIndex);
                 fileName = path.substring(lastIndex + 1);
             } else {
@@ -369,32 +373,44 @@ public class Sftp {
      * @throws SftpException sftp异常
      */
     private void cycleMkDir(final String path, final ChannelSftp channelSftp) throws SftpException {
-        if (path.contains(Constants.FILE_SEPARATOR)) {
-
-            final String[] fullItem = path.split(Constants.FILE_SEPARATOR);
-            if (path.startsWith(Constants.FILE_SEPARATOR)) {
-                fullItem[0] = Constants.FILE_SEPARATOR.concat(fullItem[0]);
-            }
-            //pathItem最后一项是文件名，剔除
-            final String[] pathItem = new String[fullItem.length - 1];
-            System.arraycopy(fullItem, 0, pathItem, 0, fullItem.length - 1);
-            // 遍历文件路径，递归创建文件夹
-            for (String item : pathItem) {
-                try {
-                    channelSftp.cd(item);
-                } catch (SftpException sException) {
-                    if (ChannelSftp.SSH_FX_NO_SUCH_FILE == sException.id) {
-                        log.debug("{}sftp服务器创建文件路径={}", logPrefix, item);
-                        channelSftp.mkdir(item);
-                        channelSftp.cd(item);
-                    } else {
-                        log.error("{}sftp.cd 报错", logPrefix, sException);
-                    }
-                }
-            }
-
+        if (path.contains(Constants.FILE_SEPARATOR_FORWARD)) {
+            cycleMkDir(path, channelSftp, Constants.FILE_SEPARATOR_FORWARD);
+        } else if (path.contains(Constants.FILE_SEPARATOR_BACK)) {
+            cycleMkDir(path, channelSftp, Constants.FILE_SEPARATOR_BACK);
         }
 
+    }
+
+    /**
+     * 循环创建目录.
+     *
+     * @param path        文件全路径
+     * @param channelSftp sftp通道
+     * @param separator   分隔符
+     * @throws SftpException sftp异常
+     */
+    private void cycleMkDir(final String path, final ChannelSftp channelSftp, final String separator) throws SftpException {
+        final String[] fullItem = path.split(separator);
+        if (path.startsWith(separator)) {
+            fullItem[0] = separator.concat(fullItem[0]);
+        }
+        //pathItem最后一项是文件名，剔除
+        final String[] pathItem = new String[fullItem.length - 1];
+        System.arraycopy(fullItem, 0, pathItem, 0, fullItem.length - 1);
+        // 遍历文件路径，递归创建文件夹
+        for (String item : pathItem) {
+            try {
+                channelSftp.cd(item);
+            } catch (SftpException sException) {
+                if (ChannelSftp.SSH_FX_NO_SUCH_FILE == sException.id) {
+                    log.debug("{}sftp服务器创建文件路径={}", logPrefix, item);
+                    channelSftp.mkdir(item);
+                    channelSftp.cd(item);
+                } else {
+                    log.error("{}sftp.cd 报错", logPrefix, sException);
+                }
+            }
+        }
     }
 
 

@@ -15,7 +15,6 @@ import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
 import com.itextpdf.text.pdf.parser.RenderListener;
 import com.itextpdf.text.pdf.parser.TextRenderInfo;
 import com.itextpdf.text.pdf.security.BouncyCastleDigest;
-import com.itextpdf.text.pdf.security.DigestAlgorithms;
 import com.itextpdf.text.pdf.security.ExternalDigest;
 import com.itextpdf.text.pdf.security.ExternalSignature;
 import com.itextpdf.text.pdf.security.MakeSignature;
@@ -26,9 +25,11 @@ import com.itextpdf.tool.xml.html.CssAppliers;
 import com.itextpdf.tool.xml.html.CssAppliersImpl;
 import com.itextpdf.tool.xml.html.Tags;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
-import com.xiafei.tools.common.StreamUtil;
 import lombok.Data;
+import org.icepdf.core.util.GraphicsRenderingHints;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,7 +39,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
-import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
@@ -60,30 +60,31 @@ public class PdfUtils {
     public static final char[] PASSWORD = "111111".toCharArray();//keystory密码
 
     public static void main(String[] args) throws Exception {
-//        html2Pdf(new FileInputStream(new File("./temp/contract.vm")), new FileOutputStream(new File("./temp/test.pdf")));
-        try {
-            //读取keystore ，获得私钥和证书链
-            KeyStore ks = KeyStore.getInstance("PKCS12");
-            ks.load(new FileInputStream(KEYSTORE), PASSWORD);
-            String alias = (String) ks.aliases().nextElement();
-            PrivateKey pk = (PrivateKey) ks.getKey(alias, PASSWORD);
-            Certificate[] chain = ks.getCertificateChain(alias);
-            long start = System.currentTimeMillis();
-            signPdf(new FileInputStream(new File("./temp/test.pdf")),
-                    new FileOutputStream(new File("./temp/test-signed.pdf")),
-                    StreamUtil.getBytes(new FileInputStream("./temp/Chrysanthemum.jpg")),
-                    chain, pk, DigestAlgorithms.SHA1,
-                    null,
-                    MakeSignature.CryptoStandard.CMS,
-                    "qixiafei ceshi",
-                    "beijing",
-                    "jxjzsignhere", true);
-            System.out.println("elapse time " + (System.currentTimeMillis() - start));
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        html2Pdf(new FileInputStream(new File("./temp/contract.vm")), new FileOutputStream(new File("./temp/test.pdf")));
+//        try {
+//            //读取keystore ，获得私钥和证书链
+//            KeyStore ks = KeyStore.getInstance("PKCS12");
+//            ks.load(new FileInputStream(KEYSTORE), PASSWORD);
+//            String alias = (String) ks.aliases().nextElement();
+//            PrivateKey pk = (PrivateKey) ks.getKey(alias, PASSWORD);
+//            Certificate[] chain = ks.getCertificateChain(alias);
+//            long start = System.currentTimeMillis();
+//            signPdf(new FileInputStream(new File("./temp/test.pdf")),
+//                    new FileOutputStream(new File("./temp/test-signed.pdf")),
+//                    StreamUtil.getBytes(new FileInputStream("./temp/Chrysanthemum.jpg")),
+//                    chain, pk, DigestAlgorithms.SHA1,
+//                    null,
+//                    MakeSignature.CryptoStandard.CMS,
+//                    "qixiafei ceshi",
+//                    "beijing",
+//                    "jxjzsignhere", true);
+//            System.out.println("elapse time " + (System.currentTimeMillis() - start));
+//        } catch (Exception e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
 
+//        pdf2Img(new FileInputStream(new File("./temp/APPLY_CONTRACT.pdf")), new FileOutputStream(new File("./temp/APPLY_CONTRACT-img.jpg")));
     }
 
     /**
@@ -172,6 +173,31 @@ public class PdfUtils {
 
         }
 
+    }
+
+    /**
+     * pdf转图片.
+     *
+     * @param pdfIn  pdf输入流
+     * @param imgOut 图片输出流
+     * @throws Exception 各种异常
+     */
+    public static void pdf2Img(final InputStream pdfIn, final OutputStream imgOut) throws Exception {
+        org.icepdf.core.pobjects.Document document = new org.icepdf.core.pobjects.Document();
+        document.setInputStream(pdfIn, "");
+        float scale = 1.1f;// 缩放比例（大图）
+        // float scale = 0.2f;// 缩放比例（小图）
+        float rotation = 0f;// 旋转角度
+        for (int i = 0; i < document.getNumberOfPages(); i++) {
+            BufferedImage image = (BufferedImage) document.getPageImage(i,
+                    GraphicsRenderingHints.SCREEN,
+                    org.icepdf.core.pobjects.Page.BOUNDARY_CROPBOX,
+                    rotation, scale);
+            // 这里png作用是：格式是jpg但有png清晰度
+            ImageIO.write(image, "png", imgOut);
+            image.flush();
+        }
+        document.dispose();
     }
 
     private static void signInner(final byte[] pdfIn, final OutputStream signedPdfOut, final byte[] signedImg,
