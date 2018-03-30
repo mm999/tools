@@ -58,86 +58,88 @@ public final class SourceGenerator {
         param.setCommentsUser("齐霞飞");
         param.setCommentsSince("JDK 1.8.0");
         param.setCommentsVersion("1.0.0");
-        param.setDomainDirectory("C:\\code\\local\\yx\\lease-core\\lease-core-domain\\src\\main\\java\\com\\virgo\\finance\\lease\\core\\domain\\po");
-        param.setDomainPackage("com.virgo.finance.lease.core.domain.po");
+        param.setDomainDirectory("C:\\code\\jxjz\\small-order-gateway\\small-order-gateway-domain\\src\\main\\java\\com\\virgo\\finance\\small\\order\\gateway\\domain\\po");
+        param.setDomainPackage("com.virgo.finance.small.order.gateway.domain.po");
         param.setDomainSuffix("Po");
-        param.setMapperDirectory("C:\\code\\local\\yx\\lease-core\\lease-core-web\\src\\main\\resources\\lease\\mappings");
-        param.setDaoDirectory("C:\\code\\local\\yx\\lease-core\\lease-core-dao\\src\\main\\java\\com\\virgo\\finance\\lease\\core\\dao");
-        param.setDaoPackage("com.virgo.finance.lease.core.dao");
+        param.setMapperDirectory("C:\\code\\jxjz\\small-order-gateway\\small-order-gateway-web\\src\\main\\resources\\small\\order\\gateway\\mappings");
+        param.setDaoDirectory("C:\\code\\jxjz\\small-order-gateway\\small-order-gateway-dao\\src\\main\\java\\com\\virgo\\finance\\small\\order\\gateway\\dao");
+        param.setDaoPackage("com.virgo.finance.small.order.gateway.dao");
         // is cover ori file's content
         param.setCoverFile(true);
         param.setJavaTime(false);
         param.setLombok(true);
 
-        String jdbcUrl = "jdbc:mysql://192.168.130.221:3306/lease?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=true";
+        String jdbcUrl = "jdbc:mysql://192.168.130.221:3306/small_order?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=true";
         String dbUser = "root";
         String pwd = "root";
 
         List<GenerateSourceParamItem> itemList = new ArrayList<>();
-//
-//        GenerateSourceParamItem table1 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL, jdbcUrl, dbUser, pwd,
-//                "CHANNEL", "lease",
-//                "Channel", "渠道表");
-//        itemList.add(table1);
 
-//        GenerateSourceParamItem table2 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-//                "CSTM_PRIVATE", "lease",
-//            "CstmPrivate", "客户渠道私有属性（1对1）");
-//        itemList.add(table2);
+        GenerateSourceParamItem table1 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL, jdbcUrl, dbUser, pwd,
+                "IDEMPOTENT", "small_order",
+                "Idempotent", "幂等表");
+        itemList.add(table1);
 
-//        GenerateSourceParamItem table3 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-//                "GOODS", "lease",
-//            "Goods", "物资表（1对多）");
-//        itemList.add(table3);
-//
-//        GenerateSourceParamItem table4 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-//                "DEPOSIT_ACCOUNT", "lease",
-//            "DepositAccount", "保证金账户表");
-//        itemList.add(table4);
-//
-//        GenerateSourceParamItem table5 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-//                "DEPOSIT_ACCOUNT_CHANGES", "lease",
-//            "DepositAccountChanges", "保证金账户变动记录表");
-//        itemList.add(table5);
-//        GenerateSourceParamItem table6 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-//                "APPLY_ORDER", "lease",
-//            "ApplyOrder", "租赁申请订单表  ");
-//        itemList.add(table6);
-//
-//        GenerateSourceParamItem table7 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-//                "APPLY_FILES", "lease",
-//            "ApplyFiles", "租赁文件资料表（1对多）");
-//        itemList.add(table7);
-//
-//        GenerateSourceParamItem table8 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-//                "APPLY_GOODS", "lease",
-//            "ApplyGoods", "租赁物资表（1对多）");
-//        itemList.add(table8);
-//
-//        GenerateSourceParamItem table9 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-//                "BATCH_CONFIRM", "lease",
-//            "BatchConfirm", "租赁申请批次确认表");
-//        itemList.add(table9);
-//
-//        GenerateSourceParamItem table10 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-//                "REPAYMENT_PLAN", "lease",
-//            "RepaymentPlan", "还款计划表");
-//        itemList.add(table10);
-//        GenerateSourceParamItem table11 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-//                "REPAYMENT_PLAN_SUBJECT", "lease",
-//            "RepaymentPlanSubject", "还款科目表");
-//        itemList.add(table11);
-//        GenerateSourceParamItem table12 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-//                "REPAYMENT_RECORD", "lease",
-//            "RepaymentRecord", "还款记录表");
-//        itemList.add(table12);
-//        GenerateSourceParamItem table13 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-//                "KRY_APPLY_INFO", "lease",
-//            "KryApplyInfo", "客如云租赁附加信息表");
-//        itemList.add(table13);
+        GenerateSourceParamItem table2 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "DEPOSIT_ACCOUNT", "small_order",
+            "DepositAccount", "保证金账户表");
+        itemList.add(table2);
+
+        GenerateSourceParamItem table3 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "DEPOSIT_ACCOUNT_CHANGES", "small_order",
+            "DepositAccountChanges", "保证金账户变动记录表");
+        itemList.add(table3);
+
+        GenerateSourceParamItem table4 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "APPLY_ORDER", "small_order",
+            "ApplyOrder", "租赁申请订单表");
+        itemList.add(table4);
+
+        GenerateSourceParamItem table5 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "USER_INFO", "small_order",
+            "UserInfo", "用户表");
+        itemList.add(table5);
+
+        GenerateSourceParamItem table6 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "SEND_LOG", "small_order",
+            "SendLog", "发送日志");
+        itemList.add(table6);
+
+        GenerateSourceParamItem table7 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "APPLY_INFO", "small_order",
+            "ApplyInfo", "瑞洺租赁附加信息表");
+        itemList.add(table7);
+
+        GenerateSourceParamItem table8 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "APPLY_ID_CARD_INFO", "small_order",
+            "ApplyIdCardInfo", "租赁申请身份证信息表");
+        itemList.add(table8);
+
+        GenerateSourceParamItem table9 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "BUSINESS_LICENSE", "small_order",
+            "BusinessLicense", "营业执照信息表");
+        itemList.add(table9);
+
+        GenerateSourceParamItem table10 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "CATERING_SERVICE_LICENSE", "small_order",
+            "CateringServiceLicense", "餐饮服务许可证信息表");
+        itemList.add(table10);
+
+        GenerateSourceParamItem table11 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "APPLY_FILES", "small_order",
+            "ApplyFiles", "租赁文件资料表（1对多）");
+        itemList.add(table11);
+        GenerateSourceParamItem table12 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "APPLY_GOODS", "small_order",
+            "ApplyGoods", "租赁物资表（1对多）");
+        itemList.add(table12);
+        GenerateSourceParamItem table13 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+                "CONTRACT_INFO", "small_order",
+            "ContractInfo", "合同信息表");
+        itemList.add(table13);
 //        GenerateSourceParamItem table14 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-//                "ID_CARD_INFO", "lease",
-//            "IdCardInfo", "身份证信息表");
+//                "USER_INFO", "small_order",
+//            "UserInfo", "用户表");
 //        itemList.add(table14);
 //        GenerateSourceParamItem table15 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
 //                "BUSINESS_LICENSE", "lease",
@@ -171,10 +173,10 @@ public final class SourceGenerator {
 //                "REPAYMENT_FAIL_RECORD", "lease",
 //                "RepaymentFailRecord", "还款失败记录表");
 //        itemList.add(table22);
-        GenerateSourceParamItem table23 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
-                "TIAN_YAN_CHA_CO_RECORD", "lease",
-                "TianYanChaCoRecord", "天眼查查询企业基本信息调用记录表");
-        itemList.add(table23);
+//        GenerateSourceParamItem table23 = new GenerateSourceParamItem(DataBaseTypeEnum.MYSQL,jdbcUrl,dbUser, pwd,
+//                "TIAN_YAN_CHA_CO_RECORD", "lease",
+//                "TianYanChaCoRecord", "天眼查查询企业基本信息调用记录表");
+//        itemList.add(table23);
         param.setItems(itemList);
 
         exec(param);

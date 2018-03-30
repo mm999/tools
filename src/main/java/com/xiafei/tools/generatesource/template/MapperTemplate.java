@@ -172,7 +172,7 @@ public final class MapperTemplate extends SourceTemplate {
             content.add("");
             content.add(getIndent(1) + "<!-- 基础字段 -->");
             content.add(getIndent(1) + "<sql id=\"Base_Columns\">");
-            content.add(getIndent(2) + primaryColumn.getName() + ",");
+            content.add(getIndent(2) + "`"+primaryColumn.getName() + "`,");
             content.add(getIndent(2) + "<include refid=\"Columns_For_Insert\"/>");
             content.add(getIndent(1) + "</sql>");
 
