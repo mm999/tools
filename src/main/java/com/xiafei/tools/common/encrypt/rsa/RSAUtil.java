@@ -33,7 +33,7 @@ public class RSAUtil {
     private static final String ALGORITHM = "RSA";
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-//        System.out.println(encryptByPubKey("123456", "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCGdOxalt/5zCMXxDueXPeHb42/1M03WCNV2gKyt6TFj6VVr1bFxRYHXz3R6vxne+7ayaA56IuXE8mM5zKlrsUjKSoEORqmvWZ78It2R+yqN1FSE0PjB62fhfbXIcxCUxrDuBvSRG12A7PhPKxR1ekWpVPPhZTo33vgNG2Czg4mgQIDAQAB"));
+        System.out.println(encryptByPubKey("254805", "LEASE"));
 //        Properties sp = System.getProperties();
 //        Enumeration e = sp.propertyNames();
 //        while (e.hasMoreElements()) {
@@ -42,26 +42,26 @@ public class RSAUtil {
 //        }
 
 //        System.out.println(sign("{\"applyNoList\":[\"2018032110372800275000100008\"],\"batchNo\":\"2018032110372800275000100009\",\"endDate\":\"20190321\",\"signedFilePath\":\"/files/apply/2018032110372800275000100008/APPLY_CONTRACT\",\"startDate\":\"20180321\",\"status\":\"6\"}"));
-        // 初始化密码操作器
-        final PublicKey pubKey = KeyFactory.getInstance(ALGORITHM).generatePublic(new X509EncodedKeySpec(Base64.decodeBase64("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5TZyGRaCucf7Ke+S9rqYB1rvUO8qyzZQLkMCpS1pxjvWA3BBr5wYj+LWYVBXoHao0da7Vqu5R9LlWXsjmsHWwZY0CTyIVSKDidPJZJRfitOqsHV1LUQ/jddMAbE4Om6DKc20cJTRnStR0Zo7TKx/LgmgI/DflXthoh6AbYq5umQIDAQAB")));
-        final Cipher cipher = Cipher.getInstance(pubKey.getAlgorithm());
-        cipher.init(Cipher.DECRYPT_MODE, pubKey);
-        // 分段处理
-        byte[] data = Base64.decodeBase64("SFsFa60LC+Z9AwnwTgCaLYFHb4z4bXgZsl/I4xL9csm90Q+h8KDm03eGo0LxvT3v7lDygW5cZ8I5fhxIJCFHveuLkbQgNFxEotXwjEkjqrJGWKP3NW/Mz/WZ4H4IV9myPlI3yAFlORnbf0IP9eh6e0jn1YgoTKt8zi7PuLplK4E=");
-        final int inputLen = data.length;
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            // 对数据分段加密
-            for (int offSet = 0; offSet < inputLen; offSet += 128) {
-                final byte[] cache;
-                if (inputLen >= 128 + offSet) {
-                    cache = cipher.doFinal(data, offSet, 128);
-                } else {
-                    cache = cipher.doFinal(data, offSet, inputLen - offSet);
-                }
-                out.write(cache, 0, cache.length);
-            }
-            System.out.println(new String(out.toByteArray(), "UTF-8"));
-        }
+//        // 初始化密码操作器
+//        final PublicKey pubKey = KeyFactory.getInstance(ALGORITHM).generatePublic(new X509EncodedKeySpec(Base64.decodeBase64("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5TZyGRaCucf7Ke+S9rqYB1rvUO8qyzZQLkMCpS1pxjvWA3BBr5wYj+LWYVBXoHao0da7Vqu5R9LlWXsjmsHWwZY0CTyIVSKDidPJZJRfitOqsHV1LUQ/jddMAbE4Om6DKc20cJTRnStR0Zo7TKx/LgmgI/DflXthoh6AbYq5umQIDAQAB")));
+//        final Cipher cipher = Cipher.getInstance(pubKey.getAlgorithm());
+//        cipher.init(Cipher.DECRYPT_MODE, pubKey);
+//        // 分段处理
+//        byte[] data = Base64.decodeBase64("SFsFa60LC+Z9AwnwTgCaLYFHb4z4bXgZsl/I4xL9csm90Q+h8KDm03eGo0LxvT3v7lDygW5cZ8I5fhxIJCFHveuLkbQgNFxEotXwjEkjqrJGWKP3NW/Mz/WZ4H4IV9myPlI3yAFlORnbf0IP9eh6e0jn1YgoTKt8zi7PuLplK4E=");
+//        final int inputLen = data.length;
+//        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+//            // 对数据分段加密
+//            for (int offSet = 0; offSet < inputLen; offSet += 128) {
+//                final byte[] cache;
+//                if (inputLen >= 128 + offSet) {
+//                    cache = cipher.doFinal(data, offSet, 128);
+//                } else {
+//                    cache = cipher.doFinal(data, offSet, inputLen - offSet);
+//                }
+//                out.write(cache, 0, cache.length);
+//            }
+//            System.out.println(new String(out.toByteArray(), "UTF-8"));
+//        }
 
     }
 
@@ -104,13 +104,13 @@ public class RSAUtil {
      * 用公钥加密.
      *
      * @param src    原内容，明文
-     * @param pubKey 公钥
+     * @param propPrefix 配置文件中前缀
      * @return 加密后的Base64字符串
      */
-    public static String encryptByPubKey(String src, String pubKey) {
+    public static String encryptByPubKey(String src, String propPrefix) {
 
         try {
-            byte[] bytes = RSA.encryptByPublicKey(src.getBytes("UTF-8"), pubKey);
+            byte[] bytes = RSA.encryptByPublicKey(src.getBytes("UTF-8"), propPrefix);
             return Base64.encodeBase64String(bytes);
         } catch (Exception e) {
             log.error("RSA encrypt failure:src={}", src, e);
