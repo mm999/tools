@@ -52,7 +52,7 @@ public class AesUtils {
     }
 
     public static void main(String[] args) {
-//        System.out.println(getEncrypted("liang131401234560123456789012345", "d85975de95974ebda7d34393218904fa"));
+        System.out.println(getEncrypted("liang131401234560123456789012345", "d85975de95974ebda7d34393218904fa"));
 //        System.out.println(getDecrypted("iZeIsBY2Fc/W/hIKUliRhuWBIpeHrwz4mk+IDcWW4hp+JjXQYot4XpVfblqeRrFV", "d85975de95974ebda7d34393218904fa"));
     }
 
@@ -96,8 +96,9 @@ public class AesUtils {
             return null;
         }
         try {
-            final SecureRandom sr = new SecureRandom();
-            final Key secureKey = getKey(key);
+            SecureRandom sr = SecureRandom.getInstance(SEED);
+            sr.setSeed(key.getBytes(CHARSET));
+            final Key secureKey = getKey(sr);
             final Cipher cipher = Cipher.getInstance(ALGORITHM_NAME);
             cipher.init(Cipher.ENCRYPT_MODE, secureKey, sr);
             return cipher.doFinal(source.getBytes(CHARSET));
@@ -121,27 +122,25 @@ public class AesUtils {
             return null;
         }
         try {
-            final Key secretKey = getKey(key);
+            SecureRandom sr = SecureRandom.getInstance(SEED);
+            sr.setSeed(key.getBytes(CHARSET));
+            final Key secretKey = getKey(sr);
             final Cipher cipher = Cipher.getInstance(ALGORITHM_NAME);// 创建密码器
             cipher.init(Cipher.DECRYPT_MODE, secretKey, new SecureRandom());// 初始化
             return cipher.doFinal(source); // 解密
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException
-                | BadPaddingException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
+                BadPaddingException | UnsupportedEncodingException e) {
             e.printStackTrace();
             return null;
         }
     }
 
 
-    private static Key getKey(String strKey) {
+    private static Key getKey(SecureRandom sr) {
         try {
-            if (strKey == null) {
-                strKey = "";
-            }
+
             KeyGenerator _generator = KeyGenerator.getInstance(ALGORITHM_NAME);
-            SecureRandom secureRandom = SecureRandom.getInstance(SEED);
-            secureRandom.setSeed(strKey.getBytes(CHARSET));
-            _generator.init(128, secureRandom);
+            _generator.init(128, sr);
             return _generator.generateKey();
         } catch (Exception e) {
             throw new RuntimeException(" 初始化密钥出现异常 ");
