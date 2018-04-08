@@ -1,6 +1,7 @@
 package com.xiafei.tools.excel;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -56,127 +57,153 @@ public class ExcelUtil {
 //
 //        new ExcelUtil().export(sheetName, titleName, fileName, columnNumber, columnWidth, columnName, dataList,
 //                new FileOutputStream(new File("./temp/test.xlsx")), "123");
-        new ExcelUtil().read(new FileInputStream(new File("./temp/test.xlsx")), "test.xlsx", new ArrayList<>());
+        new ExcelUtil().read(new FileInputStream(new File("./temp/test.xlsx")), "test.xlsx", null, new ArrayList<>());
     }
 
-    public void export(final String sheetName, final String titleName, final String fileName,
-                       final int columnNumber, final int[] columnWidth, final String[] columnName,
-                       final String[][] dataList, final HttpServletResponse response, final String uuid)
+    /**
+     * 导出数据到Excel.
+     *
+     * @param sheetName sheet页名字
+     * @param title     标题
+     * @param fileName  输出的Excel文件名
+     * @param colsName  列名数组
+     * @param data      数据二位数组，第一维代表一行，第二维是每列
+     * @param response  http响应对象
+     * @param uuid      业务流水号，记日志用，可以为空
+     * @throws IOException 导出失败
+     */
+    public void export(final String sheetName, final String title, final String fileName, final String[] colsName,
+                       final String[][] data, final HttpServletResponse response, final String uuid)
             throws IOException {
         response.setContentType("application/ms-excel;charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment;filename="
                 .concat(String.valueOf(URLEncoder.encode(fileName, "UTF-8"))));
-        export(sheetName, titleName, fileName, columnNumber, columnWidth, columnName, dataList, response.getOutputStream(), uuid);
+        export(sheetName, title, fileName, colsName, data, response.getOutputStream(), uuid);
     }
 
-    private void export(final String sheetName, final String titleName, final String fileName,
-                        final int columnNumber, final int[] columnWidth, final String[] columnName,
-                        final String[][] dataList, final OutputStream out, final String uuid) throws IOException {
-        if (columnNumber == columnWidth.length && columnWidth.length == columnName.length) {
-            // 第一步，创建一个webbook，对应一个Excel文件
-            Workbook wb;
-            if (fileName.endsWith(".xls")) {
-                wb = new HSSFWorkbook();
-            } else {
-                wb = new XSSFWorkbook();
-            }
-            // 第二步，在webbook中添加一个sheet,对应Excel文件中的sheet
-            Sheet sheet = wb.createSheet(sheetName);
-            // sheet.setDefaultColumnWidth(15); //统一设置列宽
-            for (int i = 0; i < columnNumber; i++) {
-                sheet.setColumnWidth(i, columnWidth[i] * 256); // 单独设置每列的宽
-            }
-            // 创建第0行 也就是标题
-            Row title = sheet.createRow(0);
-            title.setHeightInPoints(50);// 设备标题的高度
-            // 第三步创建标题的单元格样式style2以及字体样式headerFont1
-            CellStyle titleStyle = wb.createCellStyle();
-            titleStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-            titleStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-            titleStyle.setFillForegroundColor(HSSFColor.LIGHT_TURQUOISE.index);
-            titleStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-            Font titleFont = wb.createFont(); // 创建字体样式
-            titleFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD); // 字体加粗
-            titleFont.setFontName(FONT_NAME); // 设置字体类型
-            titleFont.setFontHeightInPoints((short) 15); // 设置字体大小
-            titleStyle.setFont(titleFont); // 为标题样式设置字体样式
-            Cell titleCell = title.createCell(0);// 创建标题第一列
-            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0,
-                    columnNumber - 1)); // 合并列标题
-            titleCell.setCellValue(titleName); // 设置值标题
-            titleCell.setCellStyle(titleStyle); // 设置标题样式
-
-            // 创建第1行 也就是表头
-            Row header = sheet.createRow(1);
-            header.setHeightInPoints(37);// 设置表头高度
-
-            // 第四步，创建表头单元格样式 以及表头的字体样式
-            CellStyle headerStyle = wb.createCellStyle();
-            headerStyle.setWrapText(true);// 设置自动换行
-            headerStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-            headerStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER); // 创建一个居中格式
-
-            headerStyle.setBottomBorderColor(HSSFColor.BLACK.index);
-            headerStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-            headerStyle.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-            headerStyle.setBorderRight(HSSFCellStyle.BORDER_THIN);
-            headerStyle.setBorderTop(HSSFCellStyle.BORDER_THIN);
-            Font headerFont = wb.createFont(); // 创建字体样式
-            headerFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD); // 字体加粗
-            headerFont.setFontName(FONT_NAME); // 设置字体类型
-            headerFont.setFontHeightInPoints((short) 10); // 设置字体大小
-            headerStyle.setFont(headerFont); // 为标题样式设置字体样式
-
-            // 第四.一步，创建表头的列
-            for (int i = 0; i < columnNumber; i++) {
-                Cell cell = header.createCell(i);
-                cell.setCellStyle(headerStyle);
-                cell.setCellValue(columnName[i]);
-            }
-
-            // 为数据内容设置特点新单元格样式2 自动换行 上下居中左右也居中
-            CellStyle dataStyle = wb.createCellStyle();
-            dataStyle.setWrapText(true);// 设置自动换行
-            dataStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER); // 创建一个上下居中格式
-            dataStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);// 左右居中
-            // 设置边框
-            dataStyle.setBottomBorderColor(HSSFColor.BLACK.index);
-            dataStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-            dataStyle.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-            dataStyle.setBorderRight(HSSFCellStyle.BORDER_THIN);
-            dataStyle.setBorderTop(HSSFCellStyle.BORDER_THIN);
-            // 第五步，创建单元格，并设置值
-            for (int i = 0; i < dataList.length; i++) {
-                Row dataRow = sheet.createRow(i + 2);
-                for (int j = 0; j < columnNumber; j++) {
-                    final Cell datacell = dataRow.createCell(j);
-                    datacell.setCellValue(dataList[i][j]);
-                    datacell.setCellStyle(dataStyle);
-                }
-            }
-
-            // 第六步，将文件存到浏览器设置的下载位置
-            try {
-                wb.write(out);// 将数据写出去
-                log.info("[{}]导出Excel成功", uuid);
-            } finally {
-                if (out != null) {
-                    try {
-                        out.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-
+    /**
+     * 导出数据到Excel.
+     *
+     * @param sheetName sheet页名字
+     * @param title     标题
+     * @param fileName  输出的Excel文件名
+     * @param colsName  列名数组
+     * @param data      数据二位数组，第一维代表一行，第二维是每列
+     * @param out       输出流
+     * @param uuid      业务流水号，记日志用，可以为空
+     * @throws IOException 导出失败
+     */
+    private void export(final String sheetName, final String title, final String fileName, final String[] colsName,
+                        final String[][] data, final OutputStream out, final String uuid) throws IOException {
+        // 第一步，创建一个webbook
+        Workbook wb;
+        if (fileName.endsWith(".xls")) {
+            wb = new HSSFWorkbook();
         } else {
-            log.error("[{}]传入参数不匹配", uuid);
+            wb = new XSSFWorkbook();
+        }
+        // 第二步，在webbook中添加一个sheet,对应Excel文件中的sheet
+        Sheet sheet = wb.createSheet(sheetName);
+        for (int i = 0, len = colsName.length; i < len; i++) {
+            sheet.setColumnWidth(i, colsName[i].length() << 8); // 单独设置每列的宽为字符数*256
+        }
+        // 第三步创建标题行
+        final Row titleRow = sheet.createRow(0);
+        titleRow.setHeightInPoints(50);// 设备标题的高度
+        // 设计标题样式
+        final CellStyle titleStyle = wb.createCellStyle();
+        titleStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        titleStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
+        titleStyle.setFillForegroundColor(HSSFColor.LIGHT_TURQUOISE.index);
+        titleStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        // 设置标题字体
+        final Font titleFont = wb.createFont(); // 创建字体样式
+        titleFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD); // 字体加粗
+        titleFont.setFontName(FONT_NAME); // 设置字体类型
+        titleFont.setFontHeightInPoints((short) 15); // 设置字体大小
+        titleStyle.setFont(titleFont); // 为标题样式设置字体样式
+        // 真正创建标题单元格
+        final Cell titleCell = titleRow.createCell(0);// 创建标题第一列
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, colsName.length - 1)); // 合并列标题
+        titleCell.setCellValue(title); // 设置标题内容
+        titleCell.setCellStyle(titleStyle); // 设置标题样式
+
+        // 第四步 创建表头
+        final Row headerRow = sheet.createRow(1);
+        headerRow.setHeightInPoints(37);// 设置表头高度
+        // 设置表头样式
+        final CellStyle headerStyle = wb.createCellStyle();
+        headerStyle.setWrapText(true);// 设置自动换行
+        headerStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        headerStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER); // 创建一个居中格式
+        headerStyle.setBottomBorderColor(HSSFColor.BLACK.index);
+        headerStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        headerStyle.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        headerStyle.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        headerStyle.setBorderTop(HSSFCellStyle.BORDER_THIN);
+        // 设备表头字体
+        final Font headerFont = wb.createFont(); // 创建字体样式
+        headerFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD); // 字体加粗
+        headerFont.setFontName(FONT_NAME); // 设置字体类型
+        headerFont.setFontHeightInPoints((short) 10); // 设置字体大小
+        headerStyle.setFont(headerFont); // 为标题样式设置字体样式
+        // 创建表头每个单元格内容
+        for (int i = 0, len = colsName.length; i < len; i++) {
+            final Cell cell = headerRow.createCell(i);
+            cell.setCellStyle(headerStyle);
+            cell.setCellValue(colsName[i]);
+        }
+
+        // 第五步 将数据导入workbook
+        // 设置数据样式
+        final CellStyle dataStyle = wb.createCellStyle();
+        dataStyle.setWrapText(true);// 设置自动换行
+        dataStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER); // 创建一个上下居中格式
+        dataStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);// 左右居中
+        // 设置边框
+        dataStyle.setBottomBorderColor(HSSFColor.BLACK.index);
+        dataStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        dataStyle.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        dataStyle.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        dataStyle.setBorderTop(HSSFCellStyle.BORDER_THIN);
+        // 创建单元格，并设置值
+        for (int i = 0, rows = data.length; i < rows; i++) {
+            final Row dataRow = sheet.createRow(i + 2);
+            for (int j = 0, colNum = colsName.length; j < colNum; j++) {
+                final Cell datacell = dataRow.createCell(j);
+                datacell.setCellStyle(dataStyle);
+                datacell.setCellValue(data[i][j]);
+            }
+        }
+
+        // 最终 将文件写出到输出流
+        try {
+            wb.write(out);
+            log.info("[{}]导出Excel成功", uuid);
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
 
     }
 
-    public void read(InputStream is, final String fileName, List<Map<String, Object>> dataList) throws IOException {
+    /**
+     * 读取Excel数据.
+     *
+     * @param is        Excel文件输入流
+     * @param fileName  Excel文件名
+     * @param sheetName sheet页名字，可以为空，默认取第一个sheet页
+     * @param dataList  要放读入数据的数据列表，使用时自己替换
+     * @throws IOException 读取失败
+     */
+    public void read(InputStream is, final String fileName, final String sheetName, List<Map<String, Object>> dataList)
+            throws IOException {
         final Workbook wb;
         if (fileName.endsWith(".xls")) {
             wb = new HSSFWorkbook(is);
@@ -184,7 +211,12 @@ public class ExcelUtil {
             wb = new XSSFWorkbook(is);
         }
         try {
-            final Sheet sheet = wb.getSheetAt(0);
+            final Sheet sheet;
+            if (StringUtils.isNotBlank(sheetName)) {
+                sheet = wb.getSheet(sheetName);
+            } else {
+                sheet = wb.getSheetAt(0);
+            }
             for (Row row : sheet) {
                 if (row.getRowNum() < 2) { // rowNum从0开始是第一行，这里假设标题有两行，跳过标题数据
                     continue;
@@ -198,6 +230,7 @@ public class ExcelUtil {
             try {
                 is.close();
             } catch (Exception e) {
+                //
             }
         }
 
