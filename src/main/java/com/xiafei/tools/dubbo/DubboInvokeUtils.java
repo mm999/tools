@@ -1,8 +1,8 @@
 package com.xiafei.tools.dubbo;
 
-import com.xiafei.tools.exceptions.BizException;
 import com.xiafei.tools.data.Message;
 import com.xiafei.tools.data.Messages;
+import com.xiafei.tools.exceptions.BizException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,6 +29,7 @@ public class DubboInvokeUtils {
 
     public static void test() {
         getData((DubboTask<Object, Object>) Messages::success, "123", "调用userInterface.getUser()接口");
+        getData((DubboTask<Object, Object>) Messages::success, "param", "");
     }
 
     /**

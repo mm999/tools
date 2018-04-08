@@ -126,7 +126,7 @@ public class AesUtils {
             sr.setSeed(key.getBytes(CHARSET));
             final Key secretKey = getKey(sr);
             final Cipher cipher = Cipher.getInstance(ALGORITHM_NAME);// 创建密码器
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, new SecureRandom());// 初始化
+            cipher.init(Cipher.DECRYPT_MODE, secretKey,sr);// 初始化
             return cipher.doFinal(source); // 解密
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
                 BadPaddingException | UnsupportedEncodingException e) {

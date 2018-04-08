@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -34,7 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ToString
 public class Sftp {
 
-
     /**
      * ssh默认端口号.
      */
@@ -48,18 +48,18 @@ public class Sftp {
     /**
      * 连接池.
      */
-    private final LinkedList<ChannelSftp> POOL = new LinkedList<>();
+    private final LinkedList<ChannelSftp> pool = new LinkedList<>();
 
     /**
      * 文件上传线程池，因文件上传速度主要取决于网络及服务器硬盘写速度，所以使用单线程的线程池.
      */
-    private final Executor UPLOAD_THREADS = Executors.newSingleThreadExecutor();
+    private final Executor uploadExecutor = Executors.newSingleThreadExecutor();
     /**
      * SHELL操作连接池.
      */
-    private Executor SHEEL_THREADS = Executors.newCachedThreadPool();
+    private Executor sheelExecutor = Executors.newCachedThreadPool();
 
-    private String logPrefix = "";
+    private String logPrefix;
 
     /**
      * sftp主机ip.
@@ -106,6 +106,11 @@ public class Sftp {
     private AtomicInteger needSize;
 
     /**
+     * 是否初始化成功.
+     */
+    private AtomicBoolean inited = new AtomicBoolean(false);
+
+    /**
      * 初始化sftp连接池.
      *
      * @throws JSchException 连接异常
@@ -121,16 +126,8 @@ public class Sftp {
         this.maxSize = maxSize;
         this.poolSize = initSize;
         this.needSize = new AtomicInteger(0);
-        logPrefix = host + ":" + port + ",";
-        try {
-            for (int i = 0; i < initSize; i++) {
-
-                POOL.addLast(createChannel());
-
-            }
-        } catch (JSchException e) {
-            log.error("初始化sftp报错,host={}，port={},userName={},password={}", host, port, userName, password, e);
-        }
+        logPrefix = userName + "@" + host + ":" + port + ",";
+        initPool();
     }
 
     /**
@@ -138,13 +135,15 @@ public class Sftp {
      *
      * @param path 文件路径
      * @return 文件并读取成字节流
+     * @throws IOException   输入流获取失败，通常是网络原因
+     * @throws SftpException sftp操作异常，包括权限，目录，文件不存在等
      */
     public byte[] getBytes(final String path) throws IOException, SftpException {
         ChannelSftp channel = null;
         try {
             channel = fetch();
-            try (final InputStream is = channel.get(path);
-                 final ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            try (InputStream is = channel.get(path);
+                 ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
                 final byte[] buffer = new byte[Constants.SFTP_BUFFER_SIZE];
                 int remain;
                 while ((remain = is.read(buffer, 0, Constants.SFTP_BUFFER_SIZE)) > 0) {
@@ -164,6 +163,7 @@ public class Sftp {
      *
      * @param path 文件路径
      * @return 文件的输入流
+     * @throws SftpException sftp操作异常，包括权限，目录，文件不存在等
      */
     public InputStream getStream(final String path) throws SftpException {
         ChannelSftp channel = null;
@@ -180,7 +180,7 @@ public class Sftp {
      *
      * @param remotePath 要下载的sftp服务器上文件地址
      * @param localPath  要下载到的本地文件存放地址
-     * @throws SftpException sftp各种异常
+     * @throws SftpException sftp操作异常，包括权限，目录，文件不存在等
      */
     public void download(final String remotePath, final String localPath) throws SftpException {
         ChannelSftp channel = null;
@@ -198,17 +198,18 @@ public class Sftp {
      *
      * @param path  文件路径
      * @param bytes 文件字节数组
-     * @throws SftpException 操作异常
+     * @throws SftpException sftp操作异常，包括权限，目录，文件不存在等
      */
     public void uploadSync(final String path, final byte[] bytes) throws SftpException {
         ChannelSftp channelSftp = null;
         try {
             channelSftp = fetch();
-            try (final ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
+            try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
                 cycleMkDir(path, channelSftp);
                 channelSftp.put(bis, path);
+                log.info("{}[upload success],path={}", logPrefix, path);
             } catch (IOException e) {
-                log.warn("{}sftp同步上传后关闭byte数组输入流失败", logPrefix);
+                log.warn("{}sftp上传后关闭byte数组输入流失败", logPrefix);
             }
 
         } finally {
@@ -223,10 +224,9 @@ public class Sftp {
      * @param bytes 文件字节数组
      */
     public void uploadAsync(final String path, final byte[] bytes) {
-        UPLOAD_THREADS.execute(() -> {
+        uploadExecutor.execute(() -> {
             try {
                 uploadSync(path, bytes);
-                log.info("{}uploadAsync success,path={}", logPrefix, path);
             } catch (SftpException e) {
                 log.error("{}uploadAsync with bytes file operate exception,path={}", logPrefix, path, e);
             } catch (Throwable e) {
@@ -248,6 +248,7 @@ public class Sftp {
             channelSftp = fetch();
             cycleMkDir(path, channelSftp);
             channelSftp.put(is, path);
+            log.info("{}[upload by inputStream success],path={}", logPrefix, path);
         } finally {
             release(channelSftp);
         }
@@ -260,10 +261,9 @@ public class Sftp {
      * @param is   输入流
      */
     public void uploadAsync(final String path, final InputStream is) {
-        UPLOAD_THREADS.execute(() -> {
+        uploadExecutor.execute(() -> {
             try {
                 uploadSync(path, is);
-                log.info("{}uploadAsync success,path={}", logPrefix, path);
             } catch (SftpException e) {
                 log.error("{}uploadAsync with inputStream file operate exception,path={}", logPrefix, path, e);
             } catch (Throwable e) {
@@ -284,6 +284,7 @@ public class Sftp {
             channelSftp = fetch();
             cycleMkDir(remotePath, channelSftp);
             channelSftp.put(localPath, remotePath);
+            log.info("{}[upload by localPath success],path={}", logPrefix, remotePath);
         } finally {
             release(channelSftp);
         }
@@ -296,10 +297,9 @@ public class Sftp {
      * @param localPath  本地文件路径
      */
     public void uploadAsync(final String remotePath, final String localPath) {
-        UPLOAD_THREADS.execute(() -> {
+        uploadExecutor.execute(() -> {
             try {
                 uploadSync(remotePath, localPath);
-                log.info("{}uploadAsync success,remotePath={},localPath={}", logPrefix, remotePath, localPath);
             } catch (SftpException e) {
                 log.error("{}uploadAsync with inputStream file operate exception,remotePath={},localPath={}", logPrefix, remotePath,
                         localPath, e);
@@ -341,6 +341,8 @@ public class Sftp {
             } else {
                 channelSftp.rm(fileName);
             }
+            log.info("{}[remove success],path={}", logPrefix, path);
+
         } finally {
             release(channelSftp);
         }
@@ -352,10 +354,9 @@ public class Sftp {
      * @param path 文件路径
      */
     public void removeAsync(final String path, final boolean isDirectory) {
-        SHEEL_THREADS.execute(() -> {
+        sheelExecutor.execute(() -> {
             try {
                 removeSync(path, isDirectory);
-                log.info("{}removeAsync success,path={}", logPrefix, path);
             } catch (SftpException e) {
                 log.error("{}removeAsync file operate exception,path={}", logPrefix, path, e);
             } catch (Throwable e) {
@@ -413,7 +414,6 @@ public class Sftp {
         }
     }
 
-
     /**
      * 从连接池中取出一个连接，无限等待.
      *
@@ -430,16 +430,21 @@ public class Sftp {
      * @return sftp通道
      */
     private ChannelSftp fetch(long millis) {
+        if (!inited.get() && inited.compareAndSet(false, true)) {
+            if (!initPool()) {
+                throw new RuntimeException("重新初始化sftp连接池报错" + logPrefix);
+            }
+        }
         needSize.incrementAndGet();
-        synchronized (POOL) {
+        synchronized (pool) {
             try {
 
                 if (millis <= 0) {
                     // 无限等待
-                    while (POOL.isEmpty()) {
+                    while (pool.isEmpty()) {
                         if (poolSize == maxSize) {
                             try {
-                                POOL.wait();
+                                pool.wait();
                             } catch (InterruptedException e) {
                                 log.warn("从连接池获取sftp通道时线程被通知中断等待,sftp={}", this);
                             }
@@ -448,20 +453,20 @@ public class Sftp {
                             try {
                                 return add();
                             } catch (JSchException e) {
-                                log.error("获取更多连接失败");
+                                log.error("{}获取更多连接失败", logPrefix);
                             }
                         }
 
                     }
-                    return reconnectIfExpire(POOL.removeFirst());
+                    return reconnectIfExpire(pool.removeFirst());
                 } else {
                     // 超时等待
                     long future = System.currentTimeMillis() + millis;
                     long remain = millis;
-                    while (POOL.isEmpty() && remain >= 0) {
+                    while (pool.isEmpty() && remain >= 0) {
                         if (poolSize == maxSize) {
                             try {
-                                POOL.wait();
+                                pool.wait();
                             } catch (InterruptedException e) {
                                 log.warn("从连接池获取sftp通道时线程被通知中断等待,sftp={}", this);
                             }
@@ -471,19 +476,19 @@ public class Sftp {
                             try {
                                 return add();
                             } catch (JSchException e) {
-                                log.error("获取更多连接失败");
+                                log.error("{}获取更多连接失败", logPrefix);
                             }
                         }
                     }
-                    if (!POOL.isEmpty()) {
-                        return reconnectIfExpire(POOL.removeFirst());
+                    if (!pool.isEmpty()) {
+                        return reconnectIfExpire(pool.removeFirst());
                     }
                     //超时返回null
                     return null;
                 }
             } finally {
                 needSize.decrementAndGet();
-                log.info("当前连接池数据={}", this);
+                log.debug("当前连接池数据={}", this);
             }
         }
     }
@@ -495,15 +500,15 @@ public class Sftp {
      */
     private void release(final ChannelSftp channel) {
         if (channel != null) {
-            synchronized (POOL) {
-                if (!POOL.isEmpty() && poolSize > initSize && needSize.get() < POOL.size()) {
+            synchronized (pool) {
+                if (!pool.isEmpty() && poolSize > initSize && needSize.get() < pool.size()) {
                     remove();
                     closeChannel(channel);
                 } else {
-                    POOL.addLast(channel);
+                    pool.addLast(channel);
                 }
-                POOL.notify();
-                log.info("已释放，当前连接池数据={}", this);
+                pool.notify();
+                log.debug("已释放，当前连接池数据={}", this);
             }
         }
     }
@@ -535,12 +540,12 @@ public class Sftp {
             channel.pwd();
             return channel;
         } catch (SftpException e) {
-            log.warn("连接超时被服务器断开，重新连接");
+            log.warn("{}连接超时被服务器断开，重新连接", logPrefix);
             try {
                 closeChannel(channel);
                 return createChannel();
             } catch (JSchException e1) {
-                log.error("重新连接失败");
+                log.error("{}重新连接失败", logPrefix);
                 return null;
             }
         }
@@ -586,6 +591,25 @@ public class Sftp {
             }
         } catch (Throwable e) {
             log.error("关闭sftp连接失败,hannel={}", channel, e);
+        }
+    }
+
+
+    private boolean initPool() {
+        try {
+            for (int i = 0; i < initSize; i++) {
+
+                pool.addLast(createChannel());
+
+            }
+            log.info("{}初始化sftp成功", logPrefix);
+            inited.set(true);
+            return true;
+        } catch (JSchException e) {
+            inited.set(false);
+            log.error("{}初始化sftp报错", logPrefix, e);
+            return false;
+
         }
     }
 
