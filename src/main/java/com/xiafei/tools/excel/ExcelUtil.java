@@ -18,6 +18,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -39,25 +40,26 @@ import java.util.Map;
  */
 @Slf4j
 public class ExcelUtil {
-
+    public static final String XLSX = ".xlsx";
+    public static final String XLS = ".xls";
     /**
      * Excel导出使用的字体名称.
      */
     private static final String FONT_NAME = "黑体";
 
     public static void main(String[] args) throws IOException {
-//        String sheetName = "用车统计表单";
-//        String titleName = "用车申请数据统计表";
-//        String fileName = "用车申请统计表单";
-//        int columnNumber = 3;
-//        int[] columnWidth = {10, 20, 30};
-//        String[][] dataList = {{"001", "2015-01-01", "IT"},
-//                {"002", "2015-01-02", "市场部"}, {"003", "2015-01-03", "测试"}};
-//        String[] columnName = {"单号", "申请时间", "申请部门"};
-//
-//        new ExcelUtil().export(sheetName, titleName, fileName, columnNumber, columnWidth, columnName, dataList,
-//                new FileOutputStream(new File("./temp/test.xlsx")), "123");
-        new ExcelUtil().read(new FileInputStream(new File("./temp/test.xlsx")), "test.xlsx", null, new ArrayList<>());
+        String sheetName = "用车统计表单";
+        String titleName = "用车申请数据统计表";
+        String fileName = "用车申请统计表单";
+        int columnNumber = 3;
+        int[] columnWidth = {10, 20, 30};
+        String[][] dataList = {{"001", "2015-01-01", "IT"},
+                {"002", "2015-01-02", "市场部"}, {"003", "2015-01-03", "测试"}};
+        String[] columnName = {"单号", "申请时间", "申请部门"};
+
+        export(sheetName, titleName, fileName, columnName, dataList,
+                new FileOutputStream(new File("./temp/test.xlsx")), "123");
+//        new ExcelUtil().read(new FileInputStream(new File("./temp/test.xlsx")), "test.xlsx", null, new ArrayList<>(),"1213");
     }
 
     /**
@@ -72,7 +74,7 @@ public class ExcelUtil {
      * @param uuid      业务流水号，记日志用，可以为空
      * @throws IOException 导出失败
      */
-    public void export(final String sheetName, final String title, final String fileName, final String[] colsName,
+    public static void export(final String sheetName, final String title, final String fileName, final String[] colsName,
                        final String[][] data, final HttpServletResponse response, final String uuid)
             throws IOException {
         response.setContentType("application/ms-excel;charset=UTF-8");
@@ -93,7 +95,7 @@ public class ExcelUtil {
      * @param uuid      业务流水号，记日志用，可以为空
      * @throws IOException 导出失败
      */
-    private void export(final String sheetName, final String title, final String fileName, final String[] colsName,
+    private static void export(final String sheetName, final String title, final String fileName, final String[] colsName,
                         final String[][] data, final OutputStream out, final String uuid) throws IOException {
         // 第一步，创建一个webbook
         Workbook wb;
@@ -105,7 +107,7 @@ public class ExcelUtil {
         // 第二步，在webbook中添加一个sheet,对应Excel文件中的sheet
         Sheet sheet = wb.createSheet(sheetName);
         for (int i = 0, len = colsName.length; i < len; i++) {
-            sheet.setColumnWidth(i, colsName[i].length() << 8); // 单独设置每列的宽为字符数*256
+            sheet.setColumnWidth(i, colsName[i].length() << 10); // 单独设置每列的宽为字符数*256
         }
         // 第三步创建标题行
         final Row titleRow = sheet.createRow(0);
@@ -200,15 +202,20 @@ public class ExcelUtil {
      * @param fileName  Excel文件名
      * @param sheetName sheet页名字，可以为空，默认取第一个sheet页
      * @param dataList  要放读入数据的数据列表，使用时自己替换
+     * @param uuid      业务流水号，记日志用
      * @throws IOException 读取失败
      */
-    public void read(InputStream is, final String fileName, final String sheetName, List<Map<String, Object>> dataList)
+    public void read(InputStream is, final String fileName, final String sheetName,
+                     final List<Map<String, Object>> dataList, final String uuid)
             throws IOException {
         final Workbook wb;
-        if (fileName.endsWith(".xls")) {
+        if (fileName.endsWith(XLS)) {
             wb = new HSSFWorkbook(is);
-        } else {
+        } else if (fileName.endsWith(XLSX)) {
             wb = new XSSFWorkbook(is);
+        } else {
+            log.error("[{}]Excel格式错误，文件名[{}]", uuid, fileName);
+            throw new RuntimeException("Excel格式错误");
         }
         try {
             final Sheet sheet;

@@ -1,6 +1,6 @@
 package com.xiafei.tools.common.encrypt;
 
-import org.apache.commons.codec.binary.Base64;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -12,6 +12,7 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Base64;
 
 /**
  * <P>Description: Aes加密解密工具. </P>
@@ -24,6 +25,7 @@ import java.security.SecureRandom;
  * @version 1.0
  * @since java 1.7.0
  */
+@Slf4j
 public class AesUtils {
 
     /**
@@ -38,9 +40,12 @@ public class AesUtils {
      * 编码格式。
      */
     private static final String CHARSET = "utf-8";
-
     /**
-     * 产生随机数的种子，如果不指定，则无法对称解密.
+     * AES私钥，不要给别人看哦.
+     */
+    public static final String AES_PRI_KEY = "d85975de95974ebda7d34393218904fa";
+    /**
+     * 产生随机数的种子.
      */
     private static final String SEED = "SHA1PRNG";
 
@@ -51,8 +56,9 @@ public class AesUtils {
 
     }
 
-    public static void main(String[] args) {
-        System.out.println(getEncrypted("liang131401234560123456789012345", "d85975de95974ebda7d34393218904fa"));
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        System.out.println(getEncrypted("024334", AES_PRI_KEY));
+        String a = "g48jRUhGea9OKCBWeesq0A==";
 //        System.out.println(getDecrypted("iZeIsBY2Fc/W/hIKUliRhuWBIpeHrwz4mk+IDcWW4hp+JjXQYot4XpVfblqeRrFV", "d85975de95974ebda7d34393218904fa"));
     }
 
@@ -64,7 +70,12 @@ public class AesUtils {
      * @return 使用密钥加密的字符串
      */
     public static String getEncrypted(final String source, final String key) {
-        return Base64.encodeBase64String(encrypt(source, key));
+        try {
+            return new String(Base64.getEncoder().encode(encrypt(source, key)), CHARSET);
+        } catch (UnsupportedEncodingException e) {
+            log.error("Aes加密编码错误,字符串={}", source);
+            throw new RuntimeException("Aes加密编码错误");
+        }
     }
 
     /**
@@ -76,10 +87,11 @@ public class AesUtils {
      */
     public static String getDecrypted(final String source, final String key) {
         try {
-            return new String(decrypt(Base64.decodeBase64(source), key), CHARSET);
+            final Base64.Decoder decoder = Base64.getDecoder();
+            return new String(decrypt(decoder.decode(source.getBytes(CHARSET)), key), CHARSET);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return null;
+            log.error("Aes解密编码错误,字符串={}", source);
+            throw new RuntimeException("Aes解密编码错误");
         }
     }
 
@@ -126,7 +138,7 @@ public class AesUtils {
             sr.setSeed(key.getBytes(CHARSET));
             final Key secretKey = getKey(sr);
             final Cipher cipher = Cipher.getInstance(ALGORITHM_NAME);// 创建密码器
-            cipher.init(Cipher.DECRYPT_MODE, secretKey,sr);// 初始化
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, sr);// 初始化
             return cipher.doFinal(source); // 解密
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
                 BadPaddingException | UnsupportedEncodingException e) {
@@ -134,7 +146,6 @@ public class AesUtils {
             return null;
         }
     }
-
 
     private static Key getKey(SecureRandom sr) {
         try {

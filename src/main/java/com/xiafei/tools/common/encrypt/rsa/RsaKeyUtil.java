@@ -2,8 +2,8 @@ package com.xiafei.tools.common.encrypt.rsa;
 
 import com.xiafei.tools.common.BundleUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
 
+import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -12,6 +12,7 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -30,6 +31,7 @@ final class RsaKeyUtil {
 
     // 加密算法
     private static final String ALGORITHM = "RSA";
+
 
     // Rsa密钥钥缓存池
     private static final ConcurrentHashMap<String, Key> KEY_MAP = new ConcurrentHashMap<>();
@@ -62,7 +64,7 @@ final class RsaKeyUtil {
      * @throws NoSuchAlgorithmException 找不到此算法异常
      * @throws InvalidKeySpecException  私钥格式校验失败
      */
-    public static PrivateKey getPrik() throws InvalidKeySpecException, NoSuchAlgorithmException {
+    public static PrivateKey getPrik() throws InvalidKeySpecException, NoSuchAlgorithmException, UnsupportedEncodingException {
         if (KEY_MAP.containsKey(PRIVATE_KEY_MAP_KEY)) {
             return (PrivateKey) KEY_MAP.get(PRIVATE_KEY_MAP_KEY);
         } else {
@@ -78,15 +80,15 @@ final class RsaKeyUtil {
     }
 
     /**
-     * 根据配置文件中前缀拿到公钥.
+     * 根据合作方编码拿到对接系统的公钥.
      *
-     * @param propPre 配置文件中前缀
+     * @param coopCode 合作方编码
      * @return 公钥
      * @throws NoSuchAlgorithmException 找不到此算法异常
      * @throws InvalidKeySpecException  私钥格式校验失败
      */
-    public static PublicKey getPubK(String propPre) throws InvalidKeySpecException, NoSuchAlgorithmException {
-        final String key = propPre.concat(PUB_KEY_SUFFIX);
+    public static PublicKey getPubK(String coopCode) throws InvalidKeySpecException, NoSuchAlgorithmException, UnsupportedEncodingException {
+        final String key = coopCode.concat(PUB_KEY_SUFFIX);
         if (KEY_MAP.containsKey(key)) {
             return (PublicKey) KEY_MAP.get(key);
         } else {
@@ -108,9 +110,10 @@ final class RsaKeyUtil {
      * @throws NoSuchAlgorithmException 找不到此算法异常
      * @throws InvalidKeySpecException  私钥格式校验失败
      */
-    private static void loadPrik() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    private static void loadPrik() throws NoSuchAlgorithmException, InvalidKeySpecException, UnsupportedEncodingException {
         final String priKStr = BundleUtil.instance(PROPERTIES_FILE_NAME).getString(PRIVATE_KEY_MAP_KEY);
-        final PrivateKey priKey = KeyFactory.getInstance(ALGORITHM).generatePrivate(new PKCS8EncodedKeySpec(Base64.decodeBase64(priKStr)));
+        final PrivateKey priKey = KeyFactory.getInstance(ALGORITHM).
+                generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(priKStr.getBytes("utf-8"))));
         KEY_MAP.putIfAbsent(PRIVATE_KEY_MAP_KEY, priKey);
     }
 
@@ -120,9 +123,10 @@ final class RsaKeyUtil {
      * @throws NoSuchAlgorithmException 找不到此算法异常
      * @throws InvalidKeySpecException  公钥格式校验失败
      */
-    private static void loadPubK(final String key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    private static void loadPubK(final String key) throws NoSuchAlgorithmException, InvalidKeySpecException, UnsupportedEncodingException {
         final String pubKStr = BundleUtil.instance(PROPERTIES_FILE_NAME).getString(key);
-        final PublicKey pubKey = KeyFactory.getInstance(ALGORITHM).generatePublic(new X509EncodedKeySpec(Base64.decodeBase64(pubKStr)));
+        final PublicKey pubKey = KeyFactory.getInstance(ALGORITHM).
+                generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(pubKStr.getBytes("utf-8"))));
         KEY_MAP.putIfAbsent(key, pubKey);
     }
 

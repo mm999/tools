@@ -196,20 +196,21 @@ public class Sftp {
     /**
      * 同步上传文件，如果文件已存在则覆盖.
      *
-     * @param path  文件路径
-     * @param bytes 文件字节数组
+     * @param path     文件路径
+     * @param bytes    文件字节数组
+     * @param serialNo 业务流水号，记日志用，可以为空
      * @throws SftpException sftp操作异常，包括权限，目录，文件不存在等
      */
-    public void uploadSync(final String path, final byte[] bytes) throws SftpException {
+    public void uploadSync(final String path, final byte[] bytes, final String serialNo) throws SftpException {
         ChannelSftp channelSftp = null;
         try {
             channelSftp = fetch();
             try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
                 cycleMkDir(path, channelSftp);
                 channelSftp.put(bis, path);
-                log.info("{}[upload success],path={}", logPrefix, path);
+                log.info("[{}]{}[upload success],path={}", serialNo, logPrefix, path);
             } catch (IOException e) {
-                log.warn("{}sftp上传后关闭byte数组输入流失败", logPrefix);
+                log.warn("[{}]{}sftp上传后关闭byte数组输入流失败", serialNo, logPrefix);
             }
 
         } finally {
@@ -220,17 +221,18 @@ public class Sftp {
     /**
      * 异步上传文件，如果文件已存在则覆盖.
      *
-     * @param path  文件路径
-     * @param bytes 文件字节数组
+     * @param path     文件路径
+     * @param bytes    文件字节数组
+     * @param serialNo 业务流水号，记日志用，可以为空
      */
-    public void uploadAsync(final String path, final byte[] bytes) {
+    public void uploadAsync(final String path, final byte[] bytes, final String serialNo) {
         uploadExecutor.execute(() -> {
             try {
-                uploadSync(path, bytes);
+                uploadSync(path, bytes, serialNo);
             } catch (SftpException e) {
-                log.error("{}uploadAsync with bytes file operate exception,path={}", logPrefix, path, e);
+                log.error("[{}]{}uploadAsync with bytes file operate exception,path={}", serialNo, logPrefix, path, e);
             } catch (Throwable e) {
-                log.error("{}uploadAsync with bytes uncaught exception,path={}", logPrefix, path, e);
+                log.error("[{}]{}uploadAsync with bytes uncaught exception,path={}", serialNo, logPrefix, path, e);
             }
         });
     }
@@ -239,16 +241,17 @@ public class Sftp {
     /**
      * 同步上传文件，如果文件已存在则覆盖（流）.
      *
-     * @param path 文件路径
-     * @param is   输入流
+     * @param path     文件路径
+     * @param is       输入流
+     * @param serialNo 业务流水号，记日志用，可以为空
      */
-    public void uploadSync(final String path, final InputStream is) throws SftpException {
+    public void uploadSync(final String path, final InputStream is, final String serialNo) throws SftpException {
         ChannelSftp channelSftp = null;
         try {
             channelSftp = fetch();
             cycleMkDir(path, channelSftp);
             channelSftp.put(is, path);
-            log.info("{}[upload by inputStream success],path={}", logPrefix, path);
+            log.info("[{}]{}[upload by inputStream success],path={}", serialNo, logPrefix, path);
         } finally {
             release(channelSftp);
         }
@@ -257,17 +260,18 @@ public class Sftp {
     /**
      * 异步上传文件，如果文件已存在则覆盖（流）.
      *
-     * @param path 文件路径
-     * @param is   输入流
+     * @param path     文件路径
+     * @param is       输入流
+     * @param serialNo 业务流水号，记日志用，可以为空
      */
-    public void uploadAsync(final String path, final InputStream is) {
+    public void uploadAsync(final String path, final InputStream is, final String serialNo) {
         uploadExecutor.execute(() -> {
             try {
-                uploadSync(path, is);
+                uploadSync(path, is, serialNo);
             } catch (SftpException e) {
-                log.error("{}uploadAsync with inputStream file operate exception,path={}", logPrefix, path, e);
+                log.error("[{}]{}uploadAsync with inputStream file operate exception,path={}", serialNo, logPrefix, path, e);
             } catch (Throwable e) {
-                log.error("{}uploadAsync with inputStream uncaught exception,path={}", logPrefix, path, e);
+                log.error("[{}]{}uploadAsync with inputStream uncaught exception,path={}", serialNo, logPrefix, path, e);
             }
         });
     }
@@ -277,14 +281,15 @@ public class Sftp {
      *
      * @param remotePath 要上传到sftp上的文件路径
      * @param localPath  本地文件路径
+     * @param serialNo   业务流水号，记日志用，可以为空
      */
-    public void uploadSync(final String remotePath, final String localPath) throws SftpException {
+    public void uploadSync(final String remotePath, final String localPath, final String serialNo) throws SftpException {
         ChannelSftp channelSftp = null;
         try {
             channelSftp = fetch();
             cycleMkDir(remotePath, channelSftp);
             channelSftp.put(localPath, remotePath);
-            log.info("{}[upload by localPath success],path={}", logPrefix, remotePath);
+            log.info("[{}]{}[upload by localPath success],path={}", serialNo, logPrefix, remotePath);
         } finally {
             release(channelSftp);
         }
@@ -295,16 +300,17 @@ public class Sftp {
      *
      * @param remotePath 要上传到sftp上的文件路径
      * @param localPath  本地文件路径
+     * @param serialNo   业务流水号，记日志用，可以为空
      */
-    public void uploadAsync(final String remotePath, final String localPath) {
+    public void uploadAsync(final String remotePath, final String localPath, final String serialNo) {
         uploadExecutor.execute(() -> {
             try {
-                uploadSync(remotePath, localPath);
+                uploadSync(remotePath, localPath, serialNo);
             } catch (SftpException e) {
-                log.error("{}uploadAsync with inputStream file operate exception,remotePath={},localPath={}", logPrefix, remotePath,
+                log.error("[{}]{}uploadAsync with inputStream file operate exception,remotePath={},localPath={}", serialNo, logPrefix, remotePath,
                         localPath, e);
             } catch (Throwable e) {
-                log.error("{}uploadAsync with inputStream uncaught exception,remotePath={},localPath={}", logPrefix, remotePath,
+                log.error("[{}]{}uploadAsync with inputStream uncaught exception,remotePath={},localPath={}", serialNo, logPrefix, remotePath,
                         localPath, e);
             }
         });
@@ -313,9 +319,11 @@ public class Sftp {
     /**
      * 删除文件（同步）.
      *
-     * @param path 文件路径
+     * @param path        文件路径
+     * @param isDirectory 是否是目录
+     * @param serialNo    业务流水号，记日志用，可以为空
      */
-    public void removeSync(final String path, final boolean isDirectory) throws SftpException {
+    public void removeSync(final String path, final boolean isDirectory, final String serialNo) throws SftpException {
         ChannelSftp channelSftp = null;
         try {
             channelSftp = fetch();
@@ -341,7 +349,7 @@ public class Sftp {
             } else {
                 channelSftp.rm(fileName);
             }
-            log.info("{}[remove success],path={}", logPrefix, path);
+            log.info("[{}]{}[remove success],path={}", serialNo, logPrefix, path);
 
         } finally {
             release(channelSftp);
@@ -351,16 +359,18 @@ public class Sftp {
     /**
      * 删除文件（异步）.
      *
-     * @param path 文件路径
+     * @param path        文件路径
+     * @param isDirectory 是否是目录
+     * @param serialNo    业务流水号，记日志用，可以为空
      */
-    public void removeAsync(final String path, final boolean isDirectory) {
+    public void removeAsync(final String path, final boolean isDirectory, final String serialNo) {
         sheelExecutor.execute(() -> {
             try {
-                removeSync(path, isDirectory);
+                removeSync(path, isDirectory, serialNo);
             } catch (SftpException e) {
-                log.error("{}removeAsync file operate exception,path={}", logPrefix, path, e);
+                log.error("[{}]{}removeAsync file operate exception,path={}", serialNo, logPrefix, path, e);
             } catch (Throwable e) {
-                log.error("{}removeAsync uncaught exception,path={}", logPrefix, path, e);
+                log.error("[{}]{}removeAsync uncaught exception,path={}", serialNo, logPrefix, path, e);
             }
 
         });

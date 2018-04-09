@@ -1,7 +1,6 @@
 package com.xiafei.tools.common.encrypt.rsa;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;
@@ -9,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.util.Base64;
 
 /**
  * <P>Description: RSA签名,加解密处理核心文件，注意：密钥长度1024 </P>
@@ -61,12 +61,12 @@ class RSA {
     /**
      * 公钥分段加密.
      *
-     * @param data    源数据字节流
-     * @param propPre 配置文件中前缀
+     * @param data     源数据字节流
+     * @param coopCode 合作方编码
      */
-    static byte[] encryptByPublicKey(byte[] data, String propPre) throws Exception {
+    static byte[] encryptByPublicKey(byte[] data, String coopCode) throws Exception {
         // 初始化key对象
-        final PublicKey publicK = RsaKeyUtil.getPubK(propPre);
+        final PublicKey publicK = RsaKeyUtil.getPubK(coopCode);
         // 初始化密码操作器
         final Cipher cipher = Cipher.getInstance(publicK.getAlgorithm());
         cipher.init(Cipher.ENCRYPT_MODE, publicK);
@@ -86,24 +86,24 @@ class RSA {
         signature.initSign(privateK);
         signature.update(getContentBytes(plain, "utf-8"));
         byte[] result = signature.sign();
-        return Base64.encodeBase64String(result);
+        return new String(Base64.getEncoder().encode(result), "utf-8");
 
     }
 
     /**
      * 验证签名字符串
      *
-     * @param sign    客户签名结果
-     * @param plain   签名前参数
-     * @param propPre 配置文件中前缀
+     * @param sign     客户签名结果
+     * @param plain    签名前参数
+     * @param coopCode 合作方编码
      * @return 验签结果
      */
-    static boolean verify(String sign, String plain, String propPre) throws Exception {
-        PublicKey publicK = RsaKeyUtil.getPubK(propPre);
+    static boolean verify(String sign, String plain, String coopCode) throws Exception {
+        PublicKey publicK = RsaKeyUtil.getPubK(coopCode);
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initVerify(publicK);
         signature.update(getContentBytes(plain, "utf-8"));
-        return signature.verify(Base64.decodeBase64(sign));
+        return signature.verify(Base64.getDecoder().decode(sign.getBytes("utf-8")));
 
 
     }
@@ -152,9 +152,6 @@ class RSA {
     }
 
     public static void main(String[] args) {
-        final String s = Base64.encodeBase64String("测测需要多少字符测测需要多少字符".getBytes());
-        System.out.println(s);
-        System.out.println(s.length());
     }
 
 }

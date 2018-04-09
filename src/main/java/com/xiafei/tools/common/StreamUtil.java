@@ -1,6 +1,9 @@
 package com.xiafei.tools.common;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -15,6 +18,7 @@ import java.io.InputStream;
  * @version 1.0
  * @since java 1.8.0
  */
+@Slf4j
 public class StreamUtil {
     private static final int BUFFER_SIZE = 1024 << 3;
 
@@ -27,6 +31,28 @@ public class StreamUtil {
                 baos.write(buffer, 0, remains);
             }
             return baos.toByteArray();
+        }
+    }
+
+    /**
+     * 关闭流.
+     *
+     * @param streams  流
+     * @param serialNo 业务流水号，记日志用，可以为空
+     */
+    public static void closeStream(final String serialNo, final Closeable... streams) {
+
+        if (streams != null) {
+            for (Closeable stream : streams) {
+                if (stream != null) {
+                    try {
+                        stream.close();
+                    } catch (IOException e) {
+                        log.warn("[{}]stream 关闭失败", serialNo, e);
+                    }
+                }
+            }
+
         }
     }
 }
