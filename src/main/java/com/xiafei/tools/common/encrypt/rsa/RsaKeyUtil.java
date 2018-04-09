@@ -113,7 +113,7 @@ final class RsaKeyUtil {
     private static void loadPrik() throws NoSuchAlgorithmException, InvalidKeySpecException, UnsupportedEncodingException {
         final String priKStr = BundleUtil.instance(PROPERTIES_FILE_NAME).getString(PRIVATE_KEY_MAP_KEY);
         final PrivateKey priKey = KeyFactory.getInstance(ALGORITHM).
-                generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(priKStr.getBytes("utf-8"))));
+                generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(priKStr.getBytes("UTF-8"))));
         KEY_MAP.putIfAbsent(PRIVATE_KEY_MAP_KEY, priKey);
     }
 
@@ -126,7 +126,7 @@ final class RsaKeyUtil {
     private static void loadPubK(final String key) throws NoSuchAlgorithmException, InvalidKeySpecException, UnsupportedEncodingException {
         final String pubKStr = BundleUtil.instance(PROPERTIES_FILE_NAME).getString(key);
         final PublicKey pubKey = KeyFactory.getInstance(ALGORITHM).
-                generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(pubKStr.getBytes("utf-8"))));
+                generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(pubKStr.getBytes("UTF-8"))));
         KEY_MAP.putIfAbsent(key, pubKey);
     }
 

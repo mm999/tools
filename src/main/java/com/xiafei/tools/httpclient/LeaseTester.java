@@ -114,7 +114,7 @@ public class LeaseTester {
         infoMap0.put("deductNo", deductNo);
         //0-客户银行卡，1-保证金账户
         infoMap0.put("acctType", "1");
-        infoMap0.put("bankNo", RSAUtil.encryptTemp("yhk", "LEASE"));
+//        infoMap0.put("bankNo", RSAUtil.encryptTemp("yhk", "LEASE"));
         infoMap0.put("amount", "10000");
         infoMap0.put("repayDate", "20180322");
         infoMap0.put("subject", "0");
@@ -125,7 +125,7 @@ public class LeaseTester {
         infoMap1.put("deductNo", deductNo);
         //0-客户银行卡，1-保证金账户
         infoMap1.put("acctType", "0");
-        infoMap1.put("bankNo", RSAUtil.encryptTemp("yhk", "LEASE"));
+//        infoMap1.put("bankNo", RSAUtil.encryptTemp("yhk", "LEASE"));
         infoMap1.put("amount", "10000");
         infoMap1.put("repayDate", "20180322");
         infoMap1.put("subject", "0");
@@ -136,7 +136,7 @@ public class LeaseTester {
         infoMap2.put("deductNo", deductNo);
         //0-客户银行卡，1-保证金账户
         infoMap2.put("acctType", "1");
-        infoMap2.put("bankNo", RSAUtil.encryptTemp("yhk", "LEASE"));
+//        infoMap2.put("bankNo", RSAUtil.encryptTemp("yhk", "LEASE"));
         infoMap2.put("amount", "10000");
         infoMap2.put("repayDate", "20180322");
         infoMap2.put("subject", "0");
@@ -158,7 +158,7 @@ public class LeaseTester {
         infoMap0.put("failNo", "1");
         //0-客户银行卡，1-保证金账户
         infoMap0.put("acctType", "1");
-        infoMap0.put("bankNo", RSAUtil.encryptTemp("yhk", "LEASE"));
+//        infoMap0.put("bankNo", RSAUtil.encryptTemp("yhk", "LEASE"));
         infoMap0.put("amount", "10000");
         infoMap0.put("repayDate", "20180322");
         //0-本金，1-利息，2-罚息
