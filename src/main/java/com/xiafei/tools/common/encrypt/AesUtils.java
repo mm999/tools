@@ -70,12 +70,7 @@ public class AesUtils {
      * @return 使用密钥加密的字符串
      */
     public static String getEncrypted(final String source, final String key) {
-        try {
-            return new String(Base64.getEncoder().encode(encrypt(source, key)), CHARSET);
-        } catch (UnsupportedEncodingException e) {
-            log.error("Aes加密编码错误,字符串={}", source);
-            throw new RuntimeException("Aes加密编码错误");
-        }
+        return Base64.getEncoder().encodeToString(encrypt(source, key));
     }
 
     /**
@@ -88,7 +83,7 @@ public class AesUtils {
     public static String getDecrypted(final String source, final String key) {
         try {
             final Base64.Decoder decoder = Base64.getDecoder();
-            return new String(decrypt(decoder.decode(source.getBytes(CHARSET)), key), CHARSET);
+            return new String(decrypt(decoder.decode(source), key), CHARSET);
         } catch (UnsupportedEncodingException e) {
             log.error("Aes解密编码错误,字符串={}", source);
             throw new RuntimeException("Aes解密编码错误");

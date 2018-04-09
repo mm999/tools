@@ -21,7 +21,7 @@ public class RSAUtil {
 
     public static void main(String[] args) {
 //        System.out.println(encryptByPubKey("123456", "pt"));
-        System.out.println(decryptByPriKey("Ht3NzZohSK61B4AhLbb4O43N7fpklz99+P49mTZlKNhG6I56SEHofzEhR3xWmJmPj2Om2h64tR5iBam/wQo3AZpXSOzFHoIt1Eqt5yKZispN+aS4K5zkfWMZ1fk9wXUC1YPZ0o1ISRm4LIzWkhyaQynx15UXPlGu8SVVTTPvSoY="));
+        System.out.println(decryptByPriKey("Y1yRJsUEaKUQevu5/Mr2vBmbKO+vjYyeloJd8uQiGD39DFLCVc76KyRhiR4tZzdyBrmPrH38ACvN2VirP1aBPkp9FjKhyBZ88PQGFX6CSEg4Ar6jQiYo36JVheN7FcGkHaybWm415qQMM9WwppkdZrCD3j0TXYBAVUFJcE2ZUt0="));
 //        Properties sp = System.getProperties();
 //        Enumeration e = sp.propertyNames();
 //        while (e.hasMoreElements()) {
@@ -42,7 +42,7 @@ public class RSAUtil {
 
         try {
             byte[] bytes = RSA.encryptByPublicKey(src.getBytes("UTF-8"), coopCode);
-            return new String(Base64.getEncoder().encode(bytes), "UTF-8");
+            return Base64.getEncoder().encodeToString(bytes);
         } catch (Exception e) {
             log.error("RSA encrypt failure:src={}", src, e);
         }
@@ -57,7 +57,7 @@ public class RSAUtil {
      */
     public static String decryptByPriKey(String encryptedStr) {
         try {
-            byte[] bytes = RSA.decryptByPrikey(Base64.getDecoder().decode(encryptedStr.getBytes("UTF-8")));
+            byte[] bytes = RSA.decryptByPrikey(Base64.getDecoder().decode(encryptedStr));
             return new String(bytes, "UTF-8");
         } catch (Exception e) {
             log.error("RSA decrypt failure:encryptedStr={}", encryptedStr, e);

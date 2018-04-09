@@ -84,9 +84,9 @@ class RSA {
         PrivateKey privateK = RsaKeyUtil.getPrik();
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initSign(privateK);
-        signature.update(getContentBytes(plain, "utf-8"));
+        signature.update(getContentBytes(plain, "UTF-8"));
         byte[] result = signature.sign();
-        return new String(Base64.getEncoder().encode(result), "utf-8");
+        return Base64.getEncoder().encodeToString(result);
 
     }
 
@@ -102,10 +102,8 @@ class RSA {
         PublicKey publicK = RsaKeyUtil.getPubK(coopCode);
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initVerify(publicK);
-        signature.update(getContentBytes(plain, "utf-8"));
-        return signature.verify(Base64.getDecoder().decode(sign.getBytes("utf-8")));
-
-
+        signature.update(getContentBytes(plain, "UTF-8"));
+        return signature.verify(Base64.getDecoder().decode(sign));
     }
 
     /**
