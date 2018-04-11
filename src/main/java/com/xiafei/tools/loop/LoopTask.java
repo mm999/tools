@@ -19,18 +19,18 @@ public interface LoopTask {
     void invoke();
 
     /**
-     * 延迟多久执行，单位ms.
+     * 循环周期间隔，单位ms.
      *
-     * @return 延迟多久执行，单位ms
+     * @return 循环周期的间隔，单位ms
      */
-    long delay();
+    long period();
 
     /**
-     * 每天固定的时间点执行，这个方法返回非null值，忽略delay()方法返回.
+     * 第一次执行时间，可以为空，若为空则启动项目延迟LoopConfig中写死的延迟后立即启动.
      *
      * @return 下一次执行的时间戳
      */
-    Long fixTime();
+    Long firstTime();
 
     /**
      * 是否并发执行.

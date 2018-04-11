@@ -14,7 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * <P>Description: 定时任务配置. </P>
+ * <P>Description: 定时任务配置，只要放在spring扫描路径下即可，想要实现定时任务实现接口LoopTask就可以. </P>
  * <P>CALLED BY:   齐霞飞 </P>
  * <P>UPDATE BY:   齐霞飞 </P>
  * <P>CREATE DATE: 2018/2/6</P>
@@ -33,6 +33,10 @@ public class LoopConfig implements ApplicationContextAware {
      */
     private final List<LoopTask> loopTaskList = new ArrayList<>();
 
+    /**
+     * 第一次跑定时任务距离容器启动延迟，单位ms.
+     */
+    private static final long INIT_DELAY = 10000L;
 
     /**
      * 当spring容器加载完成后初始化定时任务.
@@ -49,18 +53,22 @@ public class LoopConfig implements ApplicationContextAware {
 
 
             for (LoopTask task : loopTaskList) {
-                if (task.fixTime() != null) {
-                    ses.scheduleAtFixedRate(task::invoke, task.fixTime() - System.currentTimeMillis(),
-                            TimeUnit.DAYS.toMillis(1), TimeUnit.MILLISECONDS);
-                } else {
-
-                    if (task.concurrent()) {
-                        ses.scheduleAtFixedRate(task::invoke, 1000L, task.delay(), TimeUnit.MILLISECONDS);
-                    } else {
-                        ses.scheduleWithFixedDelay(task::invoke, 1000L, task.delay(), TimeUnit.MILLISECONDS);
+                long initDelay;
+                final Long firstTime = task.firstTime();
+                if (firstTime != null) {
+                    initDelay = firstTime - System.currentTimeMillis();
+                    if (initDelay < 0) {
+                        initDelay = 0L;
                     }
+                } else {
+                    initDelay = INIT_DELAY;
                 }
-                log.info("{},循环定时任务启动成功，间隔={}，并发={}", task.getClass().getName(), task.delay(), task.concurrent());
+                if (task.concurrent()) {
+                    ses.scheduleAtFixedRate(task::invoke, initDelay, task.period(), TimeUnit.MILLISECONDS);
+                } else {
+                    ses.scheduleWithFixedDelay(task::invoke, initDelay, task.period(), TimeUnit.MILLISECONDS);
+                }
+                log.info("{},循环定时任务启动成功，间隔={}，并发={}", task.getClass().getName(), task.period(), task.concurrent());
             }
         }
     }

@@ -1,7 +1,10 @@
 package com.xiafei.tools;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <P>Description: 跑单元测试时候，可以使用这个类加快测试速度. </P>
@@ -15,6 +18,7 @@ import java.util.Date;
  * @since java 1.8.0
  */
 public class TestUtils {
+
 
     /**
      * 给对象设置一些初始属性.
@@ -62,6 +66,31 @@ public class TestUtils {
         return object;
     }
 
-    public static void main(String[] args) throws IllegalAccessException {
+    public static void main(String[] args) throws IllegalAccessException, InterruptedException {
+
+        List<byte[]> oom = new ArrayList<>();
+        try{
+
+            for (int i = 0; i < 1000; i++) {
+                oom.add(new byte[1024*1024]);
+            }
+        }catch (Throwable e){
+            System.out.println("捕获到异常了");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    List<byte[]> oom2 = new ArrayList<>();
+                    oom2.add(new byte[1024*1024]);
+                    System.out.println("另一个线程执行");
+                    System.out.println(oom2.toString());
+
+                }
+            }).start();
+            TimeUnit.SECONDS.sleep(5);
+        }
+        System.out.println("程序继续执行");
+
+        oom = null;
+
     }
 }

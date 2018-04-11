@@ -1,17 +1,3 @@
-/* 
- * Copyright (C) 2006-2016 乐视控股（北京）有限公司.
- * 本系统是商用软件,未经授权擅自复制或传播本程序的部分或全部将是非法的.
-============================================================
- * FileName: BundleUtil.java 
- * Created: [2016年6月29日 下午14:13:23] by 胡建    (copy by leFinanceLoan)    
- * $Id$
- * $Revision$
- * $Author$
- * $Date$
-============================================================ 
- * ProjectName: leFinanceLoan_task 
- * Description: 乐视小贷批次任务持久 properties 文件
-==========================================================*/
 package com.xiafei.tools.common;
 
 import lombok.extern.slf4j.Slf4j;

@@ -1,7 +1,5 @@
 package com.xiafei.tools.common.check;
 
-import com.xiafei.tools.exceptions.BizException;
-import com.xiafei.tools.data.Code;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.ElementType;
@@ -27,6 +25,9 @@ import java.util.List;
  */
 @Slf4j
 public class CheckUtils {
+
+    private static final String nullDesc = "必填参数为空";
+
     private CheckUtils() {
 
     }
@@ -39,6 +40,7 @@ public class CheckUtils {
     public @interface PropertySkipCheck {
 
     }
+
     /**
      * 在需要跳过检查的参数上加这个注解.
      */
@@ -48,52 +50,56 @@ public class CheckUtils {
 
     }
 
+
     /**
      * 检查对象及字段是否为空，最多遍历两层.
      *
-     * @param nullCode 如果检查到空的字段了抛出Biz异常中的错误码
-     * @param nullDesc 如果检查到空的字段了抛出Biz异常中的错误信息
-     * @param objs     要检查的对象，可变.
-     * @throws BizException 空异常
+     * @param objs 要检查的对象，可变.
      */
-    public static void checkNull(int nullCode, String nullDesc, Object... objs) {
+    public static void checkNull(Object... objs) throws Exception {
         if (objs == null) {
-            throw new BizException(nullCode, nullDesc);
+            throw new Exception(nullDesc);
         }
         for (Object obj : objs) {
             // 如果对象为空，抛出异常
             if (obj == null) {
-                throw new BizException(nullCode, nullDesc);
+                throw new Exception(nullDesc);
             }
             final Class clazz = obj.getClass();
             // 字符串判断是否是空串
             if (clazz == String.class) {
                 if (obj.toString().trim().equals("")) {
-                    throw new BizException(nullCode, nullDesc);
+                    throw new Exception(nullDesc);
                 }
             }
             // 如果是可以遍历的类型，比如list，set，遍历处理参数
             if (Iterable.class.isAssignableFrom(clazz)) {
+                int count = 0;
                 for (Object property : (Iterable) obj) {
+                    count++;
                     if (property == null) {
-                        throw new BizException(nullCode, nullDesc);
+                        throw new Exception(nullDesc);
                     }
                     Class propertyClass = property.getClass();
                     if (propertyClass == String.class) {
                         if (property.toString().trim().equals("")) {
-                            throw new BizException(nullCode, nullDesc);
+                            throw new Exception(nullDesc);
                         }
                     }
                     if (isPojo(propertyClass)) {
-                        checkPropertiesNullFirstFloor(nullCode, nullDesc, property, propertyClass);
+                        checkPojo(property, propertyClass);
                     }
                 }
+                if (count == 0) {
+                    throw new Exception(nullDesc);
+                }
+                continue;
             }
 
             // 如果是pojo，判断属性是否含有空的
             if (isPojo(clazz)) {
                 // 如果不是基本类型，利用内省机制检查字段
-                checkPropertiesNullFirstFloor(nullCode, nullDesc, obj, clazz);
+                checkPojo(obj, clazz);
             }
 
         }
@@ -102,12 +108,10 @@ public class CheckUtils {
     /**
      * 检查对象字段是否为空,最多向下遍历两层..
      *
-     * @param nullCode 如果检查到空的字段了抛出Biz异常中的错误码
-     * @param nullDesc 如果检查到空的字段了抛出Biz异常中的错误信息
-     * @param obj      要检查的对象
-     * @param clazz    要检查的对象class
+     * @param obj   要检查的对象
+     * @param clazz 要检查的对象class
      */
-    private static void checkPropertiesNullFirstFloor(final int nullCode, final String nullDesc, final Object obj, final Class clazz) {
+    private static void checkPojo(final Object obj, final Class clazz) throws Exception {
         final List<Field> fieldList = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
         Class tempClass = clazz;
         while (true) {
@@ -134,85 +138,48 @@ public class CheckUtils {
                 propertyValue = field.get(obj);
             } catch (IllegalAccessException e) {
                 log.error("反射获取第一层属性值对象报错", e);
-                throw new BizException(Code.SYSTEMEXCEPTION.getValue(), "系统内部错误");
+                throw new Exception(field.getName() + "校验失败");
             }
             if (propertyValue == null) {
-                throw new BizException(nullCode, nullDesc);
+                throw new Exception(field.getName() + "为空");
             }
             final Class propertyValueClass = propertyValue.getClass();
             // 字符串判断是否是空串
             if (propertyValueClass == String.class) {
                 if (propertyValue.toString().trim().equals("")) {
-                    throw new BizException(nullCode, nullDesc);
+                    throw new Exception(field.getName() + "为空");
                 }
-            }
-
-            // 如果是可以遍历的类型，比如list，set，遍历处理参数
-            if (Iterable.class.isAssignableFrom(propertyValueClass)) {
-                for (Object propertysProperty : (Iterable) propertyValue) {
-                    if (propertysProperty == null) {
-                        throw new BizException(nullCode, nullDesc);
-                    }
-                    Class propertysPropertyClass = propertysProperty.getClass();
-                    if (propertysPropertyClass == String.class) {
-                        if (propertysProperty.toString().trim().equals("")) {
-                            throw new BizException(nullCode, nullDesc);
-                        }
-                    }
-
-                }
-            }
-            if (isPojo(propertyValueClass)) {
-                checkPropertiesNullSecondeFloor(nullCode, nullDesc, propertyValue, propertyValueClass);
-            }
-        }
-    }
-
-    private static void checkPropertiesNullSecondeFloor(final int nullCode, final String nullDesc,
-                                                        final Object obj, final Class clazz) {
-        final Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            field.setAccessible(true);
-            // 如果有跳过注解的字段放过检查
-            if (field.getAnnotation(PropertySkipCheck.class) != null) {
                 continue;
             }
-            final Object propertyValue;
-            try {
-                propertyValue = field.get(obj);
-            } catch (IllegalAccessException e) {
-                log.error("反射获取第二层属性值对象报错", e);
-                throw new BizException(Code.SYSTEMEXCEPTION.getValue(), "系统内部错误");
-            }
-            if (propertyValue == null) {
-                throw new BizException(nullCode, nullDesc);
-            }
-            final Class propertyValueClass = propertyValue.getClass();
-            // 字符串判断是否是空串
-            if (propertyValueClass == String.class) {
-                if (propertyValue.toString().trim().equals("")) {
-                    throw new BizException(nullCode, nullDesc);
-                }
-            }
 
             // 如果是可以遍历的类型，比如list，set，遍历处理参数
             if (Iterable.class.isAssignableFrom(propertyValueClass)) {
+                int count = 0;
                 for (Object propertysProperty : (Iterable) propertyValue) {
+                    count++;
                     if (propertysProperty == null) {
-                        throw new BizException(nullCode, nullDesc);
+                        throw new Exception(field.getName() + "为空");
                     }
                     Class propertysPropertyClass = propertysProperty.getClass();
                     if (propertysPropertyClass == String.class) {
                         if (propertysProperty.toString().trim().equals("")) {
-                            throw new BizException(nullCode, nullDesc);
+                            throw new Exception(field.getName() + "为空");
                         }
                     }
-
+                    if (isPojo(propertysPropertyClass)) {
+                        checkPojo(propertysProperty, propertysPropertyClass);
+                    }
                 }
+                if (count == 0) {
+                    throw new Exception(field.getName() + "为空");
+                }
+                continue;
+            }
+            if (isPojo(propertyValueClass)) {
+                checkPojo(propertyValue, propertyValueClass);
             }
         }
     }
-
 
     /**
      * 判断对象是否是jdk中定义之外的对象.
