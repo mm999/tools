@@ -71,7 +71,7 @@ public class TestController {
     @GetMapping("/sftp")
     public String sftpTest() throws JSchException, SftpException, IOException {
         String randomStr = UUID.randomUUID().toString();
-        final byte[] bytes = sftp.getBytes("/uploadfile/20170832/3018032110372800275000100009/FJDL103100/1/sourceFile/APPLY_CONTRACT.pdf");
+//        final byte[] bytes = sftp.getBytes("/uploadfile/20170832/3018032110372800275000100009/FJDL103100/1/sourceFile/APPLY_CONTRACT.pdf");
         return "complete";
     }
 

@@ -7,6 +7,8 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -41,13 +43,22 @@ public class AesUtils {
      */
     private static final String CHARSET = "utf-8";
     /**
-     * AES私钥，不要给别人看哦.
+     * 随机数种子，相当于私钥，不要给别人看哦.
      */
-    public static final String AES_PRI_KEY = "d85975de95974ebda7d34393218904fa";
+    public static byte[] RANDOM_SEED;
+
+    static {
+        try {
+            RANDOM_SEED = "d85975de95974ebda7d34393218904fa".getBytes(CHARSET);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
-     * 产生随机数的种子.
+     * 随机算法.
      */
-    private static final String SEED = "SHA1PRNG";
+    private static final String RANDOM_ALGORITHM = "SHA1PRNG";
 
     /**
      * 工具类不允许实例化.
@@ -56,8 +67,8 @@ public class AesUtils {
 
     }
 
-    public static void main(String[] args) throws UnsupportedEncodingException {
-        System.out.println(getEncrypted("024334", AES_PRI_KEY));
+    public static void main(String[] args) {
+        System.out.println(getEncrypted("024334", RANDOM_SEED));
         String a = "g48jRUhGea9OKCBWeesq0A==";
 //        System.out.println(getDecrypted("iZeIsBY2Fc/W/hIKUliRhuWBIpeHrwz4mk+IDcWW4hp+JjXQYot4XpVfblqeRrFV", "d85975de95974ebda7d34393218904fa"));
     }
@@ -66,24 +77,24 @@ public class AesUtils {
      * 获取加密后的字符串.
      *
      * @param source 要加密的内容，明文
-     * @param key    密钥，调用者自己保存
+     * @param seed   密钥，调用者自己保存
      * @return 使用密钥加密的字符串
      */
-    public static String getEncrypted(final String source, final String key) {
-        return Base64.getEncoder().encodeToString(encrypt(source, key));
+    public static String getEncrypted(final String source, final byte[] seed) {
+        return Base64.getEncoder().encodeToString(encrypt(source, seed));
     }
 
     /**
      * 通过加密后的字符串和密钥解密成明文.
      *
      * @param source 要解密的使用本工具类加密的密码串
-     * @param key    密钥，调用者自己保存
+     * @param seed   密钥，调用者自己保存
      * @return 密码串加密前的样子
      */
-    public static String getDecrypted(final String source, final String key) {
+    public static String getDecrypted(final String source, final byte[] seed) {
         try {
             final Base64.Decoder decoder = Base64.getDecoder();
-            return new String(decrypt(decoder.decode(source), key), CHARSET);
+            return new String(decrypt(decoder.decode(source), seed), CHARSET);
         } catch (UnsupportedEncodingException e) {
             log.error("Aes解密编码错误,字符串={}", source);
             throw new RuntimeException("Aes解密编码错误");
@@ -95,19 +106,17 @@ public class AesUtils {
      * 对内容加密.
      *
      * @param source 需要加密的内容
-     * @param key    加密钥匙
+     * @param seed   加密钥匙
      * @return 加密后的内容字节流
      */
-    private static byte[] encrypt(final String source, final String key) {
-        if (source == null || key == null || source.length() == 0 || key.length() == 0) {
+    private static byte[] encrypt(final String source, final byte[] seed) {
+        if (source == null || seed == null || source.length() == 0 || seed.length == 0) {
             return null;
         }
         try {
-            SecureRandom sr = SecureRandom.getInstance(SEED);
-            sr.setSeed(key.getBytes(CHARSET));
-            final Key secureKey = getKey(sr);
+            final Key secureKey = getKey(getSr(seed));
             final Cipher cipher = Cipher.getInstance(ALGORITHM_NAME);
-            cipher.init(Cipher.ENCRYPT_MODE, secureKey, sr);
+            cipher.init(Cipher.ENCRYPT_MODE, secureKey, getSr(seed));
             return cipher.doFinal(source.getBytes(CHARSET));
 
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | UnsupportedEncodingException
@@ -121,22 +130,20 @@ public class AesUtils {
      * 对内容解密.
      *
      * @param source 待解密内容
-     * @param key    加密钥匙
+     * @param seed   加密钥匙
      * @return 对内容解密后的字节流
      */
-    private static byte[] decrypt(final byte[] source, final String key) {
-        if (source == null || key == null || source.length == 0 || key.length() == 0) {
+    private static byte[] decrypt(final byte[] source, final byte[] seed) {
+        if (source == null || seed == null || source.length == 0 || seed.length == 0) {
             return null;
         }
         try {
-            SecureRandom sr = SecureRandom.getInstance(SEED);
-            sr.setSeed(key.getBytes(CHARSET));
-            final Key secretKey = getKey(sr);
+            final Key secretKey = getKey(getSr(seed));
             final Cipher cipher = Cipher.getInstance(ALGORITHM_NAME);// 创建密码器
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, sr);// 初始化
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, getSr(seed));// 初始化
             return cipher.doFinal(source); // 解密
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
-                BadPaddingException | UnsupportedEncodingException e) {
+                BadPaddingException e) {
             e.printStackTrace();
             return null;
         }
@@ -145,12 +152,20 @@ public class AesUtils {
     private static Key getKey(SecureRandom sr) {
         try {
 
-            KeyGenerator _generator = KeyGenerator.getInstance(ALGORITHM_NAME);
+            final KeyGenerator _generator = KeyGenerator.getInstance(ALGORITHM_NAME);
             _generator.init(128, sr);
-            return _generator.generateKey();
+            final SecretKey origin_key = _generator.generateKey();
+            final SecretKey key = new SecretKeySpec(origin_key.getEncoded(), ALGORITHM_NAME);
+            return key;
         } catch (Exception e) {
             throw new RuntimeException(" 初始化密钥出现异常 ");
         }
+    }
+
+    private static SecureRandom getSr(final byte[] seed) throws NoSuchAlgorithmException {
+        SecureRandom sr = SecureRandom.getInstance(RANDOM_ALGORITHM);
+        sr.setSeed(seed);
+        return sr;
     }
 
 }

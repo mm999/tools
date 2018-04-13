@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.Base64;
 
 /**
@@ -23,6 +24,8 @@ import java.util.Base64;
  */
 @Slf4j
 class RSA {
+
+    private static final String COMMON_CHARSET = "UTF-8";
 
     /**
      * 签名算法
@@ -52,8 +55,9 @@ class RSA {
     static byte[] decryptByPrikey(final byte[] encryptedData) throws Exception {
 
         // 初始化密码操作器
-        final Cipher cipher = Cipher.getInstance(RsaKeyUtil.getPrik().getAlgorithm());
-        cipher.init(Cipher.DECRYPT_MODE, RsaKeyUtil.getPrik());
+        final RSAPrivateKey prik = RsaKeyUtil.getPrik();
+        final Cipher cipher = Cipher.getInstance(prik.getAlgorithm());
+        cipher.init(Cipher.DECRYPT_MODE, prik);
         // 分段处理
         return segmentDeal(cipher, MAX_DECRYPT_BLOCK, encryptedData);
     }
@@ -84,7 +88,7 @@ class RSA {
         PrivateKey privateK = RsaKeyUtil.getPrik();
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initSign(privateK);
-        signature.update(getContentBytes(plain, "UTF-8"));
+        signature.update(getContentBytes(plain, COMMON_CHARSET));
         byte[] result = signature.sign();
         return Base64.getEncoder().encodeToString(result);
 
@@ -102,7 +106,7 @@ class RSA {
         PublicKey publicK = RsaKeyUtil.getPubK(coopCode);
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initVerify(publicK);
-        signature.update(getContentBytes(plain, "UTF-8"));
+        signature.update(getContentBytes(plain, COMMON_CHARSET));
         return signature.verify(Base64.getDecoder().decode(sign));
     }
 
@@ -117,7 +121,7 @@ class RSA {
     private static byte[] segmentDeal(final Cipher cipher, final int segmentLengh, final byte[] data) throws Exception {
         final int inputLen = data.length;
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            // 对数据分段加密
+            // 对数据分段加密或解密
             for (int offSet = 0; offSet < inputLen; offSet += segmentLengh) {
                 final byte[] cache;
                 if (inputLen >= segmentLengh + offSet) {

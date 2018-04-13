@@ -1,13 +1,12 @@
 package com.xiafei.tools.common.encrypt.rsa;
 
-import org.apache.commons.codec.binary.Base64;
-
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Base64;
 
 /**
  * <P>Description: RsaKey生成器. </P>
@@ -25,6 +24,7 @@ public class RsaKeyGenerator {
     public static void main(String[] args) {
         genKeyPair();
     }
+
     /**
      * 随机生成密钥对
      */
@@ -37,7 +37,7 @@ public class RsaKeyGenerator {
             e.printStackTrace();
         }
         // 初始化密钥对生成器，密钥大小为96-1024位
-        keyPairGen.initialize(1024,new SecureRandom());
+        keyPairGen.initialize(1024, new SecureRandom());
         // 生成一个密钥对，保存在keyPair中
         KeyPair keyPair = keyPairGen.generateKeyPair();
         // 得到私钥
@@ -47,10 +47,10 @@ public class RsaKeyGenerator {
         try {
             System.out.println("PublicKey:");
             // 得到公钥字符串
-            System.out.println(Base64.encodeBase64String(publicKey.getEncoded()));
+            System.out.println(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
             System.out.println("PrivateKey: Don't Show Others!!!");
             // 得到私钥字符串
-            System.out.println(Base64.encodeBase64String(privateKey.getEncoded()));
+            System.out.println(new String(Base64.getDecoder().decode(privateKey.getEncoded()), "UTF-8"));
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,10 +1,10 @@
 package com.xiafei.tools;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.xiafei.tools.common.JsonUtil;
 import com.xiafei.tools.common.check.CheckUtils;
 import lombok.Data;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,15 +21,17 @@ import java.util.List;
 public class Test {
 
     public static void main(String[] args) {
-        String json = "{\"systemId\":\"AGENCY_RM\",\"data\":{\"applyNo\":\"2018041114214100797C0A882DF00017\",\"confirmContractPath\":\"/files/apply/2018041114214100797C0A882DF00017/GOODS_CONFIRM_CONTRACT/GOODS_CONFIRM_CONTRACT.pdf\",\"goodsList\":[{\"goodsModel\":\"EP901\",\"serialNo\":\"1,2\",\"softVersion\":\"高级版\"}]},\"service\":\"lease_apply_goods_confirm\",\"sign\":\"aQYaFa1m1pvFZsu+Qa4dQH/PWdb9YV2cTgdgvSN29fjDwq4MBHTEiS5+0l3N1IFyyI8EKpMOSTFqnfDHNaQXjFJg2LRdidbiILKJGA1u6/cVtlMFsamI+qmprPmDjUnR0HxdLrIwHCIJu2jQaTCxMNRoxgagfU/BfMVeXBQhBIE\\u003d\",\"version\":\"1.0\",\"serialNo\":\"2018041118473700204C0A882DF00048\"}";
-        OuterReqVo reqVo = JsonUtil.fromJson(json, OuterReqVo.class);
-
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 100000; i++) {
-            OuterReqVo reqVo1 = JsonUtil.fromJson(json, OuterReqVo.class);
-            json = JsonUtil.toJson(reqVo1);
-        }
-        System.out.println(System.currentTimeMillis() - start);
+//        String json = "{\"systemId\":\"AGENCY_RM\",\"data\":{\"applyNo\":\"2018041114214100797C0A882DF00017\",\"confirmContractPath\":\"/files/apply/2018041114214100797C0A882DF00017/GOODS_CONFIRM_CONTRACT/GOODS_CONFIRM_CONTRACT.pdf\",\"goodsList\":[{\"goodsModel\":\"EP901\",\"serialNo\":\"1,2\",\"softVersion\":\"高级版\"}]},\"service\":\"lease_apply_goods_confirm\",\"sign\":\"aQYaFa1m1pvFZsu+Qa4dQH/PWdb9YV2cTgdgvSN29fjDwq4MBHTEiS5+0l3N1IFyyI8EKpMOSTFqnfDHNaQXjFJg2LRdidbiILKJGA1u6/cVtlMFsamI+qmprPmDjUnR0HxdLrIwHCIJu2jQaTCxMNRoxgagfU/BfMVeXBQhBIE\\u003d\",\"version\":\"1.0\",\"serialNo\":\"2018041118473700204C0A882DF00048\"}";
+//        OuterReqVo reqVo = JsonUtil.fromJson(json, OuterReqVo.class);
+//
+//        long start = System.currentTimeMillis();
+//        for (int i = 0; i < 100000; i++) {
+//            OuterReqVo reqVo1 = JsonUtil.fromJson(json, OuterReqVo.class);
+//            json = JsonUtil.toJson(reqVo1);
+//        }
+//        System.out.println(System.currentTimeMillis() - start);
+        System.out.println(Arrays.toString("\u003d".getBytes()));
+        System.out.println(Arrays.toString("=".getBytes()));
     }
 
 

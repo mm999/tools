@@ -3,12 +3,11 @@ package com.xiafei.tools.common.encrypt.rsa;
 import com.xiafei.tools.common.BundleUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -64,16 +63,16 @@ final class RsaKeyUtil {
      * @throws NoSuchAlgorithmException 找不到此算法异常
      * @throws InvalidKeySpecException  私钥格式校验失败
      */
-    public static PrivateKey getPrik() throws InvalidKeySpecException, NoSuchAlgorithmException, UnsupportedEncodingException {
+    public static RSAPrivateKey getPrik() throws InvalidKeySpecException, NoSuchAlgorithmException {
         if (KEY_MAP.containsKey(PRIVATE_KEY_MAP_KEY)) {
-            return (PrivateKey) KEY_MAP.get(PRIVATE_KEY_MAP_KEY);
+            return (RSAPrivateKey) KEY_MAP.get(PRIVATE_KEY_MAP_KEY);
         } else {
             synchronized (KEY_MAP) {
                 if (KEY_MAP.containsKey(PRIVATE_KEY_MAP_KEY)) {
-                    return (PrivateKey) KEY_MAP.get(PRIVATE_KEY_MAP_KEY);
+                    return (RSAPrivateKey) KEY_MAP.get(PRIVATE_KEY_MAP_KEY);
                 } else {
                     loadPrik();
-                    return (PrivateKey) KEY_MAP.get(PRIVATE_KEY_MAP_KEY);
+                    return (RSAPrivateKey) KEY_MAP.get(PRIVATE_KEY_MAP_KEY);
                 }
             }
         }
@@ -87,17 +86,17 @@ final class RsaKeyUtil {
      * @throws NoSuchAlgorithmException 找不到此算法异常
      * @throws InvalidKeySpecException  私钥格式校验失败
      */
-    public static PublicKey getPubK(String coopCode) throws InvalidKeySpecException, NoSuchAlgorithmException, UnsupportedEncodingException {
+    public static RSAPublicKey getPubK(String coopCode) throws InvalidKeySpecException, NoSuchAlgorithmException {
         final String key = coopCode.concat(PUB_KEY_SUFFIX);
         if (KEY_MAP.containsKey(key)) {
-            return (PublicKey) KEY_MAP.get(key);
+            return (RSAPublicKey) KEY_MAP.get(key);
         } else {
             synchronized (KEY_MAP) {
                 if (KEY_MAP.containsKey(key)) {
-                    return (PublicKey) KEY_MAP.get(key);
+                    return (RSAPublicKey) KEY_MAP.get(key);
                 } else {
                     loadPubK(key);
-                    return (PublicKey) KEY_MAP.get(key);
+                    return (RSAPublicKey) KEY_MAP.get(key);
 
                 }
             }
@@ -110,11 +109,12 @@ final class RsaKeyUtil {
      * @throws NoSuchAlgorithmException 找不到此算法异常
      * @throws InvalidKeySpecException  私钥格式校验失败
      */
-    private static void loadPrik() throws NoSuchAlgorithmException, InvalidKeySpecException, UnsupportedEncodingException {
+    private static RSAPrivateKey loadPrik() throws NoSuchAlgorithmException, InvalidKeySpecException {
         final String priKStr = BundleUtil.instance(PROPERTIES_FILE_NAME).getString(PRIVATE_KEY_MAP_KEY);
-        final PrivateKey priKey = KeyFactory.getInstance(ALGORITHM).
-                generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(priKStr.getBytes("UTF-8"))));
+        final RSAPrivateKey priKey = (RSAPrivateKey) KeyFactory.getInstance(ALGORITHM).
+                generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(priKStr)));
         KEY_MAP.putIfAbsent(PRIVATE_KEY_MAP_KEY, priKey);
+        return priKey;
     }
 
     /**
@@ -123,11 +123,12 @@ final class RsaKeyUtil {
      * @throws NoSuchAlgorithmException 找不到此算法异常
      * @throws InvalidKeySpecException  公钥格式校验失败
      */
-    private static void loadPubK(final String key) throws NoSuchAlgorithmException, InvalidKeySpecException, UnsupportedEncodingException {
+    private static RSAPublicKey loadPubK(final String key) throws NoSuchAlgorithmException, InvalidKeySpecException {
         final String pubKStr = BundleUtil.instance(PROPERTIES_FILE_NAME).getString(key);
-        final PublicKey pubKey = KeyFactory.getInstance(ALGORITHM).
-                generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(pubKStr.getBytes("UTF-8"))));
+        final RSAPublicKey pubKey = (RSAPublicKey) KeyFactory.getInstance(ALGORITHM).
+                generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(pubKStr)));
         KEY_MAP.putIfAbsent(key, pubKey);
+        return pubKey;
     }
 
 }
