@@ -1,4 +1,4 @@
-package com.xiafei.tools.sftp;
+package com.xiafei.tools.common;
 
 
 /**
@@ -12,11 +12,14 @@ package com.xiafei.tools.sftp;
  * @version 1.0
  * @since java 1.7.0
  */
-public class Constants {
+public class CommonConst {
 
-    private Constants() {
+    private CommonConst() {
 
     }
+
+    public static final String COMMON_CHARSET = "UTF-8";
+    public static final String ENCRYPT_CHARSET = "UTF-8";
 
     /**
      * 金额类的查不到数据给前端传的值.

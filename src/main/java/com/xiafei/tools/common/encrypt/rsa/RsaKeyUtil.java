@@ -28,9 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 final class RsaKeyUtil {
 
-    // 加密算法
-    private static final String ALGORITHM = "RSA";
-
+    // 钥匙加密算法
+    private static final String KEY_ALGORITHM = "RSA";
 
     // Rsa密钥钥缓存池
     private static final ConcurrentHashMap<String, Key> KEY_MAP = new ConcurrentHashMap<>();
@@ -111,7 +110,7 @@ final class RsaKeyUtil {
      */
     private static RSAPrivateKey loadPrik() throws NoSuchAlgorithmException, InvalidKeySpecException {
         final String priKStr = BundleUtil.instance(PROPERTIES_FILE_NAME).getString(PRIVATE_KEY_MAP_KEY);
-        final RSAPrivateKey priKey = (RSAPrivateKey) KeyFactory.getInstance(ALGORITHM).
+        final RSAPrivateKey priKey = (RSAPrivateKey) KeyFactory.getInstance(KEY_ALGORITHM).
                 generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(priKStr)));
         KEY_MAP.putIfAbsent(PRIVATE_KEY_MAP_KEY, priKey);
         return priKey;
@@ -125,7 +124,7 @@ final class RsaKeyUtil {
      */
     private static RSAPublicKey loadPubK(final String key) throws NoSuchAlgorithmException, InvalidKeySpecException {
         final String pubKStr = BundleUtil.instance(PROPERTIES_FILE_NAME).getString(key);
-        final RSAPublicKey pubKey = (RSAPublicKey) KeyFactory.getInstance(ALGORITHM).
+        final RSAPublicKey pubKey = (RSAPublicKey) KeyFactory.getInstance(KEY_ALGORITHM).
                 generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(pubKStr)));
         KEY_MAP.putIfAbsent(key, pubKey);
         return pubKey;

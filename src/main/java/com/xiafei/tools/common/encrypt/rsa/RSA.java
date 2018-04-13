@@ -1,5 +1,6 @@
 package com.xiafei.tools.common.encrypt.rsa;
 
+import com.xiafei.tools.common.CommonConst;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Cipher;
@@ -25,16 +26,18 @@ import java.util.Base64;
 @Slf4j
 class RSA {
 
-    private static final String COMMON_CHARSET = "UTF-8";
-
     /**
      * 签名算法
      */
     private static final String SIGNATURE_ALGORITHM = "SHA1withRSA";
+    // cipher 算法
+    private static final String CIPHER_ALGORITHM = "RSA/ECB/PKCS1Padding";
+
     /**
-     * 加密算法RSA
+     * 秘钥位数.
      */
-    private static final String KEY_ALGORITHM = "RSA";
+    private static final int KEY_SIZE = 1024;
+
     /**
      * 1024密钥RSA加密最大分段大小.
      */
@@ -56,7 +59,7 @@ class RSA {
 
         // 初始化密码操作器
         final RSAPrivateKey prik = RsaKeyUtil.getPrik();
-        final Cipher cipher = Cipher.getInstance(prik.getAlgorithm());
+        final Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, prik);
         // 分段处理
         return segmentDeal(cipher, MAX_DECRYPT_BLOCK, encryptedData);
@@ -72,7 +75,7 @@ class RSA {
         // 初始化key对象
         final PublicKey publicK = RsaKeyUtil.getPubK(coopCode);
         // 初始化密码操作器
-        final Cipher cipher = Cipher.getInstance(publicK.getAlgorithm());
+        final Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, publicK);
         // 分段处理
         return segmentDeal(cipher, MAX_ENCRYPT_BLOCK, data);
@@ -88,7 +91,7 @@ class RSA {
         PrivateKey privateK = RsaKeyUtil.getPrik();
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initSign(privateK);
-        signature.update(getContentBytes(plain, COMMON_CHARSET));
+        signature.update(getContentBytes(plain, CommonConst.COMMON_CHARSET));
         byte[] result = signature.sign();
         return Base64.getEncoder().encodeToString(result);
 
@@ -106,30 +109,31 @@ class RSA {
         PublicKey publicK = RsaKeyUtil.getPubK(coopCode);
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initVerify(publicK);
-        signature.update(getContentBytes(plain, COMMON_CHARSET));
+        signature.update(getContentBytes(plain, CommonConst.COMMON_CHARSET));
         return signature.verify(Base64.getDecoder().decode(sign));
     }
 
     /**
      * 分段处理.
      *
-     * @param cipher       密码操作对象
-     * @param segmentLengh 分段大小
-     * @param data         数据字节流
+     * @param cipher    密码操作对象
+     * @param blockSize 分段大小
+     * @param data      数据字节流
      * @return 处理后的字节流
      */
-    private static byte[] segmentDeal(final Cipher cipher, final int segmentLengh, final byte[] data) throws Exception {
-        final int inputLen = data.length;
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+    private static byte[] segmentDeal(final Cipher cipher, final int blockSize, final byte[] data) throws Exception {
+        final int dataLength = data.length;
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream(KEY_SIZE)) {
             // 对数据分段加密或解密
-            for (int offSet = 0; offSet < inputLen; offSet += segmentLengh) {
+            for (int offSet = 0; offSet < dataLength; offSet += blockSize) {
                 final byte[] cache;
-                if (inputLen >= segmentLengh + offSet) {
-                    cache = cipher.doFinal(data, offSet, segmentLengh);
+                if (offSet + blockSize < dataLength) {
+                    cache = cipher.doFinal(data, offSet, blockSize);
                 } else {
-                    cache = cipher.doFinal(data, offSet, inputLen - offSet);
+                    cache = cipher.doFinal(data, offSet, dataLength - offSet);
+
                 }
-                out.write(cache, 0, cache.length);
+                out.write(cache);
             }
             return out.toByteArray();
         }

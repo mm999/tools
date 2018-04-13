@@ -1,5 +1,6 @@
 package com.xiafei.tools.common.encrypt;
 
+import com.xiafei.tools.common.CommonConst;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.BadPaddingException;
@@ -35,9 +36,13 @@ public class AesUtils {
      */
     private static final int KEY_BITS = 128;
     /**
-     * 算法名字.
+     * key算法名字.
      */
-    private static final String ALGORITHM_NAME = "AES";
+    private static final String KEY_ALGORITHM_NAME = "AES";
+    /**
+     * cipher算法.
+     */
+    private static final String DEFAULT_CIPHER_ALGORITHM = "AES/ECB/PKCS5Padding";
     /**
      * 编码格式。
      */
@@ -49,7 +54,7 @@ public class AesUtils {
 
     static {
         try {
-            RANDOM_SEED = "d85975de95974ebda7d34393218904fa".getBytes(CHARSET);
+            RANDOM_SEED = "d85975de95974ebda7d34393218904fa".getBytes(CommonConst.COMMON_CHARSET);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -68,6 +73,10 @@ public class AesUtils {
     }
 
     public static void main(String[] args) {
+        final String encrypted = getEncrypted("024334", RANDOM_SEED);
+        System.out.println("加密后：" + encrypted);
+        final String decry = getDecrypted(encrypted, RANDOM_SEED);
+        System.out.println("解密后：" + decry);
         System.out.println(getEncrypted("024334", RANDOM_SEED));
         String a = "g48jRUhGea9OKCBWeesq0A==";
 //        System.out.println(getDecrypted("iZeIsBY2Fc/W/hIKUliRhuWBIpeHrwz4mk+IDcWW4hp+JjXQYot4XpVfblqeRrFV", "d85975de95974ebda7d34393218904fa"));
@@ -115,7 +124,7 @@ public class AesUtils {
         }
         try {
             final Key secureKey = getKey(getSr(seed));
-            final Cipher cipher = Cipher.getInstance(ALGORITHM_NAME);
+            final Cipher cipher = Cipher.getInstance(DEFAULT_CIPHER_ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secureKey, getSr(seed));
             return cipher.doFinal(source.getBytes(CHARSET));
 
@@ -139,7 +148,7 @@ public class AesUtils {
         }
         try {
             final Key secretKey = getKey(getSr(seed));
-            final Cipher cipher = Cipher.getInstance(ALGORITHM_NAME);// 创建密码器
+            final Cipher cipher = Cipher.getInstance(DEFAULT_CIPHER_ALGORITHM);// 创建密码器
             cipher.init(Cipher.DECRYPT_MODE, secretKey, getSr(seed));// 初始化
             return cipher.doFinal(source); // 解密
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
@@ -152,10 +161,10 @@ public class AesUtils {
     private static Key getKey(SecureRandom sr) {
         try {
 
-            final KeyGenerator _generator = KeyGenerator.getInstance(ALGORITHM_NAME);
+            final KeyGenerator _generator = KeyGenerator.getInstance(KEY_ALGORITHM_NAME);
             _generator.init(128, sr);
             final SecretKey origin_key = _generator.generateKey();
-            final SecretKey key = new SecretKeySpec(origin_key.getEncoded(), ALGORITHM_NAME);
+            final SecretKeySpec key = new SecretKeySpec(origin_key.getEncoded(), KEY_ALGORITHM_NAME);
             return key;
         } catch (Exception e) {
             throw new RuntimeException(" 初始化密钥出现异常 ");
