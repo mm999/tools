@@ -36,6 +36,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Sftp {
 
     /**
+     * sftp缓冲区的大小（8K）.
+     */
+    private static final int SFTP_BUFFER_SIZE = 1024 << 3;
+
+    /**
+     * 文件分隔符，正斜杠.
+     */
+    private static final String FILE_SEPARATOR_FORWARD = "/";
+
+    /**
+     * 文件分隔符，反斜杠.
+     */
+    private static final String FILE_SEPARATOR_BACK = "\\";
+
+    /**
      * ssh默认端口号.
      */
     private static final int DEFAULT_PORT = 22;
@@ -113,7 +128,13 @@ public class Sftp {
     /**
      * 初始化sftp连接池.
      *
-     * @throws JSchException 连接异常
+     * @param host     sftp服务器ip地址
+     * @param port     sftp服务器端口号
+     * @param userName sftp用户名
+     * @param password sftp密码
+     * @param timeOut  建立连接超时
+     * @param initSize 初始化连接池连接数量
+     * @param maxSize  连接池最大连接数量
      */
     public Sftp(final String host, final Integer port, final String userName, final String password,
                 final Integer timeOut, final Integer initSize, final Integer maxSize) {
@@ -133,23 +154,28 @@ public class Sftp {
     /**
      * 从sftp服务器上下载文件并读取成字节流.
      *
-     * @param path 文件路径
+     * @param path     文件路径
+     * @param serialNo 业务流水号，日志用
      * @return 文件并读取成字节流
-     * @throws IOException   输入流获取失败，通常是网络原因
-     * @throws SftpException sftp操作异常，包括权限，目录，文件不存在等
      */
-    public byte[] getBytes(final String path) throws IOException, SftpException {
+    public byte[] getBytes(final String path, final String serialNo) {
         ChannelSftp channel = null;
         try {
             channel = fetch();
             try (InputStream is = channel.get(path);
                  ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-                final byte[] buffer = new byte[Constants.SFTP_BUFFER_SIZE];
+                final byte[] buffer = new byte[SFTP_BUFFER_SIZE];
                 int remain;
-                while ((remain = is.read(buffer, 0, Constants.SFTP_BUFFER_SIZE)) > 0) {
+                while ((remain = is.read(buffer, 0, SFTP_BUFFER_SIZE)) > 0) {
                     bos.write(buffer, 0, remain);
                 }
                 return bos.toByteArray();
+            } catch (SftpException e) {
+                log.error("[{}]{}sftp操作异常，获取path={}文件的输出流失败", serialNo, logPrefix, path, e);
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                log.error("[{}]{}输出流关闭失败", serialNo, logPrefix, e);
+                throw new RuntimeException(e);
             }
 
         } finally {
@@ -161,15 +187,18 @@ public class Sftp {
     /**
      * 从sftp服务器上获取文件的输入流.
      *
-     * @param path 文件路径
+     * @param path     文件路径
+     * @param serialNo 业务流水号，日志用
      * @return 文件的输入流
-     * @throws SftpException sftp操作异常，包括权限，目录，文件不存在等
      */
-    public InputStream getStream(final String path) throws SftpException {
+    public InputStream getStream(final String path, final String serialNo) {
         ChannelSftp channel = null;
         try {
             channel = fetch();
             return channel.get(path);
+        } catch (SftpException e) {
+            log.error("[{}]{}sftp操作异常，获取path={}文件的输出流失败", serialNo, logPrefix, path, e);
+            throw new RuntimeException(e);
         } finally {
             release(channel);
         }
@@ -180,13 +209,16 @@ public class Sftp {
      *
      * @param remotePath 要下载的sftp服务器上文件地址
      * @param localPath  要下载到的本地文件存放地址
-     * @throws SftpException sftp操作异常，包括权限，目录，文件不存在等
+     * @param serialNo   业务流水号，日志用
      */
-    public void download(final String remotePath, final String localPath) throws SftpException {
+    public void download(final String remotePath, final String localPath, final String serialNo) {
         ChannelSftp channel = null;
         try {
             channel = fetch();
             channel.get(remotePath, localPath);
+        } catch (SftpException e) {
+            log.error("[{}]{}sftp操作异常，将目标sftp上path={}的文件下载到本地={}路径下失败", serialNo, logPrefix, remotePath, localPath, e);
+            throw new RuntimeException(e);
         } finally {
             release(channel);
         }
@@ -199,18 +231,21 @@ public class Sftp {
      * @param path     文件路径
      * @param bytes    文件字节数组
      * @param serialNo 业务流水号，记日志用，可以为空
-     * @throws SftpException sftp操作异常，包括权限，目录，文件不存在等
      */
-    public void uploadSync(final String path, final byte[] bytes, final String serialNo) throws SftpException {
+    public void uploadSync(final String path, final byte[] bytes, final String serialNo) {
         ChannelSftp channelSftp = null;
         try {
             channelSftp = fetch();
             try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
                 cycleMkDir(path, channelSftp);
                 channelSftp.put(bis, path);
-                log.info("[{}]{}[upload success],path={}", serialNo, logPrefix, path);
+                log.info("[{}]{}上传成功,path={}", serialNo, logPrefix, path);
             } catch (IOException e) {
-                log.warn("[{}]{}sftp上传后关闭byte数组输入流失败", serialNo, logPrefix);
+                log.error("[{}]{}输出流关闭失败", serialNo, logPrefix, e);
+                throw new RuntimeException(e);
+            } catch (SftpException e) {
+                log.error("[{}]{}sftp操作异常，上传文件到path={}的路径下失败", serialNo, logPrefix, path, e);
+                throw new RuntimeException(e);
             }
 
         } finally {
@@ -229,8 +264,6 @@ public class Sftp {
         uploadExecutor.execute(() -> {
             try {
                 uploadSync(path, bytes, serialNo);
-            } catch (SftpException e) {
-                log.error("[{}]{}uploadAsync with bytes file operate exception,path={}", serialNo, logPrefix, path, e);
             } catch (Throwable e) {
                 log.error("[{}]{}uploadAsync with bytes uncaught exception,path={}", serialNo, logPrefix, path, e);
             }
@@ -245,13 +278,16 @@ public class Sftp {
      * @param is       输入流
      * @param serialNo 业务流水号，记日志用，可以为空
      */
-    public void uploadSync(final String path, final InputStream is, final String serialNo) throws SftpException {
+    public void uploadSync(final String path, final InputStream is, final String serialNo) {
         ChannelSftp channelSftp = null;
         try {
             channelSftp = fetch();
             cycleMkDir(path, channelSftp);
             channelSftp.put(is, path);
             log.info("[{}]{}[upload by inputStream success],path={}", serialNo, logPrefix, path);
+        } catch (SftpException e) {
+            log.error("[{}]{}sftp操作异常，上传文件到path={}的路径下失败", serialNo, logPrefix, path, e);
+            throw new RuntimeException(e);
         } finally {
             release(channelSftp);
         }
@@ -268,8 +304,6 @@ public class Sftp {
         uploadExecutor.execute(() -> {
             try {
                 uploadSync(path, is, serialNo);
-            } catch (SftpException e) {
-                log.error("[{}]{}uploadAsync with inputStream file operate exception,path={}", serialNo, logPrefix, path, e);
             } catch (Throwable e) {
                 log.error("[{}]{}uploadAsync with inputStream uncaught exception,path={}", serialNo, logPrefix, path, e);
             }
@@ -283,13 +317,16 @@ public class Sftp {
      * @param localPath  本地文件路径
      * @param serialNo   业务流水号，记日志用，可以为空
      */
-    public void uploadSync(final String remotePath, final String localPath, final String serialNo) throws SftpException {
+    public void uploadSync(final String remotePath, final String localPath, final String serialNo) {
         ChannelSftp channelSftp = null;
         try {
             channelSftp = fetch();
             cycleMkDir(remotePath, channelSftp);
             channelSftp.put(localPath, remotePath);
             log.info("[{}]{}[upload by localPath success],path={}", serialNo, logPrefix, remotePath);
+        } catch (SftpException e) {
+            log.error("[{}]{}sftp操作异常，将本地文件={}上传到sftp={}的路径下失败", serialNo, logPrefix, localPath, remotePath, e);
+            throw new RuntimeException(e);
         } finally {
             release(channelSftp);
         }
@@ -306,9 +343,6 @@ public class Sftp {
         uploadExecutor.execute(() -> {
             try {
                 uploadSync(remotePath, localPath, serialNo);
-            } catch (SftpException e) {
-                log.error("[{}]{}uploadAsync with inputStream file operate exception,remotePath={},localPath={}", serialNo, logPrefix, remotePath,
-                        localPath, e);
             } catch (Throwable e) {
                 log.error("[{}]{}uploadAsync with inputStream uncaught exception,remotePath={},localPath={}", serialNo, logPrefix, remotePath,
                         localPath, e);
@@ -323,18 +357,18 @@ public class Sftp {
      * @param isDirectory 是否是目录
      * @param serialNo    业务流水号，记日志用，可以为空
      */
-    public void removeSync(final String path, final boolean isDirectory, final String serialNo) throws SftpException {
+    public void removeSync(final String path, final boolean isDirectory, final String serialNo) {
         ChannelSftp channelSftp = null;
         try {
             channelSftp = fetch();
             final String directory;
             final String fileName;
-            if (path.contains(Constants.FILE_SEPARATOR_FORWARD)) {
-                final int lastIndex = path.lastIndexOf(Constants.FILE_SEPARATOR_FORWARD);
+            if (path.contains(FILE_SEPARATOR_FORWARD)) {
+                final int lastIndex = path.lastIndexOf(FILE_SEPARATOR_FORWARD);
                 directory = path.substring(0, lastIndex);
                 fileName = path.substring(lastIndex + 1);
-            } else if (path.contains(Constants.FILE_SEPARATOR_BACK)) {
-                final int lastIndex = path.lastIndexOf(Constants.FILE_SEPARATOR_BACK);
+            } else if (path.contains(FILE_SEPARATOR_BACK)) {
+                final int lastIndex = path.lastIndexOf(FILE_SEPARATOR_BACK);
                 directory = path.substring(0, lastIndex);
                 fileName = path.substring(lastIndex + 1);
             } else {
@@ -351,6 +385,9 @@ public class Sftp {
             }
             log.info("[{}]{}[remove success],path={}", serialNo, logPrefix, path);
 
+        } catch (SftpException e) {
+            log.error("[{}]{}sftp操作异常，删除sftp上path={}的文件失败", serialNo, logPrefix, path, e);
+            throw new RuntimeException(e);
         } finally {
             release(channelSftp);
         }
@@ -367,8 +404,6 @@ public class Sftp {
         sheelExecutor.execute(() -> {
             try {
                 removeSync(path, isDirectory, serialNo);
-            } catch (SftpException e) {
-                log.error("[{}]{}removeAsync file operate exception,path={}", serialNo, logPrefix, path, e);
             } catch (Throwable e) {
                 log.error("[{}]{}removeAsync uncaught exception,path={}", serialNo, logPrefix, path, e);
             }
@@ -383,11 +418,11 @@ public class Sftp {
      * @param channelSftp sftp通道
      * @throws SftpException sftp异常
      */
-    private void cycleMkDir(final String path, final ChannelSftp channelSftp) throws SftpException {
-        if (path.contains(Constants.FILE_SEPARATOR_FORWARD)) {
-            cycleMkDir(path, channelSftp, Constants.FILE_SEPARATOR_FORWARD);
-        } else if (path.contains(Constants.FILE_SEPARATOR_BACK)) {
-            cycleMkDir(path, channelSftp, Constants.FILE_SEPARATOR_BACK);
+    private void cycleMkDir(final String path, final ChannelSftp channelSftp) {
+        if (path.contains(FILE_SEPARATOR_FORWARD)) {
+            cycleMkDir(path, channelSftp, FILE_SEPARATOR_FORWARD);
+        } else if (path.contains(FILE_SEPARATOR_BACK)) {
+            cycleMkDir(path, channelSftp, FILE_SEPARATOR_BACK);
         }
 
     }
@@ -398,9 +433,8 @@ public class Sftp {
      * @param path        文件全路径
      * @param channelSftp sftp通道
      * @param separator   分隔符
-     * @throws SftpException sftp异常
      */
-    private void cycleMkDir(final String path, final ChannelSftp channelSftp, final String separator) throws SftpException {
+    private void cycleMkDir(final String path, final ChannelSftp channelSftp, final String separator) {
         final String[] fullItem = path.split(separator);
         if (path.startsWith(separator)) {
             fullItem[0] = separator.concat(fullItem[0]);
@@ -415,8 +449,14 @@ public class Sftp {
             } catch (SftpException sException) {
                 if (ChannelSftp.SSH_FX_NO_SUCH_FILE == sException.id) {
                     log.debug("{}sftp服务器创建文件路径={}", logPrefix, item);
-                    channelSftp.mkdir(item);
-                    channelSftp.cd(item);
+                    try {
+                        channelSftp.mkdir(item);
+                        channelSftp.cd(item);
+                    } catch (SftpException e) {
+                        log.error("{}sftp服务器创建文件路径={}失败", logPrefix, item);
+                        throw new RuntimeException(e);
+                    }
+
                 } else {
                     log.error("{}sftp.cd 报错", logPrefix, sException);
                 }
@@ -504,7 +544,10 @@ public class Sftp {
     }
 
     /**
-     * 将连接释放到连接池.
+     * 释放sftp通道，根据连接池中当前线程数量情况决定关闭通道还是放回到连接池.
+     * 如果连接池的当前连接数大于空闲线程并且实际需要的线程数量小于当前线程数量，则从连接池中移除这个连接。
+     * 否则将连接放回连接池。
+     * 这里“实际需要的线程数量”由一个AtomicInteger保存，在有线程企图获取连接（不论是否已经拿到）时自增，当线程使用完毕
      *
      * @param channel sftp通道
      */
@@ -542,7 +585,7 @@ public class Sftp {
      * 如果通道不可用，重新连接.
      *
      * @param channel 通道
-     * @return 可用通道
+     * @return 可用通道，如果重连失败返回null
      */
     private ChannelSftp reconnectIfExpire(ChannelSftp channel) {
         try {
@@ -561,18 +604,18 @@ public class Sftp {
         }
     }
 
-
     /**
      * 创建sftp通道.
      *
      * @return sftp通道
+     * @throws JSchException sftp通道建立失败
      */
     private ChannelSftp createChannel() throws JSchException {
         final Integer ftpPort = port == null ? DEFAULT_PORT : port;
-        JSch jsch = new JSch(); // 创建JSch对象
-        Session session = jsch.getSession(userName, host, ftpPort); // 根据用户名，主机ip，端口获取一个Session对象
+        final JSch jsch = new JSch(); // 创建JSch对象
+        final Session session = jsch.getSession(userName, host, ftpPort); // 根据用户名，主机ip，端口获取一个Session对象
         log.debug("sftp Session created. {}", this);
-        Properties config = new Properties();
+        final Properties config = new Properties();
         config.put("StrictHostKeyChecking", "no");
         session.setConfig(config); // 为Session对象设置properties
         session.setTimeout(timeOut); // 设置下载超时时间，单位毫秒
@@ -580,7 +623,7 @@ public class Sftp {
         session.connect(); // 通过Session建立链接
         log.debug("Session connected.");
         log.debug("Opening Channel.");
-        Channel channel = session.openChannel("sftp"); // 打开SFTP通道
+        final Channel channel = session.openChannel("sftp"); // 打开SFTP通道
         channel.connect(); // 建立SFTP通道的连接
         log.debug("Connected successfully.{}", this);
         return (ChannelSftp) channel;
@@ -588,6 +631,8 @@ public class Sftp {
 
     /**
      * 关闭通道和会话.
+     *
+     * @param channel sftp通道
      */
     private void closeChannel(final ChannelSftp channel) {
         try {
@@ -604,7 +649,11 @@ public class Sftp {
         }
     }
 
-
+    /**
+     * 初始化sftp连接池.
+     *
+     * @return 是否初始化成功
+     */
     private boolean initPool() {
         try {
             for (int i = 0; i < initSize; i++) {
