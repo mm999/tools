@@ -3,7 +3,13 @@ package com.xiafei.tools;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.xiafei.tools.common.check.CheckUtils;
 import lombok.Data;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,9 +24,10 @@ import java.util.List;
  * @version 1.0
  * @since java 1.8.0
  */
+@Service
 public class Test {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnknownHostException, SocketException {
 //        String json = "{\"systemId\":\"AGENCY_RM\",\"data\":{\"applyNo\":\"2018041114214100797C0A882DF00017\",\"confirmContractPath\":\"/files/apply/2018041114214100797C0A882DF00017/GOODS_CONFIRM_CONTRACT/GOODS_CONFIRM_CONTRACT.pdf\",\"goodsList\":[{\"goodsModel\":\"EP901\",\"serialNo\":\"1,2\",\"softVersion\":\"高级版\"}]},\"service\":\"lease_apply_goods_confirm\",\"sign\":\"aQYaFa1m1pvFZsu+Qa4dQH/PWdb9YV2cTgdgvSN29fjDwq4MBHTEiS5+0l3N1IFyyI8EKpMOSTFqnfDHNaQXjFJg2LRdidbiILKJGA1u6/cVtlMFsamI+qmprPmDjUnR0HxdLrIwHCIJu2jQaTCxMNRoxgagfU/BfMVeXBQhBIE\\u003d\",\"version\":\"1.0\",\"serialNo\":\"2018041118473700204C0A882DF00048\"}";
 //        OuterReqVo reqVo = JsonUtil.fromJson(json, OuterReqVo.class);
 //
@@ -30,8 +37,20 @@ public class Test {
 //            json = JsonUtil.toJson(reqVo1);
 //        }
 //        System.out.println(System.currentTimeMillis() - start);
-        System.out.println(Arrays.toString("\u003d".getBytes()));
-        System.out.println(Arrays.toString("=".getBytes()));
+//        System.out.println(Arrays.toString("\u003d".getBytes()));
+////        System.out.println(Arrays.toString("=".getBytes()));
+        final NetworkInterface byInetAddress = NetworkInterface.getByInetAddress(InetAddress.getLocalHost());
+        final byte[] hardwareAddress = byInetAddress.getHardwareAddress();
+        System.out.println(Arrays.toString(hardwareAddress));
+    }
+
+    @Scheduled(cron = "*/30 * * * * ?")
+    public void testSchedule() {
+        System.out.println("task1");
+    }
+    @Scheduled(cron = "*/30 * * * * ?")
+    public void testSchedule2() {
+        System.out.println("task2");
     }
 
 

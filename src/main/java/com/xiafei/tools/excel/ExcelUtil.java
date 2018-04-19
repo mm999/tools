@@ -242,4 +242,14 @@ public class ExcelUtil {
         }
 
     }
+
+
+    public static String readCell(Row row, int column) {
+        final Cell cell = row.getCell(column);
+        if (cell != null) {
+            cell.setCellType(Cell.CELL_TYPE_STRING);
+            return cell.getStringCellValue();
+        }
+        return null;
+    }
 }

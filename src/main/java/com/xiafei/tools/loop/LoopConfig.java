@@ -14,7 +14,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * <P>Description: 定时任务配置，只要放在spring扫描路径下即可，想要实现定时任务实现接口LoopTask就可以. </P>
+ * <P>Description: springboot自带的定时任务就可以胜任，该类以后只作为技术尝试
+ * 定时任务配置，只要放在spring扫描路径下即可，想要实现定时任务实现接口LoopTask就可以. </P>
  * <P>CALLED BY:   齐霞飞 </P>
  * <P>UPDATE BY:   齐霞飞 </P>
  * <P>CREATE DATE: 2018/2/6</P>
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0
  * @since java 1.8.0
  */
+@Deprecated
 @Slf4j
 @Component
 public class LoopConfig implements ApplicationContextAware {

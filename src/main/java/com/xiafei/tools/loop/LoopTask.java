@@ -11,6 +11,7 @@ package com.xiafei.tools.loop;
  * @version 1.0
  * @since java 1.8.0
  */
+@Deprecated
 public interface LoopTask {
 
     /**

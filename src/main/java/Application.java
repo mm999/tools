@@ -9,7 +9,13 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+
+import java.util.concurrent.Executors;
 
 /**
  * <P>Description: springboot启动类. </P>
@@ -25,7 +31,11 @@ import org.springframework.core.env.Environment;
 @SpringBootApplication(scanBasePackages = {"com.xiafei.tools"}, exclude = {DataSourceAutoConfiguration.class})
 @EnableConfigurationProperties({JedisClientProperties.class, RocketMQProperties.class, DubboProperties.class,
         SftpProperties.class})
-public class Application extends SpringBootServletInitializer {
+// 如果用到定时任务配置则用上这个注解
+@EnableScheduling
+// 如果用到设计模式，springBean涉及到继承和实现,则配置这个注解,否则程序会报错找不到类型
+@EnableCaching(proxyTargetClass = true)
+public class Application extends SpringBootServletInitializer implements SchedulingConfigurer {
 
     static {
         /*
@@ -63,4 +73,9 @@ public class Application extends SpringBootServletInitializer {
                 + env.getProperty("from"));
     }
 
+    @Override
+    public void configureTasks(final ScheduledTaskRegistrar scheduledTaskRegistrar) {
+        //设定一个长度10的定时任务线程池
+        scheduledTaskRegistrar.setScheduler(Executors.newScheduledThreadPool(10));
+    }
 }

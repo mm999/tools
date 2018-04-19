@@ -1,16 +1,21 @@
 package com.xiafei.tools.common;
 
-import com.xiafei.tools.common.DateUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.core.io.PathResource;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +30,7 @@ import java.util.List;
  * @version 1.0
  * @since java 1.7.0
  */
+@Slf4j
 public final class FileUtils {
     private FileUtils() {
 
@@ -122,17 +128,40 @@ public final class FileUtils {
     }
 
 
-    public static String readFileToBase64(final String path) throws IOException {
+    public static String readFileToBase64(final String path) {
         PathResource pathResource = new PathResource(path);
-        InputStream is = pathResource.getInputStream();
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[8096];
-        int remain = 0;
-        while ((remain = is.read(buffer, 0, buffer.length)) > 0) {
-            bos.write(buffer, 0, remain);
+        try (InputStream is = pathResource.getInputStream();
+             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8096];
+            int remain = 0;
+            while ((remain = is.read(buffer, 0, buffer.length)) > 0) {
+                bos.write(buffer, 0, remain);
+            }
+
+            byte[] content = bos.toByteArray();
+            return Base64.encodeBase64String(content);
+        } catch (IOException e) {
+            log.error("readFileToBase64(),关闭流失败", e);
+            return null;
         }
 
-        byte[] content = bos.toByteArray();
-        return Base64.encodeBase64String(content);
+    }
+
+    public static List<String> readFileToString(final File file) {
+        try (FileInputStream fis = new FileInputStream(file);
+             InputStreamReader isr = new InputStreamReader(fis);
+             BufferedReader br = new BufferedReader(isr)) {
+            final List<String> result = new ArrayList<>();
+            String temp;
+            while ((temp = br.readLine()) != null) {
+                result.add(temp);
+            }
+            return result;
+        } catch (FileNotFoundException e) {
+            log.error("readFileToString(),找不到文件错误", e);
+        } catch (IOException e) {
+            log.error("readFileToString,读取文件错误");
+        }
+        return null;
     }
 }
