@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +34,7 @@ import java.util.concurrent.TimeUnit;
  * @since java 1.8.0
  */
 @Slf4j
+@Component
 public class AscendingInvoke implements ApplicationContextAware {
 
     /**
@@ -43,7 +45,7 @@ public class AscendingInvoke implements ApplicationContextAware {
     /**
      * 保存线程私有变量和执行对象的文件.
      */
-    private static final String TEMP_FILE_PATH = "./ascendingTemp/";
+    private static final String TEMP_FILE_PATH = "/data/LOGS/tools/ascendingTemp/";
 
     /**
      * 运行信息分隔符.
@@ -82,71 +84,6 @@ public class AscendingInvoke implements ApplicationContextAware {
 
     }
 
-    /**
-     * 将由于程序终止导致停止的线程恢复运行.
-     */
-    public static void init() {
-        final String threadLevelKey = "THREAD_LEVEL";
-        final String threadDelayKey = "THREAD_DELAY";
-        final String threadUUID = "THREAD_UUID";
-        final String task = "TASK";
-        final File dirctory = new File(TEMP_FILE_PATH);
-        if (!dirctory.isDirectory()) {
-            dirctory.mkdirs();
-        }
-        final File[] files = dirctory.listFiles();
-        if (files == null) {
-            return;
-        }
-        final List<Map<String, Object>> runInfoMapList = new ArrayList<>(files.length >>> 1);
-        final Map<String, Map<String, Object>> cacheMap = new HashMap<>();
-        for (File file : files) {
-            final String uuid = file.getName().substring(0, file.getName().lastIndexOf("."));
-            final Map<String, Object> runInfoMap;
-            if (cacheMap.get(uuid) != null) {
-                runInfoMap = cacheMap.get(uuid);
-            } else {
-                runInfoMap = new HashMap<>();
-                cacheMap.put(uuid, runInfoMap);
-                runInfoMapList.add(runInfoMap);
-            }
-            if (file.getName().endsWith(FIELDS_FILE_SUFFIX)) {
-                final List<String> runInfoList = FileUtils.readFileToString(file);
-                if (runInfoList == null) {
-                    log.warn("文件{}，内容为空", file.getAbsolutePath());
-                    continue;
-                }
-                final String runInfo = runInfoList.get(0);
-                runInfoMap.put(threadLevelKey, Integer.parseInt(runInfo.split(RUNINFO_SPLITE)[0]));
-                runInfoMap.put(threadDelayKey, Long.parseLong(runInfo.split(RUNINFO_SPLITE)[1]));
-                runInfoMap.put(threadUUID, runInfo.split(RUNINFO_SPLITE)[2]);
-
-            } else {
-                try (FileInputStream fis = new FileInputStream(file);
-                     ObjectInputStream ois = new ObjectInputStream(fis)) {
-                    final Object o = ois.readObject();
-                    ois.close();
-                    runInfoMap.put(task, o);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }
-
-        for (Map<String, Object> runInfoMap : runInfoMapList) {
-            new Thread(() -> {
-                THREAD_LEVEL.set((Integer) runInfoMap.get(threadLevelKey));
-                THREAD_DELAY.set((Long) runInfoMap.get(threadDelayKey));
-                THREAD_UUID.set((String) runInfoMap.get(threadUUID));
-                doIt((Task) runInfoMap.get(task));
-                delRunInfo();
-            }).start();
-        }
-    }
 
     /**
      * 开始递增调用.
@@ -201,35 +138,100 @@ public class AscendingInvoke implements ApplicationContextAware {
      * 保存当前的执行数据.
      */
     private static void saveRunInfo(final Task task) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(THREAD_LEVEL.get()).append(RUNINFO_SPLITE);
-        sb.append(THREAD_DELAY.get()).append(RUNINFO_SPLITE);
-        sb.append(THREAD_UUID.get());
-        FileUtils.outPutToFileByLine(TEMP_FILE_PATH.concat(THREAD_UUID.get()).concat(FIELDS_FILE_SUFFIX),
-                Collections.singletonList(sb.toString()), true);
-
         final File file = new File(TEMP_FILE_PATH.concat(THREAD_UUID.get()).concat(OBJECT_FILE_SUFFIX));
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
             oos.writeObject(task);
+            final StringBuilder sb = new StringBuilder();
+            sb.append(THREAD_LEVEL.get()).append(RUNINFO_SPLITE);
+            sb.append(THREAD_DELAY.get()).append(RUNINFO_SPLITE);
+            sb.append(THREAD_UUID.get());
+            FileUtils.outPutToFileByLine(new File(TEMP_FILE_PATH.concat(THREAD_UUID.get()).concat(FIELDS_FILE_SUFFIX)),
+                    Collections.singletonList(sb.toString()), true);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.warn("递增调用序列化对象到文件时任务执行过程中包含不能序列化的内容，放弃保存状态", e);
         }
-
     }
 
     /**
      * 删除执行数据.
      */
     private static void delRunInfo() {
-        final File fieldFile = new File(TEMP_FILE_PATH.concat(THREAD_UUID.get()).concat(FIELDS_FILE_SUFFIX));
-        final File objectFile = new File(TEMP_FILE_PATH.concat(THREAD_UUID.get()).concat(OBJECT_FILE_SUFFIX));
-        fieldFile.delete();
-        objectFile.delete();
+        new File(TEMP_FILE_PATH.concat(THREAD_UUID.get()).concat(FIELDS_FILE_SUFFIX)).delete();
+        new File(TEMP_FILE_PATH.concat(THREAD_UUID.get()).concat(OBJECT_FILE_SUFFIX)).delete();
     }
 
     @Override
     public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
         init();
+    }
+
+    /**
+     * 将由于程序终止导致停止的线程恢复运行.
+     */
+    private void init() {
+        try {
+            final String threadLevelKey = "THREAD_LEVEL";
+            final String threadDelayKey = "THREAD_DELAY";
+            final String threadUUID = "THREAD_UUID";
+            final String task = "TASK";
+            final File dirctory = new File(TEMP_FILE_PATH);
+            if (!dirctory.isDirectory()) {
+                dirctory.mkdirs();
+                return;
+            }
+            final File[] files = dirctory.listFiles();
+            if (files == null) {
+                return;
+            }
+            final List<Map<String, Object>> runInfoMapList = new ArrayList<>(files.length >>> 1);
+            final Map<String, Map<String, Object>> cacheMap = new HashMap<>();
+            for (File file : files) {
+                System.out.println(file.getAbsolutePath());
+                final String uuid = file.getName().substring(0, file.getName().lastIndexOf("."));
+                final Map<String, Object> runInfoMap;
+                if (cacheMap.get(uuid) != null) {
+                    runInfoMap = cacheMap.get(uuid);
+                } else {
+                    runInfoMap = new HashMap<>();
+                    cacheMap.put(uuid, runInfoMap);
+                    runInfoMapList.add(runInfoMap);
+                }
+                if (file.getName().endsWith(FIELDS_FILE_SUFFIX)) {
+                    final List<String> runInfoList = FileUtils.readFileToString(file);
+                    if (runInfoList == null) {
+                        log.warn("文件{}，内容为空", file.getAbsolutePath());
+                        continue;
+                    }
+                    final String runInfo = runInfoList.get(0);
+                    runInfoMap.put(threadLevelKey, Integer.parseInt(runInfo.split(RUNINFO_SPLITE)[0]));
+                    runInfoMap.put(threadDelayKey, Long.parseLong(runInfo.split(RUNINFO_SPLITE)[1]));
+                    runInfoMap.put(threadUUID, runInfo.split(RUNINFO_SPLITE)[2]);
+
+                } else {
+                    try (FileInputStream fis = new FileInputStream(file);
+                         ObjectInputStream ois = new ObjectInputStream(fis)) {
+                        final Object o = ois.readObject();
+                        ois.close();
+                        runInfoMap.put(task, o);
+
+                    }
+
+                }
+            }
+
+            for (Map<String, Object> runInfoMap : runInfoMapList) {
+                new Thread(() -> {
+                    THREAD_LEVEL.set((Integer) runInfoMap.get(threadLevelKey));
+                    THREAD_DELAY.set((Long) runInfoMap.get(threadDelayKey));
+                    THREAD_UUID.set((String) runInfoMap.get(threadUUID));
+                    doIt((Task) runInfoMap.get(task));
+                    delRunInfo();
+                }).start();
+            }
+        } catch (Exception e) {
+            log.error("读取递增调用持久化对象失败", e);
+        }
+
     }
 
     /**

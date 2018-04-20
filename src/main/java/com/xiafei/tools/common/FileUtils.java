@@ -55,33 +55,44 @@ public final class FileUtils {
             if (isNewFile && flag) {
                 file.delete();
             }
-            try (FileOutputStream outputStream = new FileOutputStream(file, true);
-                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, "utf-8");
-                 BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter)
-            ) {
-
-                file.createNewFile();
-                if (flag && !isNewFile) {
-                    bufferedWriter.write("#########################################################");
-                    bufferedWriter.newLine();
-                    bufferedWriter.write("################" + DateUtils.getYMDHMSWithSeparate().format(new Date()) + "追加#################");
-                    bufferedWriter.newLine();
-                    bufferedWriter.write("#########################################################");
-                    bufferedWriter.newLine();
-                }
-                for (Object line : content) {
-                    bufferedWriter.write(line == null ? "" : line.toString());
-                    bufferedWriter.newLine();
-                }
-                bufferedWriter.flush();
-            } catch (IOException e) {
-                throw new RuntimeException("创建文件失败，请检查文件夹是否已经建好" + filePath);
-
-            }
+            outPutToFileByLine(file, content, isNewFile);
 
         } else {
             throw new RuntimeException("文件路径必须包含文件名和文件类型" + filePath);
         }
+    }
+
+    /**
+     * 按行输出内容到文件
+     *
+     * @param content   要输出的内容列表，列表每一个字符串代表文件一行
+     * @param isNewFile 是否替换原文件，若为否，则在源文件上追加（若存在）
+     */
+    public static void outPutToFileByLine(final File file, final List<?> content, final boolean isNewFile) {
+        try (FileOutputStream outputStream = new FileOutputStream(file, true);
+             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, "utf-8");
+             BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter)
+        ) {
+
+            file.createNewFile();
+            if (!isNewFile) {
+                bufferedWriter.write("#########################################################");
+                bufferedWriter.newLine();
+                bufferedWriter.write("################" + DateUtils.getYMDHMSWithSeparate().format(new Date()) + "追加#################");
+                bufferedWriter.newLine();
+                bufferedWriter.write("#########################################################");
+                bufferedWriter.newLine();
+            }
+            for (Object line : content) {
+                bufferedWriter.write(line == null ? "" : line.toString());
+                bufferedWriter.newLine();
+            }
+            bufferedWriter.flush();
+        } catch (IOException e) {
+            throw new RuntimeException("创建文件失败，请检查文件夹是否已经建好" + file.getAbsolutePath());
+
+        }
+
     }
 
     /**

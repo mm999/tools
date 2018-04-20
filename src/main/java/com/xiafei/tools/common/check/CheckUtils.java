@@ -2,6 +2,8 @@ package com.xiafei.tools.common.check;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -61,47 +63,7 @@ public class CheckUtils {
             throw new Exception(nullDesc);
         }
         for (Object obj : objs) {
-            // 如果对象为空，抛出异常
-            if (obj == null) {
-                throw new Exception(nullDesc);
-            }
-            final Class clazz = obj.getClass();
-            // 字符串判断是否是空串
-            if (clazz == String.class) {
-                if (obj.toString().trim().equals("")) {
-                    throw new Exception(nullDesc);
-                }
-            }
-            // 如果是可以遍历的类型，比如list，set，遍历处理参数
-            if (Iterable.class.isAssignableFrom(clazz)) {
-                int count = 0;
-                for (Object property : (Iterable) obj) {
-                    count++;
-                    if (property == null) {
-                        throw new Exception(nullDesc);
-                    }
-                    Class propertyClass = property.getClass();
-                    if (propertyClass == String.class) {
-                        if (property.toString().trim().equals("")) {
-                            throw new Exception(nullDesc);
-                        }
-                    }
-                    if (isPojo(propertyClass)) {
-                        checkPojo(property, propertyClass);
-                    }
-                }
-                if (count == 0) {
-                    throw new Exception(nullDesc);
-                }
-                continue;
-            }
-
-            // 如果是pojo，判断属性是否含有空的
-            if (isPojo(clazz)) {
-                // 如果不是基本类型，利用内省机制检查字段
-                checkPojo(obj, clazz);
-            }
-
+            checkObj(obj);
         }
     }
 
@@ -140,44 +102,41 @@ public class CheckUtils {
                 log.error("反射获取第一层属性值对象报错", e);
                 throw new Exception(field.getName() + "校验失败");
             }
-            if (propertyValue == null) {
-                throw new Exception(field.getName() + "为空");
-            }
-            final Class propertyValueClass = propertyValue.getClass();
-            // 字符串判断是否是空串
-            if (propertyValueClass == String.class) {
-                if (propertyValue.toString().trim().equals("")) {
-                    throw new Exception(field.getName() + "为空");
-                }
-                continue;
-            }
+            checkObj(propertyValue);
+        }
+    }
 
-            // 如果是可以遍历的类型，比如list，set，遍历处理参数
-            if (Iterable.class.isAssignableFrom(propertyValueClass)) {
-                int count = 0;
-                for (Object propertysProperty : (Iterable) propertyValue) {
-                    count++;
-                    if (propertysProperty == null) {
-                        throw new Exception(field.getName() + "为空");
-                    }
-                    Class propertysPropertyClass = propertysProperty.getClass();
-                    if (propertysPropertyClass == String.class) {
-                        if (propertysProperty.toString().trim().equals("")) {
-                            throw new Exception(field.getName() + "为空");
-                        }
-                    }
-                    if (isPojo(propertysPropertyClass)) {
-                        checkPojo(propertysProperty, propertysPropertyClass);
-                    }
-                }
-                if (count == 0) {
-                    throw new Exception(field.getName() + "为空");
-                }
-                continue;
+
+    private static void checkObj(final Object obj) throws Exception {
+        // 如果对象为空，抛出异常
+        if (obj == null) {
+            throw new Exception(nullDesc);
+        }
+        final Class clazz = obj.getClass();
+        // 字符串判断是否是空串
+        if (clazz == String.class) {
+            if (obj.toString().trim().equals("")) {
+                throw new Exception(nullDesc);
             }
-            if (isPojo(propertyValueClass)) {
-                checkPojo(propertyValue, propertyValueClass);
+        }
+
+        // 如果是可以遍历的类型，比如list，set，遍历处理参数
+        if (Iterable.class.isAssignableFrom(clazz)) {
+            int count = 0;
+            for (Object property : (Iterable) obj) {
+                count++;
+                checkObj(property);
             }
+            if (count == 0) {
+                throw new Exception(nullDesc);
+            }
+            return;
+        }
+
+        // 如果是pojo，判断属性是否含有空的
+        if (isPojo(clazz)) {
+            // 如果不是基本类型，利用内省机制检查字段
+            checkPojo(obj, clazz);
         }
     }
 
@@ -190,7 +149,8 @@ public class CheckUtils {
     private static boolean isPojo(final Class clazz) {
         return clazz != Date.class && clazz != Character.class && clazz != Boolean.class
                 && !Number.class.isAssignableFrom(clazz) && !Iterable.class.isAssignableFrom(clazz)
-                && String.class != clazz;
+                && String.class != clazz && !InputStream.class.isAssignableFrom(clazz)
+                && !OutputStream.class.isAssignableFrom(clazz);
     }
 
 }
